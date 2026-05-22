@@ -566,6 +566,29 @@ div[data-baseweb="select"] > div {
     align-items: center !important;
     padding-left: 8px !important;
 }
+/* RIGHT DROPDOWN ICON BUTTON */
+div[data-baseweb="select"] svg {
+    color: #ffffff !important;
+}
+
+/* DROPDOWN ARROW CONTAINER */
+div[data-baseweb="select"] div[role="button"] {
+    background: linear-gradient(135deg, #0ea5e9, #2563eb) !important;
+    border-radius: 10px !important;
+    margin-right: 6px !important;
+    width: 36px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.25s ease !important;
+}
+
+/* HOVER EFFECT */
+div[data-baseweb="select"] div[role="button"]:hover {
+    box-shadow: 0 0 18px rgba(14,165,233,0.5) !important;
+    transform: scale(1.05);
+}
 
 /* SELECTED TEXT */
 div[data-baseweb="select"] span {
