@@ -1409,7 +1409,7 @@ elif st.session_state.screen == "customer_dashboard":
             ("🐌", "Slow internet speed"), ("📡", "WiFi not working"), ("⛔", "No internet connection"),
             ("💳", "Check my bill"), ("⬆️", "Upgrade my plan"), ("🔁", "Router restart help"),
             ("📶", "Weak signal"), ("🔧", "Request a technician"), ("📋", "My ticket status"),
-            ("📦", "What plans are available"), ("✏️", "Change my name to Ahmed"), ("📍", "Change my area to Islamabad")
+            ("📦", "What plans are available")
         ]
         cols = st.columns(5)
         for i, (icon, label) in enumerate(quick_topics):
