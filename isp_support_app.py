@@ -1007,7 +1007,7 @@ if st.session_state.screen == "welcome":
     """, unsafe_allow_html=True)
 
     st.markdown("""
-    <div style='text-align:center; margin: 48px 0 28px;'>
+    <div style='text-align:center; margin:48px 0 28px;'>
         <span style='font-size:18px; color:#94a3b8; font-weight:600;'>
             Choose your account type to continue
         </span>
@@ -1016,16 +1016,16 @@ if st.session_state.screen == "welcome":
 
     col1, col2, col3 = st.columns(3, gap="large")
 
-    # ───────────────── EXISTING CUSTOMER ─────────────────
+    # EXISTING CUSTOMER
     with col1:
 
-        if st.button("", key="existing_card"):
+        if st.button(" ", key="existing_btn", use_container_width=True):
             st.session_state.customer_type = "existing"
             st.session_state.screen = "customer_login"
             st.rerun()
 
         st.markdown("""
-        <div class="choice-card">
+        <div class="choice-card-overlay">
             <div class="choice-icon">👤</div>
             <div class="choice-title">Existing Customer</div>
             <div class="choice-desc">
@@ -1035,34 +1035,33 @@ if st.session_state.screen == "welcome":
         </div>
         """, unsafe_allow_html=True)
 
-    # ───────────────── NEW CUSTOMER ─────────────────
+    # NEW CUSTOMER
     with col2:
 
-        if st.button("", key="new_card"):
+        if st.button(" ", key="new_btn", use_container_width=True):
             st.session_state.customer_type = "new"
             st.session_state.screen = "new_customer_register"
             st.rerun()
 
         st.markdown("""
-        <div class="choice-card">
+        <div class="choice-card-overlay">
             <div class="choice-icon">🆕</div>
             <div class="choice-title">New Customer</div>
             <div class="choice-desc">
-                Sign up for a new FiberISP connection and get instant
-                AI-powered support.
+                Sign up for a new FiberISP connection and get instant AI-powered support.
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-    # ───────────────── ADMIN PANEL ─────────────────
+    # ADMIN PANEL
     with col3:
 
-        if st.button("", key="admin_card"):
+        if st.button(" ", key="admin_btn", use_container_width=True):
             st.session_state.screen = "admin_login"
             st.rerun()
 
         st.markdown("""
-        <div class="choice-card">
+        <div class="choice-card-overlay">
             <div class="choice-icon">🛠️</div>
             <div class="choice-title">Admin Panel</div>
             <div class="choice-desc">
