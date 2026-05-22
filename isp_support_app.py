@@ -534,7 +534,8 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
 .metric-num.green { color: #4ade80; }
 .metric-num.blue { color: #0ea5e9; }
 
-/* ══════ STREAMLIT OVERRIDES ══════ */
+
+/* ══════ STREAMLIT INPUTS ══════ */
 /* ══════ STREAMLIT INPUTS ══════ */
 
 /* TEXT INPUTS */
@@ -547,6 +548,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
     font-family: 'Inter', sans-serif !important;
     padding: 14px 18px !important;
     font-size: 15px !important;
+    transition: all 0.25s ease !important;
 }
 
 /* INPUT FOCUS */
@@ -556,7 +558,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
     box-shadow: 0 0 0 4px rgba(14,165,233,0.18) !important;
 }
 
-/* SELECTBOX FIX */
+/* SELECTBOX MAIN */
 div[data-baseweb="select"] > div {
     background: #0f172a !important;
     border: 2px solid rgba(14,165,233,0.25) !important;
@@ -564,30 +566,14 @@ div[data-baseweb="select"] > div {
     min-height: 52px !important;
     display: flex !important;
     align-items: center !important;
-    padding-left: 8px !important;
-}
-/* RIGHT DROPDOWN ICON BUTTON */
-div[data-baseweb="select"] svg {
-    color: #ffffff !important;
-}
-
-/* DROPDOWN ARROW CONTAINER */
-div[data-baseweb="select"] div[role="button"] {
-    background: linear-gradient(135deg, #0ea5e9, #2563eb) !important;
-    border-radius: 10px !important;
-    margin-right: 6px !important;
-    width: 36px !important;
-    height: 36px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    padding-left: 10px !important;
     transition: all 0.25s ease !important;
 }
 
-/* HOVER EFFECT */
-div[data-baseweb="select"] div[role="button"]:hover {
-    box-shadow: 0 0 18px rgba(14,165,233,0.5) !important;
-    transform: scale(1.05);
+/* SELECTBOX HOVER */
+div[data-baseweb="select"] > div:hover {
+    border-color: rgba(14,165,233,0.55) !important;
+    box-shadow: 0 0 18px rgba(14,165,233,0.15) !important;
 }
 
 /* SELECTED TEXT */
@@ -597,10 +583,36 @@ div[data-baseweb="select"] span {
     font-family: 'Inter', sans-serif !important;
 }
 
-/* PLACEHOLDER */
+/* INPUT TEXT INSIDE SELECT */
 div[data-baseweb="select"] input {
     color: #f1f5f9 !important;
     font-size: 15px !important;
+}
+
+/* DROPDOWN ICON */
+div[data-baseweb="select"] svg {
+    color: #ffffff !important;
+}
+
+/* DROPDOWN ICON BUTTON */
+div[data-baseweb="select"] div[role="button"] {
+    background: linear-gradient(135deg, #0ea5e9, #2563eb) !important;
+    border-radius: 10px !important;
+    margin-right: 6px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.25s ease !important;
+}
+
+/* DROPDOWN ICON HOVER */
+div[data-baseweb="select"] div[role="button"]:hover {
+    box-shadow: 0 0 18px rgba(14,165,233,0.5) !important;
+    transform: scale(1.05);
 }
 
 /* DROPDOWN MENU */
@@ -608,13 +620,16 @@ ul[role="listbox"] {
     background: #0f172a !important;
     border: 1px solid rgba(14,165,233,0.25) !important;
     border-radius: 12px !important;
+    padding: 6px !important;
 }
 
 /* OPTIONS */
 ul[role="listbox"] li {
     color: #f1f5f9 !important;
     background: transparent !important;
-    padding: 10px 14px !important;
+    padding: 12px 14px !important;
+    border-radius: 10px !important;
+    transition: all 0.2s ease !important;
 }
 
 /* OPTION HOVER */
@@ -631,6 +646,42 @@ label {
     text-transform: uppercase !important;
     font-family: 'JetBrains Mono', monospace !important;
     margin-bottom: 8px !important;
+}
+
+/* NORMAL BUTTONS */
+.stButton > button {
+    background: linear-gradient(135deg, #0ea5e9, #3b82f6) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 14px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
+    padding: 14px 32px !important;
+    transition: all 0.3s !important;
+    width: 100% !important;
+    box-shadow: 0 4px 16px rgba(14,165,233,0.3) !important;
+}
+
+/* BUTTON HOVER */
+.stButton > button:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 10px 36px rgba(14,165,233,0.4) !important;
+}
+
+/* CLICKABLE WELCOME CARDS ONLY */
+.element-container:has(.choice-card-overlay) {
+    position: relative;
+    margin-top: -320px;
+}
+
+.element-container:has(.choice-card-overlay) .stButton > button {
+    opacity: 0 !important;
+    height: 320px !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 10 !important;
+    cursor: pointer !important;
 }
 
 </style>
