@@ -1709,3 +1709,4 @@ elif st.session_state.screen == "customer_dashboard":
                             is_first = not st.session_state.first_message_sent
                             result, err = process_ticket(
                                 llm, phone,
+)
