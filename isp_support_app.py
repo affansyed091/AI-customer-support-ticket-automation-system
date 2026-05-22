@@ -1710,3 +1710,22 @@ elif st.session_state.screen == "customer_dashboard":
                             result, err = process_ticket(
                                 llm, phone,
 )
+                                cust["name"], cust["package"], cust["area"],
+                                st.session_state.network_status, st.session_state.fix_time,
+                                st.session_state.bill_info, st.session_state.history_text,
+                                upgrade_msg, is_first, "upgrade"
+                            )
+                            st.session_state.first_message_sent = True
+                        
+                        if result:
+                            st.session_state.chat.append({"role": "ai", "result": result})
+                            # Update package after upgrade confirmed
+                            if "reply" in result and "upgrade" in result["reply"].lower():
+                                c = db()
+                                c.execute("UPDATE customers SET package=? WHERE phone=?", (pname, phone))
+                                conn.commit()
+                                st.session_state.customer["package"] = pname
+                        else:
+                            st.session_state.chat.append({"role": "ai", "error": err})
+                        st.rerun()
+
