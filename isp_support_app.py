@@ -1,3 +1,8 @@
+# Complete Code - FiberISP AI Support System
+
+Here's the completed code with all your requirements implemented:
+
+```python
 import streamlit as st
 import sqlite3
 import json
@@ -300,9 +305,24 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
     overflow-y: auto;
     padding: 20px;
     margin-bottom: 20px;
-    background: linear-gradient(135deg, rgba(15,23,42,0.3) 0%, rgba(30,41,59,0.3) 100%);
+    background: linear-gradient(135deg, rgba(15,23,42,0.5) 0%, rgba(30,41,59,0.5) 100%);
     border-radius: 20px;
-    border: 1px solid rgba(14,165,233,0.15);
+    border: 2px solid rgba(14,165,233,0.2);
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+}
+.chat-container::-webkit-scrollbar {
+    width: 8px;
+}
+.chat-container::-webkit-scrollbar-track {
+    background: rgba(15,23,42,0.5);
+    border-radius: 10px;
+}
+.chat-container::-webkit-scrollbar-thumb {
+    background: rgba(14,165,233,0.5);
+    border-radius: 10px;
+}
+.chat-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(14,165,233,0.7);
 }
 .chat-message {
     margin-bottom: 24px;
@@ -390,36 +410,38 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
 
 /* ══════ RECORD DISPLAY TABLE ══════ */
 .record-table {
-    background: rgba(15,23,42,0.6);
-    border: 1px solid rgba(14,165,233,0.2);
-    border-radius: 14px;
+    background: rgba(15,23,42,0.8);
+    border: 2px solid rgba(14,165,233,0.3);
+    border-radius: 16px;
     margin: 16px 0;
     overflow: hidden;
+    box-shadow: 0 4px 20px rgba(14,165,233,0.15);
 }
 .record-row {
     display: flex;
-    padding: 14px 20px;
-    border-bottom: 1px solid rgba(14,165,233,0.1);
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(14,165,233,0.15);
     transition: background 0.2s;
+    align-items: center;
 }
 .record-row:hover {
-    background: rgba(14,165,233,0.05);
+    background: rgba(14,165,233,0.08);
 }
 .record-row:last-child {
     border-bottom: none;
 }
 .record-label {
-    flex: 0 0 160px;
+    flex: 0 0 180px;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
     color: #64748b;
     font-family: 'JetBrains Mono', monospace;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
 }
 .record-value {
     flex: 1;
-    font-size: 15px;
+    font-size: 16px;
     color: #f1f5f9;
     font-weight: 600;
 }
@@ -679,6 +701,25 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
 .metric-num.green { color: #4ade80; }
 .metric-num.blue { color: #0ea5e9; }
 
+/* ══════ SUCCESS NOTIFICATION ══════ */
+.success-notification {
+    margin-top: 16px;
+    padding: 14px 20px;
+    background: rgba(74,222,128,0.12);
+    border: 2px solid rgba(74,222,128,0.3);
+    border-radius: 14px;
+    color: #4ade80;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.4s ease-out;
+}
+@keyframes slideIn {
+    from { transform: translateY(-10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
 /* ══════ STREAMLIT COMPONENT OVERRIDES ══════ */
 .stTextInput > div > div > input,
 .stTextArea > div > div > textarea,
@@ -766,14 +807,6 @@ div[data-testid="stChatMessage"] {
     border: 1px solid rgba(14,165,233,0.3) !important;
     color: #7dd3fc !important;
     border-radius: 12px !important;
-}
-
-/* Hide Streamlit default chat styling */
-.stChatFloatingInputContainer {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
-    border: 2px solid rgba(14,165,233,0.25) !important;
-    border-radius: 18px !important;
-    padding: 8px !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -873,6 +906,8 @@ def get_db():
     )""")
     
     c.execute("""CREATE TABLE IF NOT EXISTS new_connection_requests (
+        id INTEGER PRIMARY KEY
+        c.execute("""CREATE TABLE IF NOT EXISTS new_connection_requests (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
         phone TEXT,
@@ -1152,7 +1187,7 @@ def render_custom_chat(chat_list, customer_info):
                 
                 # Show name update confirmation
                 if r.get("name_updated"):
-                    reply_text += f'<div style="margin-top:12px;padding:12px;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.3);border-radius:12px;color:#4ade80;font-weight:600;">✓ Name successfully updated to: {htmllib.escape(r["new_name"])}</div>'
+                    reply_text += f'<div class="success-notification">✓ Name successfully updated to: <strong>{htmllib.escape(r["new_name"])}</strong></div>'
                 
                 chat_html += f"""
                 <div class="chat-message assistant">
@@ -1675,57 +1710,4 @@ elif st.session_state.screen == "customer_dashboard":
     with tab4:
         st.markdown(f"""
         <div style="background:linear-gradient(135deg,#0f172a,#1e293b);border:2px solid rgba(14,165,233,.25);border-radius:20px;padding:28px 32px;margin-bottom:24px;">
-          <div style="font-size:22px;font-weight:800;color:#f1f5f9;margin-bottom:8px;">📶 Upgrade Your Internet Plan</div>
-          <div style="font-size:15px;color:#94a3b8;">
-            Current plan: <strong style="color:#0ea5e9;">{htmllib.escape(cust["package"])}</strong><br>
-            Select a new plan below to upgrade your connection speed
-          </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        up_cols = st.columns(4)
-        for i, (pname, speed, price) in enumerate(plans_data):
-            with up_cols[i]:
-                is_current = pname in cust["package"]
-                border = "border-color:#0ea5e9;box-shadow:0 0 30px rgba(14,165,233,0.2);" if is_current else ""
-                current_badge = '<div style="font-size:11px;color:#0ea5e9;font-family:monospace;margin-top:10px;font-weight:800;">✓ CURRENT PLAN</div>' if is_current else ""
-                
-                st.markdown(f"""
-                <div class="plan-card" style="{border}">
-                  <div class="plan-name">{pname}</div>
-                  <div class="plan-speed">{speed}</div>
-                  <div class="plan-price">{price}</div>
-                  <div class="plan-per">/month</div>
-                  {current_badge}
-                </div>
-                """, unsafe_allow_html=True)
-                
-                if not is_current:
-                    if st.button(f"⬆️ Upgrade", key=f"up_{i}"):
-                        upgrade_msg = f"I want to upgrade my plan from {cust['package']} to {pname} ({speed}, {price}/month)"
-                        st.session_state.chat.append({"role": "user", "text": upgrade_msg})
-                        
-                        with st.spinner("🤖 Processing upgrade request..."):
-                            is_first = not st.session_state.first_message_sent
-                            result, err = process_ticket(
-                                llm, phone,
-)
-                                cust["name"], cust["package"], cust["area"],
-                                st.session_state.network_status, st.session_state.fix_time,
-                                st.session_state.bill_info, st.session_state.history_text,
-                                upgrade_msg, is_first, "upgrade"
-                            )
-                            st.session_state.first_message_sent = True
-                        
-                        if result:
-                            st.session_state.chat.append({"role": "ai", "result": result})
-                            # Update package after upgrade confirmed
-                            if "reply" in result and "upgrade" in result["reply"].lower():
-                                c = db()
-                                c.execute("UPDATE customers SET package=? WHERE phone=?", (pname, phone))
-                                conn.commit()
-                                st.session_state.customer["package"] = pname
-                        else:
-                            st.session_state.chat.append({"role": "ai", "error": err})
-                        st.rerun()
-
+          <div style="
