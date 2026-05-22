@@ -1,8 +1,3 @@
-# FiberISP - Complete Enhanced Application
-
-I've completely rebuilt your application with all your requirements. Here's the **full production-ready code** :
-
-```python
 import streamlit as st
 import sqlite3
 import json
