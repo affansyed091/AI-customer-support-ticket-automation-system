@@ -1075,13 +1075,17 @@ elif st.session_state.screen == "new_customer_register":
         </div>
         """, unsafe_allow_html=True)
         
-        with st.form("new_cust_form"):
-            name = st.text_input("Full Name", placeholder="Type your full name here")
-            phone = st.text_input("Phone Number", placeholder="Type your number")
-            # Correct area selection with placeholder option
-            area_options = ["-- Select your area --"] + PAKISTAN_LOCATIONS
-            area = st.selectbox("Select Your Area", area_options, index=0)
-            submit = st.form_submit_button("✅ Register")
+       with st.form("new_cust_form"):
+    name = st.text_input("Full Name", placeholder="Type your full name here")
+    phone = st.text_input("Phone Number", placeholder="Type your number")
+    area = st.selectbox("Select Your Area", PAKISTAN_LOCATIONS, index=None, placeholder="Choose your area")
+    submit = st.form_submit_button("✅ Register")
+    
+    if submit:
+        if name.strip() and phone.strip() and area is not None:
+            # registration code...
+        else:
+            st.error("⚠️ Please fill all fields and select a valid area.")
             
             if submit:
                 if name.strip() and phone.strip() and area != "-- Select your area --":
@@ -1191,7 +1195,7 @@ elif st.session_state.screen == "customer_dashboard":
     st.markdown(f"""
     <div class="cust-card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        <div class="cust-name">👋 Welcome To FiberISP Customer Dashboard, {htmllib.escape(cust["NAME"])}</div>
+        <div class="cust-name">👋 Welcome To FiberISP Customer Dashboard, {htmllib.escape(cust["name"])}</div>
         <span style="font-size:13px;background:rgba(14,165,233,.12);border:1px solid rgba(14,165,233,.25);padding:6px 16px;border-radius:24px;color:#0ea5e9;font-family:'JetBrains Mono',monospace;font-weight:700;">🇬🇧 English</span>
       </div>
       <div class="cust-meta">
