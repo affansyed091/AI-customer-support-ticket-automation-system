@@ -204,21 +204,6 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
     transform: translateY(-8px) scale(1.02);
     box-shadow: 0 20px 60px rgba(14,165,233,0.25);
 }
-/* MAKE ENTIRE CARD CLICKABLE */
-.element-container:has(.choice-card) {
-    position: relative;
-}
-
-/* INVISIBLE BUTTON OVER CARD */
-.element-container:has(.choice-card) .stButton > button {
-    position: absolute !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    opacity: 0 !important;
-    z-index: 10 !important;
-    cursor: pointer !important;
-
 .choice-icon {
     font-size: 64px;
     margin-bottom: 20px;
@@ -1042,7 +1027,7 @@ if st.session_state.screen == "welcome":
         if st.button("🔐 Admin Access", key="btn_admin", use_container_width=True):
             st.session_state.screen = "admin_login"
             st.rerun() 
-take this code and correct it 
+
 # CUSTOMER LOGIN (NO OTP)
 elif st.session_state.screen == "customer_login":
     _, col, _ = st.columns([1,2,1])
