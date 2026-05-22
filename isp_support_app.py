@@ -1263,9 +1263,9 @@ elif st.session_state.screen == "admin_login":
           <div class="form-sub">Enter administrator password</div>
         </div>
         """, unsafe_allow_html=True)
-        pwd = st.text_input("Admin Password", type="password", placeholder="admin123")
+        pwd = st.text_input("Admin Password", type="password", placeholder="xxxxxxxxxxxxxx")
         if st.button("Login →", key="admin_go"):
-            if pwd == "xxxxxxxxx":
+            if pwd == "admin123":
                 st.session_state.screen = "admin"
                 st.rerun()
             else:
