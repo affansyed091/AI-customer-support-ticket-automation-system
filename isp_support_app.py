@@ -1074,23 +1074,17 @@ elif st.session_state.screen == "new_customer_register":
           <div class="form-sub">Complete your profile to start using FiberISP services</div>
         </div>
         """, unsafe_allow_html=True)
+        
         with st.form("new_cust_form"):
-            with st.form("new_cust_form"):
-    name = st.text_input("Full Name", placeholder="Type your full name here")
-    phone = st.text_input("Phone Number", placeholder="Type your number")
-    # Correct area selection with placeholder option
-    area_options = ["-- Select your area --"] + PAKISTAN_LOCATIONS
-    area = st.selectbox("Select Your Area", area_options, index=0)
-    submit = st.form_submit_button("✅ Register")
-    
-    if submit:
-        if name.strip() and phone.strip() and area != "-- Select your area --":
-            # your registration code here
-        else:
-            st.error("Please fill all fields and select a valid area")
+            name = st.text_input("Full Name", placeholder="Type your full name here")
+            phone = st.text_input("Phone Number", placeholder="Type your number")
+            # Correct area selection with placeholder option
+            area_options = ["-- Select your area --"] + PAKISTAN_LOCATIONS
+            area = st.selectbox("Select Your Area", area_options, index=0)
+            submit = st.form_submit_button("✅ Register")
             
             if submit:
-                if name.strip() and phone.strip():
+                if name.strip() and phone.strip() and area != "-- Select your area --":
                     c = db()
                     try:
                         c.execute("INSERT INTO customers(name, phone, package, area) VALUES(?,?,?,?)",
@@ -1114,7 +1108,8 @@ elif st.session_state.screen == "new_customer_register":
                     except sqlite3.IntegrityError:
                         st.error("❌ This phone number is already registered. Please login instead.")
                 else:
-                    st.error("⚠️ Please fill in all required fields.")
+                    st.error("⚠️ Please fill all fields and select a valid area.")
+        
         if st.button("← Back", key="back_new_reg"):
             st.session_state.screen = "welcome"
             st.rerun()
