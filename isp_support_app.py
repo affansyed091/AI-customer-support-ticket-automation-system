@@ -853,12 +853,25 @@ Return ONLY valid JSON:
 def gen_ticket_id():
     return f"FIB-{datetime.datetime.now().year}-{random.randint(1000,9999)}"
 
+
 def gen_tech():
     return f"TECH-{random.randint(100,999)}"
 
-def process_ticket(llm, phone, customer_type, name, current_package,
-                   area, network_status, fix_time, bill_info, history_text,
-                   message, is_first_message=False):
+
+def process_ticket(
+    llm,
+    phone,
+    customer_type,
+    name,
+    current_package,
+    area,
+    network_status,
+    fix_time,
+    bill_info,
+    history_text,
+    message,
+    is_first_message=False
+):
     try:
         prompt_text = PROMPT_TEMPLATE.format(
             customer_type=customer_type,
@@ -873,186 +886,399 @@ def process_ticket(llm, phone, customer_type, name, current_package,
             message=message,
             is_first_message="yes" if is_first_message else "no"
         )
+
         response = llm.invoke(prompt_text)
-        raw = response.content.strip().replace("```json", "").replace("```", "").strip()
+
+        raw = (
+            response.content
+            .strip()
+            .replace("```json", "")
+            .replace("```", "")
+            .strip()
+        )
+
         m = re.search(r'\{.*\}', raw, re.DOTALL)
+
         result = json.loads(m.group(0) if m else raw)
-        
-        # Process actions
+
+        # =========================
+        # PROCESS ACTIONS
+        # =========================
+
         action = result.get("action", "none")
         new_val = result.get("new_value", "").strip()
-        
+
+        # UPDATE NAME
         if action == "update_name" and new_val:
-            db().execute("UPDATE customers SET name=? WHERE phone=?", (new_val, phone))
+
+            db().execute(
+                "UPDATE customers SET name=? WHERE phone=?",
+                (new_val, phone)
+            )
+
             conn.commit()
-            if st.session_state.customer and st.session_state.customer["name"] == name:
+
+            if (
+                st.session_state.customer and
+                st.session_state.customer["name"] == name
+            ):
                 st.session_state.customer["name"] = new_val
-            result["record_updated"] = {"field":"name","value":new_val}
+
+            result["record_updated"] = {
+                "field": "name",
+                "value": new_val
+            }
+
+        # UPDATE AREA
         elif action == "update_area" and new_val:
-            db().execute("UPDATE customers SET area=? WHERE phone=?", (new_val, phone))
+
+            db().execute(
+                "UPDATE customers SET area=? WHERE phone=?",
+                (new_val, phone)
+            )
+
             conn.commit()
-            if st.session_state.customer and st.session_state.customer["area"] == area:
+
+            if (
+                st.session_state.customer and
+                st.session_state.customer["area"] == area
+            ):
                 st.session_state.customer["area"] = new_val
+
             c = db()
-            c.execute("SELECT status, expected_fix_time FROM outages WHERE area=?", (new_val,))
+
+            c.execute(
+                "SELECT status, expected_fix_time FROM outages WHERE area=?",
+                (new_val,)
+            )
+
             out = c.fetchone()
+
             if out:
                 st.session_state.network_status = out[0]
                 st.session_state.fix_time = out[1]
-            result["record_updated"] = {"field":"area","value":new_val}
-            elif action == "update_package" and new_val:
 
-    # PLAN PRICE MAPPING
-    package_prices = {
-        "Basic Home": 2000,
-        "Gaming Pro": 4000,
-        "Ultra Fiber": 6500,
-        "Extreme Fiber": 9000
-    }
+            result["record_updated"] = {
+                "field": "area",
+                "value": new_val
+            }
 
-    # GET NEW PLAN PRICE
-    new_amount = package_prices.get(new_val, 0)
+        # UPDATE PACKAGE
+        elif action == "update_package" and new_val:
 
-    # UPDATE CUSTOMER PACKAGE
-    db().execute(
-        "UPDATE customers SET package=? WHERE phone=?",
-        (new_val, phone)
-    )
+            package_prices = {
+                "Basic Home": 2000,
+                "Gaming Pro": 4000,
+                "Ultra Fiber": 6500,
+                "Extreme Fiber": 9000
+            }
 
-    # NEW DUE DATE
-    new_due_date = (
-        datetime.date.today() + datetime.timedelta(days=30)
-    ).isoformat()
+            # GET NEW PACKAGE PRICE
+            new_amount = package_prices.get(new_val, 0)
 
-    # UPDATE / CREATE BILL
-    db().execute("""
-        INSERT OR REPLACE INTO bills(
-            customer_phone,
-            amount,
-            due_date
-        )
-        VALUES(?,?,?)
-    """, (
-        phone,
-        new_amount,
-        new_due_date
-    ))
+            # UPDATE CUSTOMER PACKAGE
+            db().execute(
+                "UPDATE customers SET package=? WHERE phone=?",
+                (new_val, phone)
+            )
 
-    conn.commit()
+            # CREATE NEW DUE DATE
+            new_due_date = (
+                datetime.date.today() +
+                datetime.timedelta(days=30)
+            ).isoformat()
 
-    # UPDATE SESSION STATE
-    if st.session_state.customer:
-        st.session_state.customer["package"] = new_val
+            # UPDATE / INSERT BILL
+            db().execute("""
+                INSERT OR REPLACE INTO bills(
+                    customer_phone,
+                    amount,
+                    due_date
+                )
+                VALUES (?, ?, ?)
+            """, (
+                phone,
+                new_amount,
+                new_due_date
+            ))
 
-    # UPDATE BILL INFO
-    st.session_state.bill_info = (
-        f"PKR {new_amount:,}, Due: {new_due_date}"
-    )
+            conn.commit()
 
-    # SHOW BILL IN CHAT
-    result["bill_data"] = {
-        "amount": new_amount,
-        "due_date": new_due_date,
-        "overdue": False
-    }
+            # UPDATE SESSION STATE
+            if st.session_state.customer:
+                st.session_state.customer["package"] = new_val
 
-    # SUCCESS MESSAGE
-    result["record_updated"] = {
-        "field": "package",
-        "value": new_val
-    }
-    # Process data display
+            # UPDATE BILL INFO
+            st.session_state.bill_info = (
+                f"PKR {new_amount:,}, Due: {new_due_date}"
+            )
+
+            # SHOW BILL DATA
+            result["bill_data"] = {
+                "amount": new_amount,
+                "due_date": new_due_date,
+                "overdue": False
+            }
+
+            # SUCCESS MESSAGE
+            result["record_updated"] = {
+                "field": "package",
+                "value": new_val
+            }
+
+        # =========================
+        # SHOW RECORDS
+        # =========================
+
         show = result.get("show_records", "none")
+
         if show == "bill":
+
             c = db()
-            c.execute("SELECT amount, due_date FROM bills WHERE customer_phone=?", (phone,))
+
+            c.execute(
+                "SELECT amount, due_date FROM bills WHERE customer_phone=?",
+                (phone,)
+            )
+
             row = c.fetchone()
+
             if row:
+
                 try:
-                    overdue = datetime.date.today() > datetime.date.fromisoformat(row[1])
+                    overdue = (
+                        datetime.date.today() >
+                        datetime.date.fromisoformat(row[1])
+                    )
+
                 except:
                     overdue = False
-                result["bill_data"] = {"amount":row[0],"due_date":row[1],"overdue":overdue}
+
+                result["bill_data"] = {
+                    "amount": row[0],
+                    "due_date": row[1],
+                    "overdue": overdue
+                }
+
         elif show == "tickets":
+
             c = db()
-            c.execute("SELECT ticket_id, issue, priority, status, created_at FROM tickets WHERE customer_phone=? ORDER BY created_at DESC LIMIT 4", (phone,))
+
+            c.execute("""
+                SELECT
+                    ticket_id,
+                    issue,
+                    priority,
+                    status,
+                    created_at
+                FROM tickets
+                WHERE customer_phone=?
+                ORDER BY created_at DESC
+                LIMIT 4
+            """, (phone,))
+
             rows = c.fetchall()
-            result["tickets_data"] = [{"ticket_id":r[0],"issue":r[1],"priority":r[2],"status":r[3],"created_at":r[4]} for r in rows]
+
+            result["tickets_data"] = [
+                {
+                    "ticket_id": r[0],
+                    "issue": r[1],
+                    "priority": r[2],
+                    "status": r[3],
+                    "created_at": r[4]
+                }
+                for r in rows
+            ]
+
         elif show == "plans":
+
             result["plans_data"] = True
-        
-        # Create ticket in database
+
+        # =========================
+        # CREATE TICKET
+        # =========================
+
         ticket_id = gen_ticket_id()
-        technician = gen_tech() if result.get("technician_required", "").lower() == "yes" else "Not Assigned"
+
+        technician = (
+            gen_tech()
+            if result.get("technician_required", "").lower() == "yes"
+            else "Not Assigned"
+        )
+
         c = db()
-        c.execute("INSERT INTO tickets VALUES(?,?,?,?,?,?,?,?)", (
-            ticket_id, phone, result.get("category","General"),
-            result.get("priority","Medium"), result.get("sentiment","Neutral"),
-            technician, "Open", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        c.execute("""
+            INSERT INTO tickets
+            VALUES(?,?,?,?,?,?,?,?)
+        """, (
+            ticket_id,
+            phone,
+            result.get("category", "General"),
+            result.get("priority", "Medium"),
+            result.get("sentiment", "Neutral"),
+            technician,
+            "Open",
+            datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         ))
+
         conn.commit()
+
         result["ticket_id"] = ticket_id
         result["technician"] = technician
+
         return result, None
+
     except Exception as e:
         return None, str(e)
 
+
 def pri_tag(p):
-    cls = {"High":"tag-high","Medium":"tag-medium","Low":"tag-low"}.get(p,"tag-low")
+
+    cls = {
+        "High": "tag-high",
+        "Medium": "tag-medium",
+        "Low": "tag-low"
+    }.get(p, "tag-low")
+
     return f'<span class="tag {cls}">{htmllib.escape(p)}</span>'
 
+
 def sent_tag(s):
+
     return f'<span class="tag tag-sent">{htmllib.escape(s)}</span>'
+
 
 def render_chat(chat_list):
     """Render conversation with extra data cards"""
+
     for msg in chat_list:
+
         if msg["role"] == "user":
+
             with st.chat_message("user"):
                 st.write(msg["text"])
+
         elif msg["role"] == "ai":
+
             with st.chat_message("assistant", avatar="🤖"):
+
                 if "error" in msg:
-                    st.error(f"Something went wrong: {msg['error']}")
+
+                    st.error(
+                        f"Something went wrong: {msg['error']}"
+                    )
+
                 else:
+
                     r = msg["result"]
+
                     st.write(r.get("reply", ""))
-                    
-                    # Show data cards if present
+
+                    # BILL DATA
                     if "bill_data" in r:
+
                         bd = r["bill_data"]
+
                         due_text = f"Due: {bd['due_date']}"
-                        status_color = "#f87171" if bd.get("overdue") else "#4ade80"
-                        status_text = "OVERDUE" if bd.get("overdue") else "CURRENT"
+
+                        status_color = (
+                            "#f87171"
+                            if bd.get("overdue")
+                            else "#4ade80"
+                        )
+
+                        status_text = (
+                            "OVERDUE"
+                            if bd.get("overdue")
+                            else "CURRENT"
+                        )
+
                         with st.expander("💳 View Bill Details"):
+
                             st.markdown(f"""
-                            <div style="background:#0f172a;border-radius:12px;padding:16px;">
-                                <div style="font-size:28px;font-weight:800;color:#fbbf24;">PKR {bd['amount']:,}</div>
+                            <div style="
+                                background:#0f172a;
+                                border-radius:12px;
+                                padding:16px;
+                            ">
+                                <div style="
+                                    font-size:28px;
+                                    font-weight:800;
+                                    color:#fbbf24;
+                                ">
+                                    PKR {bd['amount']:,}
+                                </div>
+
                                 <div>{due_text}</div>
-                                <div style="color:{status_color};">{status_text}</div>
+
+                                <div style="color:{status_color};">
+                                    {status_text}
+                                </div>
                             </div>
                             """, unsafe_allow_html=True)
-                    if "tickets_data" in r:
-                        tickets = r["tickets_data"]
-                        with st.expander(f"🎫 Recent Tickets ({len(tickets)})"):
-                            for t in tickets:
-                                st.markdown(f"**{t['ticket_id']}** - {t['issue']}  \nPriority: {t['priority']} | Status: {t['status']}")
-                    if "plans_data" in r:
-                        with st.expander("📶 Available Plans"):
-                            for p in PLANS_LIST:
-                                st.markdown(f"**{p['name']}** – {p['speed']} – {p['price']}/month")
-                    if "record_updated" in r:
-                        upd = r["record_updated"]
-                        st.success(f"✅ **{upd['field'].title()}** updated to: *{upd['value']}*")
-                    
-                    # Ticket info
-                    tid = r.get("ticket_id", "")
-                    tech = r.get("technician", "Not Assigned")
-                    caption_parts = [f"🎫 Ticket: {tid}"]
-                    if tech != "Not Assigned":
-                        caption_parts.append(f"🔧 Assigned: {tech}")
-                    st.caption("  ·  ".join(caption_parts))
 
+                    # TICKETS DATA
+                    if "tickets_data" in r:
+
+                        tickets = r["tickets_data"]
+
+                        with st.expander(
+                            f"🎫 Recent Tickets ({len(tickets)})"
+                        ):
+
+                            for t in tickets:
+
+                                st.markdown(
+                                    f"**{t['ticket_id']}** - "
+                                    f"{t['issue']}  \n"
+                                    f"Priority: {t['priority']} | "
+                                    f"Status: {t['status']}"
+                                )
+
+                    # PLANS DATA
+                    if "plans_data" in r:
+
+                        with st.expander("📶 Available Plans"):
+
+                            for p in PLANS_LIST:
+
+                                st.markdown(
+                                    f"**{p['name']}** – "
+                                    f"{p['speed']} – "
+                                    f"{p['price']}/month"
+                                )
+
+                    # RECORD UPDATED
+                    if "record_updated" in r:
+
+                        upd = r["record_updated"]
+
+                        st.success(
+                            f"✅ **{upd['field'].title()}** "
+                            f"updated to: *{upd['value']}*"
+                        )
+
+                    # TICKET INFO
+                    tid = r.get("ticket_id", "")
+
+                    tech = r.get(
+                        "technician",
+                        "Not Assigned"
+                    )
+
+                    caption_parts = [
+                        f"🎫 Ticket: {tid}"
+                    ]
+
+                    if tech != "Not Assigned":
+                        caption_parts.append(
+                            f"🔧 Assigned: {tech}"
+                        )
+
+                    st.caption(
+                        "  ·  ".join(caption_parts)
+                    )
 # ═══════════════════════════════════════════════════════════════
 # SESSION STATE
 # ═══════════════════════════════════════════════════════════════
