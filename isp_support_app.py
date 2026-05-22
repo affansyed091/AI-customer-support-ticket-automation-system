@@ -1,8 +1,3 @@
-# Complete Code - FiberISP AI Support System
-
-Here's the completed code with all your requirements implemented:
-
-```python
 import streamlit as st
 import sqlite3
 import json
