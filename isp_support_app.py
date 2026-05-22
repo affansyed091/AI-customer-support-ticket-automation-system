@@ -992,84 +992,57 @@ if st.session_state.screen != "welcome":
 
 # WELCOME
 if st.session_state.screen == "welcome":
-
     st.markdown("""
     <div class="welcome-hero">
         <div class="welcome-logo">🌐</div>
         <div class="welcome-title">Welcome to FiberISP</div>
-        <div class="welcome-subtitle">
-            Experience Ultra-Fast Fiber Internet
-        </div>
-        <div class="welcome-tagline">
-            AI-Powered Support • 24/7 Assistance • Lightning Speed
-        </div>
+        <div class="welcome-subtitle">Experience Ultra-Fast Fiber Internet</div>
+        <div class="welcome-tagline">AI-Powered Support • 24/7 Assistance • Lightning Speed</div>
     </div>
     """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div style='text-align:center; margin:48px 0 28px;'>
-        <span style='font-size:18px; color:#94a3b8; font-weight:600;'>
-            Choose your account type to continue
-        </span>
-    </div>
-    """, unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns(3, gap="large")
-
-    # EXISTING CUSTOMER
+    
+    st.markdown("<div style='text-align:center; margin: 48px 0 28px;'><span style='font-size:18px; color:#94a3b8; font-weight:600;'>Choose your account type to continue</span></div>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1,1,1], gap="large")
+    
     with col1:
-
-        if st.button(" ", key="existing_btn", use_container_width=True):
+        st.markdown("""
+        <div class="choice-card">
+            <div class="choice-icon">👤</div>
+            <div class="choice-title">Existing Customer</div>
+            <div class="choice-desc">Login with your phone number to access your account, check bills, and get AI support.</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("🔑 Login", key="btn_existing", use_container_width=True):
             st.session_state.customer_type = "existing"
             st.session_state.screen = "customer_login"
             st.rerun()
-
+    
+    with col2:
         st.markdown("""
-        <div class="choice-card-overlay">
-            <div class="choice-icon">👤</div>
-            <div class="choice-title">Existing Customer</div>
-            <div class="choice-desc">
-                Login with your phone number to access your account,
-                check bills, and get AI support.
-            </div>
+        <div class="choice-card">
+            <div class="choice-icon">🆕</div>
+            <div class="choice-title">New Customer</div>
+            <div class="choice-desc">Sign up for a new FiberISP connection and get instant AI-powered support.</div>
         </div>
         """, unsafe_allow_html=True)
-
-    # NEW CUSTOMER
-    with col2:
-
-        if st.button(" ", key="new_btn", use_container_width=True):
+        if st.button("📝 Register", key="btn_new", use_container_width=True):
             st.session_state.customer_type = "new"
             st.session_state.screen = "new_customer_register"
             st.rerun()
-
-        st.markdown("""
-        <div class="choice-card-overlay">
-            <div class="choice-icon">🆕</div>
-            <div class="choice-title">New Customer</div>
-            <div class="choice-desc">
-                Sign up for a new FiberISP connection and get instant AI-powered support.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    # ADMIN PANEL
+    
     with col3:
-
-        if st.button(" ", key="admin_btn", use_container_width=True):
-            st.session_state.screen = "admin_login"
-            st.rerun()
-
         st.markdown("""
-        <div class="choice-card-overlay">
+        <div class="choice-card">
             <div class="choice-icon">🛠️</div>
             <div class="choice-title">Admin Panel</div>
-            <div class="choice-desc">
-                Manage customers, monitor tickets, configure outages,
-                and oversee system operations.
-            </div>
+            <div class="choice-desc">Manage customers, monitor tickets, configure outages, and oversee system operations.</div>
         </div>
         """, unsafe_allow_html=True)
+        if st.button("🔐 Admin Access", key="btn_admin", use_container_width=True):
+            st.session_state.screen = "admin_login"
+            st.rerun() 
+take this code and correct it 
 # CUSTOMER LOGIN (NO OTP)
 elif st.session_state.screen == "customer_login":
     _, col, _ = st.columns([1,2,1])
