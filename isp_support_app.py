@@ -610,9 +610,9 @@ def render_chat(chat_list):
         elif m["role"] == "ai":
             res = m.get("result", {})
             h += 190
-            if res.get("bill_data"):   h += 120
+            if res.get("bill_data"):    h += 120
             if res.get("tickets_data"): h += max(80, len(res["tickets_data"]) * 52 + 40)
-            if res.get("plans_data"):  h += 160
+            if res.get("plans_data"):   h += 160
             if res.get("record_updated"): h += 50
     height = min(560, max(280, h))
 
@@ -722,6 +722,76 @@ for k, v in defaults.items():
         st.session_state[k] = v
 
 # ══════════════════════════════════════════════
+#  RESULT HANDLER  (actions + data fetching)
+#  *** MUST be defined before screen routing ***
+# ══════════════════════════════════════════════
+def _handle_result(result, err, phone):
+    now = datetime.datetime.now().strftime("%I:%M %p")
+    if not result:
+        st.session_state.chat.append({"role":"ai","error":err or "Unknown error","time":now})
+        return
+
+    cust = st.session_state.customer
+
+    # ── RECORD ACTIONS ──
+    action  = str(result.get("action","none")).lower()
+    new_val = str(result.get("new_value","")).strip()
+
+    if action == "update_name" and new_val and len(new_val) <= 80:
+        db().execute("UPDATE customers SET name=? WHERE phone=?", (new_val, phone))
+        conn.commit()
+        st.session_state.customer["name"] = new_val
+        result["record_updated"] = {"field":"name","value":new_val}
+
+    elif action == "update_area" and new_val:
+        db().execute("UPDATE customers SET area=? WHERE phone=?", (new_val, phone))
+        conn.commit()
+        st.session_state.customer["area"] = new_val
+        # Re-check outage for new area
+        c = db()
+        c.execute("SELECT status,expected_fix_time FROM outages WHERE area=?", (new_val,))
+        out = c.fetchone()
+        if out:
+            st.session_state.network_status = out[0]
+            st.session_state.fix_time       = out[1]
+        result["record_updated"] = {"field":"area","value":new_val}
+
+    elif action == "update_package" and new_val:
+        db().execute("UPDATE customers SET package=? WHERE phone=?", (new_val, phone))
+        conn.commit()
+        st.session_state.customer["package"] = new_val
+        result["record_updated"] = {"field":"package","value":new_val}
+
+    # ── SHOW RECORD DATA ──
+    show = str(result.get("show_records","none")).lower()
+
+    if show == "bill":
+        c = db()
+        c.execute("SELECT amount,due_date FROM bills WHERE customer_phone=?", (phone,))
+        row = c.fetchone()
+        if row:
+            try:
+                overdue = datetime.date.today() > datetime.date.fromisoformat(row[1])
+            except Exception:
+                overdue = False
+            result["bill_data"] = {"amount":row[0],"due_date":row[1],"overdue":overdue}
+
+    elif show == "tickets":
+        c = db()
+        c.execute("SELECT ticket_id,issue,priority,status,created_at FROM tickets WHERE customer_phone=? ORDER BY created_at DESC LIMIT 4", (phone,))
+        rows = c.fetchall()
+        result["tickets_data"] = [
+            {"ticket_id":r[0],"issue":r[1],"priority":r[2],"status":r[3],"created_at":r[4]}
+            for r in rows
+        ]
+
+    elif show == "plans":
+        result["plans_data"] = True
+
+    result["time"] = now
+    st.session_state.chat.append({"role":"ai","result":result,"time":now})
+
+# ══════════════════════════════════════════════
 #  TOP BAR  (all screens except welcome)
 # ══════════════════════════════════════════════
 if st.session_state.screen != "welcome":
@@ -781,7 +851,7 @@ if st.session_state.screen == "welcome":
             st.rerun()
 
 # ══════════════════════════════════════════════
-#  SCREEN: CUSTOMER LOGIN  (no OTP)
+#  SCREEN: CUSTOMER LOGIN
 # ══════════════════════════════════════════════
 elif st.session_state.screen == "customer_login":
     _, col, _ = st.columns([1,2,1])
@@ -827,7 +897,7 @@ elif st.session_state.screen == "customer_login":
                 st.rerun()
 
 # ══════════════════════════════════════════════
-#  SCREEN: NEW CUSTOMER REGISTER  (no OTP)
+#  SCREEN: NEW CUSTOMER REGISTER
 # ══════════════════════════════════════════════
 elif st.session_state.screen == "new_customer_register":
     _, col, _ = st.columns([1,2,1])
@@ -854,7 +924,6 @@ elif st.session_state.screen == "new_customer_register":
                         st.session_state.bill_info     = "No billing record"
                         st.session_state.history_text  = "No previous tickets."
                         st.session_state.chat          = []
-                        # Check outage for area
                         c.execute("SELECT status,expected_fix_time FROM outages WHERE area=?", (area,))
                         out = c.fetchone()
                         if out:
@@ -1107,75 +1176,6 @@ elif st.session_state.screen == "customer_dashboard":
                         _handle_result(result, err, phone)
                         st.success(f"✅ Upgrade request for '{p['name']}' submitted! Check the AI Chat tab.")
                         st.rerun()
-
-# ══════════════════════════════════════════════
-#  RESULT HANDLER  (actions + data fetching)
-# ══════════════════════════════════════════════
-def _handle_result(result, err, phone):
-    now = datetime.datetime.now().strftime("%I:%M %p")
-    if not result:
-        st.session_state.chat.append({"role":"ai","error":err or "Unknown error","time":now})
-        return
-
-    cust = st.session_state.customer
-
-    # ── RECORD ACTIONS ──
-    action  = str(result.get("action","none")).lower()
-    new_val = str(result.get("new_value","")).strip()
-
-    if action == "update_name" and new_val and len(new_val) <= 80:
-        db().execute("UPDATE customers SET name=? WHERE phone=?", (new_val, phone))
-        conn.commit()
-        st.session_state.customer["name"] = new_val
-        result["record_updated"] = {"field":"name","value":new_val}
-
-    elif action == "update_area" and new_val:
-        db().execute("UPDATE customers SET area=? WHERE phone=?", (new_val, phone))
-        conn.commit()
-        st.session_state.customer["area"] = new_val
-        # Re-check outage for new area
-        c = db()
-        c.execute("SELECT status,expected_fix_time FROM outages WHERE area=?", (new_val,))
-        out = c.fetchone()
-        if out:
-            st.session_state.network_status = out[0]
-            st.session_state.fix_time       = out[1]
-        result["record_updated"] = {"field":"area","value":new_val}
-
-    elif action == "update_package" and new_val:
-        db().execute("UPDATE customers SET package=? WHERE phone=?", (new_val, phone))
-        conn.commit()
-        st.session_state.customer["package"] = new_val
-        result["record_updated"] = {"field":"package","value":new_val}
-
-    # ── SHOW RECORD DATA ──
-    show = str(result.get("show_records","none")).lower()
-
-    if show == "bill":
-        c = db()
-        c.execute("SELECT amount,due_date FROM bills WHERE customer_phone=?", (phone,))
-        row = c.fetchone()
-        if row:
-            try:
-                overdue = datetime.date.today() > datetime.date.fromisoformat(row[1])
-            except Exception:
-                overdue = False
-            result["bill_data"] = {"amount":row[0],"due_date":row[1],"overdue":overdue}
-
-    elif show == "tickets":
-        c = db()
-        c.execute("SELECT ticket_id,issue,priority,status,created_at FROM tickets WHERE customer_phone=? ORDER BY created_at DESC LIMIT 4", (phone,))
-        rows = c.fetchall()
-        result["tickets_data"] = [
-            {"ticket_id":r[0],"issue":r[1],"priority":r[2],"status":r[3],"created_at":r[4]}
-            for r in rows
-        ]
-
-    elif show == "plans":
-        result["plans_data"] = True
-
-    result["time"] = now
-    st.session_state.chat.append({"role":"ai","result":result,"time":now})
 
 # ══════════════════════════════════════════════
 #  SCREEN: ADMIN LOGIN
