@@ -395,7 +395,7 @@ def get_llm(api_key):
         api_key=api_key,
         base_url="https://api.groq.com/openai/v1",
         model="llama-3.3-70b-versatile",
-        temperature=0.1
+        temperature=0.3
     )
 
 PLANS = """
