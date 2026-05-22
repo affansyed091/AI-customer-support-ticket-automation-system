@@ -495,33 +495,27 @@ def tech_tag(t):
     if t == "Not Assigned": return f'<span class="tag tag-sent">{htmllib.escape(t)}</span>'
     return f'<span class="tag tag-tech">🔧 {htmllib.escape(t)}</span>'
 
-def render_result_bubble(r):
-    tech_html = ""
-    if r.get("technician","") != "Not Assigned":
-        tech_html = f'<span class="tech-badge">🔧 {htmllib.escape(r["technician"])}</span>'
-    # CRITICAL: escape the AI reply text to prevent HTML injection / broken rendering
-    safe_reply = htmllib.escape(r.get("reply","")).replace("\n", "<br>")
-    return f"""
-<div class="chat-msg-ai">
-  <div class="bubble-ai">
-    <div class="ai-label"><div class="ai-dot"></div>ISP AI Support Agent</div>
-    <div class="result-inner">
-      <div style="margin-bottom:10px;">
-        <span class="ticket-badge">🎫 {htmllib.escape(r.get("ticket_id",""))}</span>
-        {tech_html}
-      </div>
-      <div class="tag-row">
-        {cat_tag(r.get("category","General"))}
-        {pri_tag(r.get("priority","Medium"))}
-        {sent_tag(r.get("sentiment","Neutral"))}
-      </div>
-      <div class="reply-box">
-        <div class="reply-lbl">AI Response</div>
-        {safe_reply}
-      </div>
-    </div>
-  </div>
-</div>"""
+def render_chat(chat_list):
+    """Render the full conversation using Streamlit native chat components — zero HTML."""
+    for msg in chat_list:
+        if msg["role"] == "user":
+            with st.chat_message("user"):
+                st.write(msg["text"])
+        elif msg["role"] == "ai":
+            with st.chat_message("assistant", avatar="🌐"):
+                if "error" in msg:
+                    st.error(f"Something went wrong: {msg['error']}")
+                else:
+                    r = msg["result"]
+                    # Plain text reply — NO HTML, NO escaping issues
+                    st.write(r.get("reply", ""))
+                    # Ticket reference as subtle caption below
+                    tid = r.get("ticket_id", "")
+                    tech = r.get("technician", "Not Assigned")
+                    caption_parts = [f"🎫 Ticket: {tid}"]
+                    if tech != "Not Assigned":
+                        caption_parts.append(f"🔧 Assigned: {tech}")
+                    st.caption("  ·  ".join(caption_parts))
 
 # ─────────────────────────────────────────
 # SESSION STATE
@@ -825,43 +819,27 @@ elif st.session_state.screen == "customer":
         st.markdown("<div class='sec-hdr'>Conversation</div>", unsafe_allow_html=True)
 
         if not st.session_state.chat:
-            st.markdown("""
-            <div class="empty-chat">
-              <div class="ec-icon">💬</div>
-              <div class="ec-text">Tap any Quick Topic above or type your issue below to get started</div>
-            </div>""", unsafe_allow_html=True)
+            st.info("💬 Tap any Quick Topic above or type your issue below to get started.")
+        else:
+            render_chat(st.session_state.chat)
 
-        for msg in st.session_state.chat:
-            if msg["role"] == "user":
-                safe_text = htmllib.escape(msg["text"])
-                st.markdown(f'<div class="chat-msg-user"><div class="bubble-user">{safe_text}</div></div>', unsafe_allow_html=True)
-            elif msg["role"] == "ai":
-                if "error" in msg:
-                    st.error(f"Error: {msg['error']}")
-                else:
-                    r = msg["result"]
-                    st.markdown(render_result_bubble(r), unsafe_allow_html=True)
-
-        # Optional text input
-        st.markdown("<div class='sec-hdr'>Or type your own message</div>", unsafe_allow_html=True)
-        with st.form("chat_form", clear_on_submit=True):
-            user_msg = st.text_input("Message", placeholder="Describe your issue…", label_visibility="collapsed")
-            submitted = st.form_submit_button("Send Message →")
-            if submitted and user_msg.strip():
-                st.session_state.chat.append({"role": "user", "text": user_msg.strip()})
-                with st.spinner("AI is analyzing your issue…"):
-                    result, err = process_ticket(
-                        llm, phone, st.session_state.customer_type,
-                        cust["name"], cust["package"], cust["area"],
-                        st.session_state.network_status, st.session_state.fix_time,
-                        st.session_state.bill_info, st.session_state.history_text,
-                        user_msg.strip(), lang
-                    )
-                if result:
-                    st.session_state.chat.append({"role": "ai", "result": result})
-                else:
-                    st.session_state.chat.append({"role": "ai", "error": err})
-                st.rerun()
+        # Native chat input — renders as a proper chat bar at the bottom
+        user_msg = st.chat_input("Type your issue here…")
+        if user_msg and user_msg.strip():
+            st.session_state.chat.append({"role": "user", "text": user_msg.strip()})
+            with st.spinner("Agent is typing…"):
+                result, err = process_ticket(
+                    llm, phone, st.session_state.customer_type,
+                    cust["name"], cust["package"], cust["area"],
+                    st.session_state.network_status, st.session_state.fix_time,
+                    st.session_state.bill_info, st.session_state.history_text,
+                    user_msg.strip(), lang
+                )
+            if result:
+                st.session_state.chat.append({"role": "ai", "result": result})
+            else:
+                st.session_state.chat.append({"role": "ai", "error": err})
+            st.rerun()
 
         if st.session_state.chat:
             if st.button("🗑️ Clear Chat", key="clear_chat"):
