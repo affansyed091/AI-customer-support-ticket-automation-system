@@ -1191,7 +1191,7 @@ elif st.session_state.screen == "customer_dashboard":
     st.markdown(f"""
     <div class="cust-card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        <div class="cust-name">👋 Welcome, {htmllib.escape(cust["name"])}</div>
+        <div class="cust-name">👋 Welcome To FiberISP Customer Dashboard, {htmllib.escape(cust["NAME"])}</div>
         <span style="font-size:13px;background:rgba(14,165,233,.12);border:1px solid rgba(14,165,233,.25);padding:6px 16px;border-radius:24px;color:#0ea5e9;font-family:'JetBrains Mono',monospace;font-weight:700;">🇬🇧 English</span>
       </div>
       <div class="cust-meta">
