@@ -1203,44 +1203,58 @@ if st.session_state.screen == "welcome":
 
     # ── Card 1: Existing Customer ──
     with c1:
-        st.markdown('<div class="welcome-choice-card">', unsafe_allow_html=True)
-        # Icon is the ONLY clickable element
-        st.markdown('<div class="icon-btn-only" style="display:flex;justify-content:center;">', unsafe_allow_html=True)
-        if st.button("👤", key="btn_existing"):
-            st.session_state.screen = "customer_login"
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
         st.markdown("""
+        <div class="welcome-choice-card">
+          <div class="wcc-logo" style="
+            background: linear-gradient(135deg,#1d4ed8,#0ea5e9);
+            box-shadow: 0 16px 48px rgba(14,165,233,.4), 0 0 0 1px rgba(14,165,233,.25);
+          ">
+            <span class="wcc-logo-icon">👤</span>
+            <span class="wcc-logo-text">EC</span>
+          </div>
           <div class="wcc-title">Existing Customer</div>
           <div class="wcc-desc">Login with your phone number and access your full AI support dashboard.</div>
         </div>""", unsafe_allow_html=True)
+        if st.button("🔑  Customer Login", key="btn_existing", use_container_width=True):
+            st.session_state.screen = "customer_login"
+            st.rerun()
 
     # ── Card 2: New Customer ──
     with c2:
-        st.markdown('<div class="welcome-choice-card">', unsafe_allow_html=True)
-        st.markdown('<span class="wcc-badge">NEW</span>', unsafe_allow_html=True)
-        st.markdown('<div class="icon-btn-only" style="display:flex;justify-content:center;">', unsafe_allow_html=True)
-        if st.button("✨", key="btn_new"):
-            st.session_state.screen = "new_customer_register"
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
         st.markdown("""
+        <div class="welcome-choice-card">
+          <span class="wcc-badge">NEW</span>
+          <div class="wcc-logo" style="
+            background: linear-gradient(135deg,#7c3aed,#3b82f6);
+            box-shadow: 0 16px 48px rgba(124,58,237,.4), 0 0 0 1px rgba(124,58,237,.25);
+          ">
+            <span class="wcc-logo-icon">✨</span>
+            <span class="wcc-logo-text">NC</span>
+          </div>
           <div class="wcc-title">New Customer</div>
           <div class="wcc-desc">Register for a new connection and get instant AI-powered support.</div>
         </div>""", unsafe_allow_html=True)
+        if st.button("📝  Register Now", key="btn_new", use_container_width=True):
+            st.session_state.screen = "new_customer_register"
+            st.rerun()
 
     # ── Card 3: Admin ──
     with c3:
-        st.markdown('<div class="welcome-choice-card">', unsafe_allow_html=True)
-        st.markdown('<div class="icon-btn-admin" style="display:flex;justify-content:center;">', unsafe_allow_html=True)
-        if st.button("🛠️", key="btn_admin"):
-            st.session_state.screen = "admin_login"
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
         st.markdown("""
+        <div class="welcome-choice-card">
+          <div class="wcc-logo" style="
+            background: linear-gradient(135deg,#0f766e,#6366f1);
+            box-shadow: 0 16px 48px rgba(99,102,241,.4), 0 0 0 1px rgba(99,102,241,.25);
+          ">
+            <span class="wcc-logo-icon">🛠️</span>
+            <span class="wcc-logo-text">AP</span>
+          </div>
           <div class="wcc-title">Admin Panel</div>
           <div class="wcc-desc">Manage customers, tickets, outages, and system operations.</div>
         </div>""", unsafe_allow_html=True)
+        if st.button("🔐  Admin Access", key="btn_admin", use_container_width=True):
+            st.session_state.screen = "admin_login"
+            st.rerun()
 
 
 # ══════════════════════════════════════════════
