@@ -21,7 +21,7 @@ st.set_page_config(
 )
 
 # ══════════════════════════════════════════════
-#  GLOBAL CSS  (redesigned – no pure black, richer gradients)
+#  GLOBAL CSS (creative, no black, unified container)
 # ══════════════════════════════════════════════
 st.markdown("""
 <style>
@@ -37,7 +37,7 @@ html,body,[class*="css"]{font-family:'DM Sans',sans-serif !important;}
 #MainMenu,footer,header{visibility:hidden;}
 .stDeployButton{display:none;}
 
-/* floating chat logo */
+/* Floating chat logo */
 .floating-chat-logo {
   position: fixed;
   bottom: 30px;
@@ -67,7 +67,7 @@ html,body,[class*="css"]{font-family:'DM Sans',sans-serif !important;}
   50%{transform: translateY(-8px);}
 }
 
-/* ══════════════════ WELCOME HERO (more creative) ══════════════════ */
+/* Welcome hero */
 .welcome-hero{
   text-align:center;padding:100px 20px 80px;
   background: radial-gradient(ellipse at 50% 0%, rgba(14,165,233,0.15), rgba(99,102,241,0.05));
@@ -112,7 +112,7 @@ html,body,[class*="css"]{font-family:'DM Sans',sans-serif !important;}
   font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;
 }
 
-/* unified chat container */
+/* Unified chat container */
 .unified-chat-container {
   background: linear-gradient(145deg, #0e1625, #0a0f1c);
   border-radius: 28px;
@@ -134,91 +134,89 @@ html,body,[class*="css"]{font-family:'DM Sans',sans-serif !important;}
   padding-bottom: 8px;
 }
 
-/* quick topics grid */
+/* Quick topics grid */
 .quick-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 12px;
   margin-bottom: 28px;
 }
-.quick-btn {
-  background: rgba(14,165,233,0.08);
-  border: 1px solid rgba(14,165,233,0.2);
-  border-radius: 16px;
-  padding: 10px 5px;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 500;
-  color: #a0c4e8;
-  transition: all 0.2s;
-  cursor: pointer;
-}
-.quick-btn:hover {
-  background: rgba(14,165,233,0.2);
-  border-color: rgba(14,165,233,0.5);
-  transform: translateY(-2px);
-}
 
-/* custom tabs */
-.custom-tabs {
-  display: flex;
-  gap: 8px;
-  background: rgba(8,14,28,0.6);
+/* Topbar, cards, status pill, etc. */
+.topbar{
+  background:rgba(8,14,28,.9);backdrop-filter:blur(24px);
+  border:1px solid rgba(14,165,233,.14);border-radius:20px;
+  padding:18px 28px;margin-bottom:28px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 8px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04);
+}
+.topbar-icon{
+  width:44px;height:44px;
+  background:linear-gradient(135deg,#0ea5e9,#3b82f6);
+  border-radius:13px;display:flex;align-items:center;justify-content:center;
+  font-size:22px;box-shadow:0 4px 18px rgba(14,165,233,.35);
+}
+.topbar-title{font-family:'Syne',sans-serif;font-size:21px;font-weight:800;color:#f1f5f9;letter-spacing:-.02em;}
+.topbar-sub{font-size:10px;color:#1e3a5f;font-family:'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;margin-top:2px;}
+.status-pill{
+  background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.22);
+  color:#4ade80;padding:8px 18px;border-radius:24px;
+  font-size:11.5px;font-weight:700;font-family:'JetBrains Mono',monospace;
+  display:flex;align-items:center;gap:8px;
+}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 7px #4ade80;}50%{opacity:.2;box-shadow:none;}}
+
+.choice-card-top{
+  background:linear-gradient(150deg,#0d1524,#0f1d35);
+  border:1px solid rgba(14,165,233,.14);
+  border-bottom:none;
+  border-radius:22px 22px 0 0;
+  padding:40px 28px 28px;
+  text-align:center;
+  position:relative;overflow:hidden;
+}
+.choice-icon-wrap{
+  width:72px;height:72px;border-radius:20px;
+  background:linear-gradient(135deg,rgba(14,165,233,.1),rgba(99,102,241,.1));
+  border:1px solid rgba(14,165,233,.18);
+  display:flex;align-items:center;justify-content:center;
+  font-size:34px;margin:0 auto 18px;
+}
+.choice-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#f1f5f9;margin-bottom:10px;}
+.choice-desc{font-size:13.5px;color:#475569;line-height:1.75;}
+.choice-badge{position:absolute;top:14px;right:14px;background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.3);color:#38bdf8;font-size:9px;font-weight:800;padding:3px 9px;border-radius:8px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;}
+
+.cust-card, .form-box, .bill-card, .plan-card, .ticket-card {
+  background: linear-gradient(145deg, #0e1625, #0a0f1c) !important;
+  border: 1px solid rgba(14,165,233,0.16) !important;
   border-radius: 20px;
-  padding: 6px;
-  margin-bottom: 28px;
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(14,165,233,0.12);
+  padding: 22px 28px;
+  margin-bottom: 24px;
 }
-.custom-tab {
-  flex: 1;
-  text-align: center;
-  padding: 12px 8px;
-  border-radius: 16px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: #6d8eaa;
-  background: transparent;
-}
-.custom-tab-active {
-  background: linear-gradient(135deg, #0f2b3f, #142c44);
-  color: #38bdf8;
-  border: 1px solid rgba(14,165,233,0.3);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
+.cust-name{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#f1f5f9;}
+.cust-meta{display:flex;gap:8px;flex-wrap:wrap;}
+.cust-chip{background:rgba(255,255,255,.04);border:1px solid rgba(14,165,233,.1);border-radius:10px;padding:7px 13px;font-size:12px;color:#475569;}
+.cust-chip span{color:#e2e8f0;margin-left:4px;font-weight:600;}
 
-/* bottom logout */
+.stButton > button {
+  background: linear-gradient(135deg, #0ea5e9, #3b82f6) !important;
+  border: none !important;
+  border-radius: 14px !important;
+  font-weight: 600 !important;
+  color: white !important;
+}
 .bottom-logout {
   margin-top: 40px;
   text-align: center;
   padding-top: 20px;
   border-top: 1px solid rgba(14,165,233,0.12);
 }
-
-/* other components (keep existing good styles, modify background) */
-.cust-card, .form-box, .choice-card-top, .bill-card, .plan-card, .ticket-card {
-  background: linear-gradient(145deg, #0e1625, #0a0f1c) !important;
-  border: 1px solid rgba(14,165,233,0.16) !important;
-}
-.stButton > button {
-  background: linear-gradient(135deg, #0ea5e9, #3b82f6) !important;
-  border: none !important;
-  border-radius: 14px !important;
-  font-weight: 600 !important;
-}
-.status-pill {
-  background: rgba(34,197,94,0.08);
-  border: 1px solid rgba(34,197,94,0.2);
-}
-/* ... rest of CSS remains, only overwritten snippets above */
 </style>
 """, unsafe_allow_html=True)
 
-# (rest of your constants, DB, AI, helpers remain exactly as in original – no changes to logic)
 # ══════════════════════════════════════════════
-#  CONSTANTS, DB, AI, HELPERS (copy from original unchanged)
+#  CONSTANTS & DATABASE (unchanged from original)
 # ══════════════════════════════════════════════
 PAKISTAN_LOCATIONS = [
     "Peshawar - University Town","Peshawar - Hayatabad","Peshawar - Saddar",
@@ -290,6 +288,9 @@ def get_db():
 conn = get_db()
 def db(): return conn.cursor()
 
+# ══════════════════════════════════════════════
+#  AI & HELPERS
+# ══════════════════════════════════════════════
 @st.cache_resource
 def get_llm(api_key):
     return ChatOpenAI(api_key=api_key, base_url="https://api.groq.com/openai/v1", model="llama-3.3-70b-versatile", temperature=0.3)
@@ -439,16 +440,24 @@ def render_chat(chat_list, customer_name="Customer"):
     </div>
     """, height=520, scrolling=False)
 
-# Session defaults
-defaults = {"screen":"welcome","phone":"","customer":None,"customer_type":"","bill_info":"","network_status":"ACTIVE","fix_time":"N/A","history_text":"","chat":[],"selected_plan":"","api_key":"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","active_tab":0}
+# ══════════════════════════════════════════════
+#  SESSION STATE
+# ══════════════════════════════════════════════
+defaults = {
+    "screen":"welcome","phone":"","customer":None,"customer_type":"",
+    "bill_info":"","network_status":"ACTIVE","fix_time":"N/A","history_text":"",
+    "chat":[],"selected_plan":"","api_key":"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",
+    "active_tab":0
+}
 for k,v in defaults.items():
-    if k not in st.session_state: st.session_state[k]=v
+    if k not in st.session_state:
+        st.session_state[k] = v
 
 # ══════════════════════════════════════════════
-#  SCREENS (only modified sections shown; keep rest same logic)
+#  SCREENS
 # ══════════════════════════════════════════════
 
-# WELCOME (more creative)
+# ---------- WELCOME ----------
 if st.session_state.screen == "welcome":
     st.markdown("""
     <div class="welcome-hero">
@@ -469,14 +478,184 @@ if st.session_state.screen == "welcome":
         st.markdown('<div class="choice-card-top"><div class="choice-icon-wrap">🛠️</div><div class="choice-title">Admin</div><div class="choice-desc">System management</div></div>', unsafe_allow_html=True)
         if st.button("🔐 Admin", key="admin_btn"): st.session_state.screen="admin_login"; st.rerun()
 
-# For customer dashboard we replace st.tabs with custom tabs, add floating logo, move logout to bottom, unify chat box
+# ---------- CUSTOMER LOGIN ----------
+elif st.session_state.screen == "customer_login":
+    _, col, _ = st.columns([1,2,1])
+    with col:
+        st.markdown("""
+        <div class="form-box">
+          <div style="font-size:36px;margin-bottom:14px;">📱</div>
+          <div class="form-title">Customer Login</div>
+          <div class="form-sub">Enter your registered phone number</div>
+        </div>""", unsafe_allow_html=True)
+        phone = st.text_input("Phone Number", placeholder="03001234567", key="login_phone")
+        if st.button("🔑 Login", key="do_login"):
+            if phone.strip():
+                c = db()
+                c.execute("SELECT name,package,area FROM customers WHERE phone=?", (phone.strip(),))
+                cust = c.fetchone()
+                if cust:
+                    st.session_state.phone = phone.strip()
+                    st.session_state.customer = {"name":cust[0],"package":cust[1],"area":cust[2]}
+                    st.session_state.customer_type = "Existing Customer"
+                    c.execute("SELECT amount,due_date FROM bills WHERE customer_phone=?", (phone.strip(),))
+                    bill = c.fetchone()
+                    st.session_state.bill_info = f"PKR {bill[0]:,}, Due: {bill[1]}" if bill else "No billing record"
+                    c.execute("SELECT status,expected_fix_time FROM outages WHERE area=?", (cust[2],))
+                    out = c.fetchone()
+                    if out:
+                        st.session_state.network_status = out[0]
+                        st.session_state.fix_time = out[1]
+                    c.execute("SELECT issue FROM tickets WHERE customer_phone=?", (phone.strip(),))
+                    rows = c.fetchall()
+                    st.session_state.history_text = "\n".join([f"- {r[0]}" for r in rows]) if rows else "No previous tickets."
+                    st.session_state.chat = []
+                    st.session_state.screen = "customer_dashboard"
+                    st.rerun()
+                else:
+                    st.error("❌ Phone not registered. Please register as new customer.")
+            else:
+                st.error("⚠️ Enter phone number.")
+        if st.button("← Back", key="back_login"):
+            st.session_state.screen = "welcome"
+            st.rerun()
+        st.markdown("<p style='text-align:center;font-size:12px;color:#1e3a5f;'>Demo: <code>03001234567</code></p>", unsafe_allow_html=True)
+
+# ---------- NEW CUSTOMER REGISTER ----------
+elif st.session_state.screen == "new_customer_register":
+    _, col, _ = st.columns([1,2,1])
+    with col:
+        st.markdown("""
+        <div class="form-box">
+          <div style="font-size:36px;margin-bottom:14px;">✨</div>
+          <div class="form-title">New Customer Registration</div>
+          <div class="form-sub">Fill in your details to create an account</div>
+        </div>""", unsafe_allow_html=True)
+        with st.form("reg_form"):
+            name = st.text_input("Full Name", placeholder="e.g. Muhammad Ali")
+            phone = st.text_input("Phone Number", placeholder="03001234567")
+            area = st.selectbox("Your Area", PAKISTAN_LOCATIONS)
+            if st.form_submit_button("✅ Create Account"):
+                if name.strip() and phone.strip():
+                    c = db()
+                    try:
+                        c.execute("INSERT INTO customers(name,phone,package,area) VALUES(?,?,?,?)",
+                                  (name.strip(), phone.strip(), "No Package", area))
+                        conn.commit()
+                        st.session_state.phone = phone.strip()
+                        st.session_state.customer = {"name":name.strip(),"package":"No Package","area":area}
+                        st.session_state.customer_type = "New Customer"
+                        st.session_state.bill_info = "No billing record"
+                        st.session_state.history_text = "No previous tickets."
+                        st.session_state.chat = []
+                        c.execute("SELECT status,expected_fix_time FROM outages WHERE area=?", (area,))
+                        out = c.fetchone()
+                        if out:
+                            st.session_state.network_status = out[0]
+                            st.session_state.fix_time = out[1]
+                        st.session_state.screen = "customer_dashboard"
+                        st.rerun()
+                    except sqlite3.IntegrityError:
+                        st.error("❌ Phone already registered. Please login.")
+                else:
+                    st.error("⚠️ Fill all fields.")
+        if st.button("← Back", key="back_reg"):
+            st.session_state.screen = "welcome"
+            st.rerun()
+
+# ---------- ADMIN LOGIN ----------
+elif st.session_state.screen == "admin_login":
+    _, col, _ = st.columns([1,2,1])
+    with col:
+        st.markdown("""
+        <div class="form-box">
+          <div style="font-size:36px;margin-bottom:14px;">🔐</div>
+          <div class="form-title">Admin Access</div>
+          <div class="form-sub">Enter admin password</div>
+        </div>""", unsafe_allow_html=True)
+        pwd = st.text_input("Admin Password", type="password", placeholder="Enter password")
+        if st.button("Login →", key="admin_go"):
+            if pwd == "admin123":
+                st.session_state.screen = "admin"
+                st.rerun()
+            else:
+                st.error("❌ Incorrect password.")
+        if st.button("← Back", key="back_admin"):
+            st.session_state.screen = "welcome"
+            st.rerun()
+
+# ---------- ADMIN DASHBOARD ----------
+elif st.session_state.screen == "admin":
+    c = db()
+    total_cust = c.execute("SELECT COUNT(*) FROM customers").fetchone()[0]
+    total_tick = c.execute("SELECT COUNT(*) FROM tickets").fetchone()[0]
+    open_tick = c.execute("SELECT COUNT(*) FROM tickets WHERE status='Open'").fetchone()[0]
+    high_tick = c.execute("SELECT COUNT(*) FROM tickets WHERE priority='High' AND status='Open'").fetchone()[0]
+    conn_reqs = c.execute("SELECT COUNT(*) FROM new_connection_requests").fetchone()[0]
+
+    st.markdown(f"""
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">
+      <div class="metric-card" style="background:#0e1625;border-radius:16px;padding:20px;"><div style="font-size:36px;font-weight:800;color:#0ea5e9;">{total_cust}</div><div style="font-size:10px;">TOTAL CUSTOMERS</div></div>
+      <div class="metric-card" style="background:#0e1625;border-radius:16px;padding:20px;"><div style="font-size:36px;font-weight:800;">{total_tick}</div><div style="font-size:10px;">TOTAL TICKETS</div></div>
+      <div class="metric-card" style="background:#0e1625;border-radius:16px;padding:20px;"><div style="font-size:36px;font-weight:800;color:#fbbf24;">{open_tick}</div><div style="font-size:10px;">OPEN TICKETS</div></div>
+      <div class="metric-card" style="background:#0e1625;border-radius:16px;padding:20px;"><div style="font-size:36px;font-weight:800;color:#f87171;">{high_tick}</div><div style="font-size:10px;">HIGH PRIORITY</div></div>
+    </div>""", unsafe_allow_html=True)
+
+    tabs = ["🎫 Tickets", "👥 Customers", "📡 Outages", "🔌 New Requests", "⚙️ Manage"]
+    tab_sel = st.radio("", tabs, horizontal=True, label_visibility="collapsed")
+    if tab_sel == "🎫 Tickets":
+        c.execute("SELECT * FROM tickets ORDER BY created_at DESC")
+        for row in c.fetchall():
+            st.markdown(f"<div style='background:#0e1625;border-radius:12px;padding:12px;margin-bottom:8px;'><b>{row[0]}</b> - {row[2]}<br>Priority: {row[3]} | Status: {row[6]}</div>", unsafe_allow_html=True)
+    elif tab_sel == "👥 Customers":
+        df = pd.DataFrame(c.execute("SELECT name,phone,package,area FROM customers").fetchall(), columns=["Name","Phone","Package","Area"])
+        st.dataframe(df, use_container_width=True)
+    elif tab_sel == "📡 Outages":
+        for area, status, fix in c.execute("SELECT * FROM outages").fetchall():
+            st.markdown(f"📍 {area} : {status} (Fix: {fix})")
+        with st.form("add_outage"):
+            oa = st.text_input("Area")
+            os = st.selectbox("Status", ["DOWN","ACTIVE"])
+            of = st.text_input("Expected Fix Time")
+            if st.form_submit_button("Save"):
+                db().execute("INSERT OR REPLACE INTO outages VALUES(?,?,?)", (oa,os,of))
+                conn.commit()
+                st.rerun()
+    elif tab_sel == "🔌 New Requests":
+        df = pd.DataFrame(c.execute("SELECT name,phone,area,package,created_at FROM new_connection_requests ORDER BY created_at DESC").fetchall(), columns=["Name","Phone","Area","Package","Requested At"])
+        st.dataframe(df, use_container_width=True)
+    elif tab_sel == "⚙️ Manage":
+        tid = st.text_input("Ticket ID to resolve")
+        if st.button("Resolve"):
+            db().execute("UPDATE tickets SET status='Resolved' WHERE ticket_id=?", (tid,))
+            conn.commit()
+            st.success("Resolved")
+        new_key = st.text_input("Groq API Key", value=st.session_state.api_key, type="password")
+        if st.button("Update Key"):
+            st.session_state.api_key = new_key
+            st.success("Updated")
+
+    if st.button("← Logout", key="admin_logout"):
+        for k in defaults:
+            st.session_state[k] = defaults[k]
+        st.rerun()
+
+# ---------- CUSTOMER DASHBOARD (FULL WORKING) ----------
 elif st.session_state.screen == "customer_dashboard":
     cust = st.session_state.customer
     phone = st.session_state.phone
-    # top bar same as before
-    st.markdown("""
-    <div class="topbar"><div style="display:flex;gap:14px;"><div class="topbar-icon">⚡</div><div><div class="topbar-title">FiberISP</div><div class="topbar-sub">AI CUSTOMER SUPPORT</div></div></div><div class="status-pill"><div class="status-dot"></div>ONLINE</div></div>""", unsafe_allow_html=True)
 
+    # Topbar
+    st.markdown("""
+    <div class="topbar">
+      <div style="display:flex;gap:14px;"><div class="topbar-icon">⚡</div><div><div class="topbar-title">FiberISP</div><div class="topbar-sub">AI CUSTOMER SUPPORT</div></div></div>
+      <div class="status-pill"><div class="status-dot"></div>ONLINE</div>
+    </div>""", unsafe_allow_html=True)
+
+    # Customer card
+    outage_html = ""
+    if st.session_state.network_status == "DOWN":
+        outage_html = f'<div class="outage-warn" style="background:rgba(248,113,113,0.1);padding:10px;border-radius:12px;margin-top:12px;">⚠️ Outage in {cust["area"]} — Fix ETA: {st.session_state.fix_time}</div>'
     st.markdown(f"""
     <div class="cust-card">
       <div style="display:flex;justify-content:space-between;">
@@ -489,42 +668,39 @@ elif st.session_state.screen == "customer_dashboard":
         <div class="cust-chip">📍 {htmllib.escape(cust['area'])}</div>
         <div class="cust-chip">💳 {htmllib.escape(st.session_state.bill_info)}</div>
       </div>
+      {outage_html}
     </div>""", unsafe_allow_html=True)
 
-    # Custom tab bar
+    # Custom Tabs
     tabs = ["💬 AI Support Chat", "🔌 New Connection", "💳 Bill & Tickets", "⬆️ Upgrade Plan"]
     cols = st.columns(len(tabs))
-    for i, tab_name in enumerate(tabs):
-        active_class = "custom-tab-active" if st.session_state.active_tab == i else ""
-        if cols[i].button(tab_name, key=f"tab_{i}", use_container_width=True):
+    for i, tab in enumerate(tabs):
+        if cols[i].button(tab, key=f"tab_{i}", use_container_width=True):
             st.session_state.active_tab = i
             st.rerun()
-        # highlight active via custom css
         if st.session_state.active_tab == i:
             st.markdown(f"<style>div[data-testid='column']:nth-child({i+1}) button {{background: linear-gradient(135deg,#0f2b3f,#142c44) !important; color:#38bdf8 !important; border:1px solid rgba(14,165,233,0.3) !important;}}</style>", unsafe_allow_html=True)
 
     # Tab content
-    if st.session_state.active_tab == 0:  # Chat
+    if st.session_state.active_tab == 0:   # AI Chat
         st.markdown('<div class="unified-chat-container">', unsafe_allow_html=True)
-        # chat banner with online status
         st.markdown("""
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;background:rgba(14,165,233,0.05);border-radius:20px;padding:12px 20px;">
           <div style="width:48px;height:48px;background:linear-gradient(135deg,#0ea5e9,#6366f1);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:24px;">🤖</div>
           <div><div style="font-weight:800;color:#38bdf8;">FiberISP AI Assistant</div><div style="font-size:12px;color:#6c8eae;">Ask about bills, outages, or say "change my name to Ahmed"</div></div>
-          <div style="margin-left:auto;"><span class="online-dot"></span> <span style="color:#4ade80;font-size:12px;">ONLINE</span></div>
+          <div style="margin-left:auto;"><span class="status-dot"></span> <span style="color:#4ade80;font-size:12px;">ONLINE</span></div>
         </div>""", unsafe_allow_html=True)
-        # quick topics (grid)
-        quick_topics = [("🐌","Slow internet speed"),("📡","WiFi not working"),("⛔","No internet connection"),("💳","Show my bill"),("⬆️","Upgrade my plan"),("🔁","Restart router"),("📶","Weak WiFi signal"),("🔧","Request technician"),("📋","Show my tickets"),("📦","Available plans")]
         st.markdown('<div class="sec-hdr">QUICK TOPICS</div>', unsafe_allow_html=True)
+        quick = [("🐌","Slow internet speed"),("📡","WiFi not working"),("⛔","No internet connection"),("💳","Show my bill"),("⬆️","Upgrade my plan"),("🔁","Restart router"),("📶","Weak WiFi signal"),("🔧","Request technician"),("📋","Show my tickets"),("📦","Available plans")]
         qcols = st.columns(5)
-        for i, (icon, label) in enumerate(quick_topics):
-            with qcols[i%5]:
-                if st.button(f"{icon} {label}", key=f"qt_{i}", use_container_width=True):
+        for idx, (icon, label) in enumerate(quick):
+            with qcols[idx%5]:
+                if st.button(f"{icon} {label}", key=f"qt_{idx}", use_container_width=True):
                     now = datetime.datetime.now().strftime("%I:%M %p")
                     st.session_state.chat.append({"role":"user","text":label,"time":now})
                     with st.spinner("AI is thinking..."):
-                        result, err = process_ticket(None, phone, st.session_state.customer_type, cust["name"], cust["package"], cust["area"], st.session_state.network_status, st.session_state.fix_time, st.session_state.bill_info, st.session_state.history_text, label)
-                    _handle_result(result, err, phone)
+                        res, err = process_ticket(None, phone, st.session_state.customer_type, cust["name"], cust["package"], cust["area"], st.session_state.network_status, st.session_state.fix_time, st.session_state.bill_info, st.session_state.history_text, label)
+                    _handle_result(res, err, phone)
                     st.rerun()
         st.markdown('<div class="sec-hdr">CONVERSATION</div>', unsafe_allow_html=True)
         render_chat(st.session_state.chat, customer_name=cust["name"])
@@ -533,50 +709,128 @@ elif st.session_state.screen == "customer_dashboard":
             now = datetime.datetime.now().strftime("%I:%M %p")
             st.session_state.chat.append({"role":"user","text":user_msg,"time":now})
             with st.spinner("AI is thinking..."):
-                result, err = process_ticket(None, phone, st.session_state.customer_type, cust["name"], cust["package"], cust["area"], st.session_state.network_status, st.session_state.fix_time, st.session_state.bill_info, st.session_state.history_text, user_msg)
-            _handle_result(result, err, phone)
+                res, err = process_ticket(None, phone, st.session_state.customer_type, cust["name"], cust["package"], cust["area"], st.session_state.network_status, st.session_state.fix_time, st.session_state.bill_info, st.session_state.history_text, user_msg)
+            _handle_result(res, err, phone)
             st.rerun()
-        if st.button("🗑️ Clear Chat", key="clear"):
+        if st.button("🗑️ Clear Chat", key="clear_chat"):
             st.session_state.chat = []
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-    elif st.session_state.active_tab == 1:  # New Connection
-        # ... keep original logic from tab2 (unchanged) ...
-        st.markdown("## 🔌 New Connection Request")
-        # (copy original content exactly, no modifications needed)
-        pass
+    elif st.session_state.active_tab == 1:   # New Connection
+        st.markdown("""
+        <div style="background:linear-gradient(150deg,#0d1524,#0f1d35);border-radius:18px;padding:24px 28px;margin-bottom:24px;">
+          <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#f1f5f9;">🔌 Request a New Internet Connection</div>
+          <div style="font-size:13.5px;color:#475569;">Our team will contact you within 24 hours to schedule installation.</div>
+        </div>""", unsafe_allow_html=True)
+        st.markdown("<div class='sec-hdr'>Select a Plan</div>", unsafe_allow_html=True)
+        pcols = st.columns(4)
+        for i, p in enumerate(PLANS_LIST):
+            with pcols[i]:
+                sel_cls = "selected" if st.session_state.selected_plan == p["name"] else ""
+                features_html = "".join([f'<li style="font-size:11px;">{f}</li>' for f in p["features"][:4]])
+                st.markdown(f"""
+                <div class="plan-card" style="border:1px solid rgba(14,165,233,0.2);border-radius:16px;padding:15px;text-align:center;">
+                  <div style="font-size:28px;">{p['icon']}</div>
+                  <div style="font-weight:700;">{p['name']}</div>
+                  <div style="font-size:12px;color:#0ea5e9;">{p['speed']}</div>
+                  <div style="font-size:22px;font-weight:800;color:#fbbf24;">{p['price']}<span style="font-size:10px;">/mo</span></div>
+                  <ul style="list-style:none;padding:0;">{features_html}</ul>
+                </div>""", unsafe_allow_html=True)
+                if st.button("Select", key=f"plan_{i}", use_container_width=True):
+                    st.session_state.selected_plan = p["name"]
+                    st.rerun()
+        if st.session_state.selected_plan:
+            st.info(f"Selected: {st.session_state.selected_plan}")
+        with st.form("nc_form"):
+            nc_name = st.text_input("Full Name", value=cust["name"])
+            nc_phone = st.text_input("Phone Number", value=phone)
+            nc_area = st.selectbox("Installation Area", PAKISTAN_LOCATIONS, index=PAKISTAN_LOCATIONS.index(cust["area"]) if cust["area"] in PAKISTAN_LOCATIONS else 0)
+            if st.form_submit_button("Submit Request"):
+                if nc_name.strip() and nc_phone.strip() and st.session_state.selected_plan:
+                    db().execute("INSERT INTO new_connection_requests(name,phone,area,package,created_at) VALUES(?,?,?,?,?)",
+                                 (nc_name.strip(), nc_phone.strip(), nc_area, st.session_state.selected_plan, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                    conn.commit()
+                    st.success("Request submitted!")
+                    st.session_state.selected_plan = ""
+                else:
+                    st.error("Please fill all fields and select a plan.")
 
-    elif st.session_state.active_tab == 2:  # Bill & Tickets
-        # ... original tab3 content ...
-        pass
+    elif st.session_state.active_tab == 2:   # Bill & Tickets
+        c = db()
+        bill_row = c.execute("SELECT amount,due_date FROM bills WHERE customer_phone=?", (phone,)).fetchone()
+        if bill_row:
+            amount, due_date = bill_row
+            try: overdue = datetime.date.today() > datetime.date.fromisoformat(due_date)
+            except: overdue = False
+            st.markdown(f"""
+            <div class="bill-card">
+              <div style="font-size:10px;color:#1e3a5f;">CURRENT BILL</div>
+              <div style="font-size:36px;font-weight:800;color:#fbbf24;">PKR {amount:,}</div>
+              <div>Due: {due_date}</div>
+              <div style="color:{'#f87171' if overdue else '#4ade80'};">{'OVERDUE' if overdue else 'CURRENT'}</div>
+            </div>""", unsafe_allow_html=True)
+        else:
+            st.info("No billing record.")
+        st.markdown("<div class='sec-hdr'>Recent Support Tickets</div>", unsafe_allow_html=True)
+        tickets = c.execute("SELECT ticket_id,issue,priority,status,created_at FROM tickets WHERE customer_phone=? ORDER BY created_at DESC LIMIT 5", (phone,)).fetchall()
+        if tickets:
+            for tid, issue, priority, status, created in tickets:
+                st.markdown(f"""
+                <div class="ticket-card">
+                  <div><b>{tid}</b> - {status}</div>
+                  <div>{issue}</div>
+                  <div style="font-size:11px;">Priority: {priority} | Created: {created}</div>
+                </div>""", unsafe_allow_html=True)
+        else:
+            st.info("No tickets found.")
 
-    elif st.session_state.active_tab == 3:  # Upgrade Plan
-        # ... original tab4 content ...
-        pass
+    elif st.session_state.active_tab == 3:   # Upgrade Plan
+        st.markdown(f"""
+        <div style="background:linear-gradient(150deg,#0d1524,#0f1d35);border-radius:18px;padding:24px 28px;margin-bottom:24px;">
+          <div style="font-size:20px;font-weight:700;">⬆️ Upgrade Your Plan</div>
+          <div>Current: <strong style="color:#0ea5e9;">{cust['package']}</strong></div>
+        </div>""", unsafe_allow_html=True)
+        up_cols = st.columns(4)
+        for i, p in enumerate(PLANS_LIST):
+            with up_cols[i]:
+                is_cur = p["name"].lower() in cust["package"].lower()
+                features_html = "".join([f'<li>{f}</li>' for f in p["features"]])
+                st.markdown(f"""
+                <div class="plan-card" style="border:1px solid rgba(14,165,233,0.2);border-radius:16px;padding:15px;text-align:center;">
+                  <div style="font-size:28px;">{p['icon']}</div>
+                  <div><b>{p['name']}</b></div>
+                  <div style="color:#0ea5e9;">{p['speed']}</div>
+                  <div style="font-size:22px;color:#fbbf24;">{p['price']}<span style="font-size:10px;">/mo</span></div>
+                  <ul style="list-style:none;padding:0;">{features_html}</ul>
+                  {"<div style='margin-top:8px;color:#4ade80;'>✓ CURRENT</div>" if is_cur else ""}
+                </div>""", unsafe_allow_html=True)
+                if not is_cur:
+                    if st.button(f"Upgrade to {p['name']}", key=f"up_{i}", use_container_width=True):
+                        msg = f"I want to upgrade from {cust['package']} to {p['name']}"
+                        now = datetime.datetime.now().strftime("%I:%M %p")
+                        st.session_state.chat.append({"role":"user","text":msg,"time":now})
+                        with st.spinner("Processing..."):
+                            res, err = process_ticket(None, phone, st.session_state.customer_type, cust["name"], cust["package"], cust["area"], st.session_state.network_status, st.session_state.fix_time, st.session_state.bill_info, st.session_state.history_text, msg)
+                        _handle_result(res, err, phone)
+                        st.success(f"Upgrade to {p['name']} requested. Check AI chat.")
+                        st.rerun()
 
-    # Logout button at bottom
+    # Logout at bottom
     st.markdown('<div class="bottom-logout">', unsafe_allow_html=True)
     if st.button("🚪 Logout", key="logout_bottom"):
-        for k in defaults: st.session_state[k] = defaults[k]
+        for k in defaults:
+            st.session_state[k] = defaults[k]
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Floating chat logo (only on customer dashboard, switches to tab 0)
+    # Floating chat logo (hidden button to switch to tab 0)
     st.markdown("""
-    <div class="floating-chat-logo" onclick="(function(){const btn = document.querySelector('div[data-testid=\"stButton\"] button'); if(btn) btn.click();})()">
+    <div class="floating-chat-logo" onclick="document.querySelector('div[data-testid=\"stButton\"] button').click();">
       💬
     </div>
     """, unsafe_allow_html=True)
-    # But we need a hidden button to trigger tab switch
-    if st.button("", key="hidden_chat_trigger", help="Open AI Chat", use_container_width=False):
+    if st.button("", key="hidden_chat_trigger", help="Open AI Chat"):
         st.session_state.active_tab = 0
         st.rerun()
     st.markdown("<style>div[data-testid='stButton']:has(button:contains('hidden_chat_trigger')) {display: none;}</style>", unsafe_allow_html=True)
-
-# Other screens (customer_login, new_customer_register, admin, etc.) remain identical to original
-# (only welcome and customer dashboard are changed as per request)
-
-# IMPORTANT: for brevity I kept only modified sections, the full code must include all original logic for admin, login, register, etc.
-# However the user expects a complete file, so I will provide a ZIP? No, I need to output the full Python script.
-# Because of length, I'll output the complete script with all modifications integrated.
