@@ -13,620 +13,1398 @@ from langchain_openai import ChatOpenAI
 #  PAGE CONFIG
 # ══════════════════════════════════════════════
 st.set_page_config(
-    page_title="FiberISP · AI Support",
+    page_title="FiberISP · Neural Support",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
 # ══════════════════════════════════════════════
-#  GLOBAL CSS
+#  GLOBAL CSS — CYBERPUNK FIBER-OPTIC THEME
 # ══════════════════════════════════════════════
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --neon-cyan:   #00f5ff;
+  --neon-blue:   #0080ff;
+  --neon-purple: #bf00ff;
+  --neon-green:  #00ff88;
+  --neon-amber:  #ffaa00;
+  --neon-red:    #ff3355;
+  --bg-void:     #020408;
+  --bg-deep:     #040810;
+  --bg-panel:    #060c18;
+  --bg-card:     rgba(6, 14, 28, 0.85);
+  --glass-border:rgba(0, 245, 255, 0.12);
+  --glass-glow:  rgba(0, 245, 255, 0.04);
+  --text-primary:#e8f4ff;
+  --text-muted:  #3a5a7a;
+  --text-dim:    #1a3050;
+}
 
 /* ── Reset & Base ── */
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body,[class*="css"]{font-family:'DM Sans',sans-serif !important;}
-.stApp{
-  background:#060b14;
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body, [class*="css"] { 
+  font-family: 'Rajdhani', sans-serif !important;
+  color: var(--text-primary) !important;
+}
+
+/* ── Void Background with animated circuit lines ── */
+.stApp {
+  background: var(--bg-void) !important;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(14,165,233,.12), transparent),
-    linear-gradient(180deg,#060b14 0%,#080e1c 100%);
-  background-attachment:fixed;
+    radial-gradient(ellipse 120% 60% at 20% -10%, rgba(0,128,255,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 40% at 80% 110%, rgba(191,0,255,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 30% at 50% 50%, rgba(0,245,255,0.02) 0%, transparent 70%) !important;
+  background-attachment: fixed !important;
 }
-.main .block-container{padding:1.5rem 2rem 4rem;max-width:1200px;}
-#MainMenu,footer,header{visibility:hidden;}
-.stDeployButton{display:none;}
 
-/* ── Grid Background ── */
-.stApp::before{
-  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+.main .block-container {
+  padding: 0 2rem 4rem !important;
+  max-width: 1400px !important;
+}
+
+#MainMenu, footer, header, .stDeployButton { visibility: hidden; }
+
+/* ── Scan lines overlay ── */
+.stApp::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 245, 255, 0.008) 2px,
+    rgba(0, 245, 255, 0.008) 4px
+  );
+  animation: scanmove 8s linear infinite;
+}
+@keyframes scanmove {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100vh; }
+}
+
+/* ── Circuit grid ── */
+.stApp::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background-image:
-    linear-gradient(rgba(14,165,233,.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(14,165,233,.025) 1px, transparent 1px);
-  background-size:60px 60px;
+    linear-gradient(rgba(0,245,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,245,255,0.018) 1px, transparent 1px);
+  background-size: 80px 80px;
 }
 
-/* ══════════════════ WELCOME HERO ══════════════════ */
-.welcome-hero{
-  text-align:center;padding:90px 20px 70px;
-  background:linear-gradient(135deg,rgba(14,165,233,.07),rgba(99,102,241,.04));
-  border-radius:28px;border:1px solid rgba(14,165,233,.16);
-  margin:24px 0 48px;position:relative;overflow:hidden;
-  box-shadow:0 30px 80px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.05);
-}
-.welcome-hero::before{
-  content:'';position:absolute;top:-40%;left:-40%;width:180%;height:180%;
-  background:radial-gradient(circle at 50% 40%, rgba(14,165,233,.09) 0%, transparent 65%);
-  animation:hpulse 8s ease-in-out infinite;
-}
-.welcome-hero::after{
-  content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(14,165,233,.4),transparent);
-}
-@keyframes hpulse{0%,100%{transform:scale(1);opacity:.5;}50%{transform:scale(1.1);opacity:1;}}
-
-.welcome-logo-wrap{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:90px;height:90px;border-radius:28px;margin-bottom:24px;
-  background:linear-gradient(135deg,#0ea5e9,#3b82f6,#6366f1);
-  box-shadow:0 20px 50px rgba(14,165,233,.35);
-  animation:float 3.5s ease-in-out infinite;position:relative;z-index:1;
-  font-size:42px;
-}
-@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
-
-.welcome-title{
-  font-family:'Syne',sans-serif;font-size:56px;font-weight:800;letter-spacing:-.04em;
-  background:linear-gradient(135deg,#38bdf8 0%,#6366f1 60%,#a78bfa 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  margin-bottom:16px;position:relative;z-index:1;
-}
-.welcome-subtitle{font-size:19px;color:#94a3b8;margin-bottom:12px;z-index:1;position:relative;font-weight:500;}
-.welcome-tagline{
-  font-size:11px;color:#1e3a5f;z-index:1;position:relative;
-  font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;
+/* ══════════════════ HERO SECTION ══════════════════ */
+.hero-wrap {
+  position: relative;
+  padding: 0;
+  margin-bottom: 0;
+  overflow: hidden;
 }
 
-/* ══════════════════ TOP BAR ══════════════════ */
-.topbar{
-  background:rgba(8,14,28,.9);backdrop-filter:blur(24px);
-  border:1px solid rgba(14,165,233,.14);border-radius:20px;
-  padding:18px 28px;margin-bottom:28px;
-  display:flex;align-items:center;justify-content:space-between;
-  box-shadow:0 8px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04);
+/* Fiber optic data stream canvas */
+.data-stream-bar {
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent 0%, var(--neon-cyan) 30%, var(--neon-blue) 60%, var(--neon-purple) 80%, transparent 100%);
+  animation: stream-flow 3s linear infinite;
+  background-size: 200% 100%;
+  margin-bottom: 0;
 }
-.topbar-icon{
-  width:44px;height:44px;
-  background:linear-gradient(135deg,#0ea5e9,#3b82f6);
-  border-radius:13px;display:flex;align-items:center;justify-content:center;
-  font-size:22px;box-shadow:0 4px 18px rgba(14,165,233,.35);
-  animation:glow 2.5s ease-in-out infinite alternate;
-}
-@keyframes glow{from{box-shadow:0 4px 18px rgba(14,165,233,.3);}to{box-shadow:0 4px 28px rgba(14,165,233,.6);}}
-.topbar-title{font-family:'Syne',sans-serif;font-size:21px;font-weight:800;color:#f1f5f9;letter-spacing:-.02em;}
-.topbar-sub{font-size:10px;color:#1e3a5f;font-family:'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;margin-top:2px;}
-.status-pill{
-  background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.22);
-  color:#4ade80;padding:8px 18px;border-radius:24px;
-  font-size:11.5px;font-weight:700;font-family:'JetBrains Mono',monospace;
-  display:flex;align-items:center;gap:8px;
-}
-.status-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;animation:blink 2s infinite;}
-@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 7px #4ade80;}50%{opacity:.2;box-shadow:none;}}
-
-/* ══════════════════ WELCOME CHOICE CARDS — ICON-ONLY CLICK ══════════════════ */
-.welcome-choice-card{
-  background:linear-gradient(150deg,#0d1524,#0f1d35);
-  border:1px solid rgba(14,165,233,.14);
-  border-radius:24px;
-  padding:36px 28px 32px;
-  text-align:center;
-  position:relative;overflow:hidden;
-  transition:border-color .35s, box-shadow .35s, transform .35s;
-}
-.welcome-choice-card:hover{
-  border-color:rgba(14,165,233,.32);
-  box-shadow:0 20px 60px rgba(14,165,233,.1);
-  transform:translateY(-4px);
-}
-.welcome-choice-card::before{
-  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
-  background:linear-gradient(90deg,transparent,rgba(14,165,233,.04),transparent);
-  transition:left .6s;
-}
-.welcome-choice-card:hover::before{left:100%;}
-.wcc-badge{
-  position:absolute;top:14px;right:14px;
-  background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.3);
-  color:#38bdf8;font-size:9px;font-weight:800;padding:3px 9px;
-  border-radius:8px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;
-}
-.wcc-title{
-  font-family:'Syne',sans-serif;font-size:19px;font-weight:700;
-  color:#f1f5f9;margin-bottom:8px;
-}
-.wcc-desc{font-size:13px;color:#334155;line-height:1.75;}
-
-/* Icon-only button — the LOGO is the clickable element */
-.icon-btn-only > div > .stButton > button {
-  width: 86px !important;
-  height: 86px !important;
-  border-radius: 24px !important;
-  background: linear-gradient(135deg, rgba(14,165,233,.13), rgba(99,102,241,.1)) !important;
-  border: 1px solid rgba(14,165,233,.25) !important;
-  color: white !important;
-  font-size: 38px !important;
-  padding: 0 !important;
-  margin: 0 auto 20px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-shadow: 0 8px 32px rgba(14,165,233,.15), inset 0 1px 0 rgba(255,255,255,.08) !important;
-  transition: all .35s cubic-bezier(.34,1.56,.64,1) !important;
-  line-height: 1 !important;
-}
-.icon-btn-only > div > .stButton > button:hover {
-  transform: translateY(-8px) scale(1.1) !important;
-  box-shadow: 0 20px 50px rgba(14,165,233,.4), 0 0 0 6px rgba(14,165,233,.08) !important;
-  background: linear-gradient(135deg, #0ea5e9, #6366f1) !important;
-  border-color: rgba(14,165,233,.6) !important;
-}
-.icon-btn-only > div > .stButton > button:active {
-  transform: translateY(-2px) scale(1.04) !important;
+@keyframes stream-flow {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-/* Admin icon variant */
-.icon-btn-admin > div > .stButton > button {
-  width: 86px !important;
-  height: 86px !important;
-  border-radius: 24px !important;
-  background: linear-gradient(135deg, rgba(168,85,247,.13), rgba(99,102,241,.1)) !important;
-  border: 1px solid rgba(168,85,247,.25) !important;
-  color: white !important;
-  font-size: 38px !important;
-  padding: 0 !important;
-  margin: 0 auto 20px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-shadow: 0 8px 32px rgba(168,85,247,.15), inset 0 1px 0 rgba(255,255,255,.08) !important;
-  transition: all .35s cubic-bezier(.34,1.56,.64,1) !important;
-  line-height: 1 !important;
-}
-.icon-btn-admin > div > .stButton > button:hover {
-  transform: translateY(-8px) scale(1.1) !important;
-  box-shadow: 0 20px 50px rgba(168,85,247,.4), 0 0 0 6px rgba(168,85,247,.08) !important;
-  background: linear-gradient(135deg, #a855f7, #6366f1) !important;
-  border-color: rgba(168,85,247,.6) !important;
+.hero-main {
+  background: linear-gradient(135deg, 
+    rgba(0,245,255,0.04) 0%,
+    rgba(0,20,40,0.9) 30%,
+    rgba(0,5,15,0.95) 60%,
+    rgba(191,0,255,0.03) 100%);
+  border: 1px solid var(--glass-border);
+  border-top: 2px solid rgba(0,245,255,0.3);
+  border-radius: 0 0 32px 32px;
+  padding: 60px 40px 50px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 0 80px rgba(0,245,255,0.05),
+    inset 0 1px 0 rgba(0,245,255,0.15),
+    0 40px 100px rgba(0,0,0,0.8);
 }
 
-/* ══════════════════ BUBBLE SCREEN BACKGROUND ══════════════════ */
-.bubble-bg-container{
-  position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
-}
-.orb{
-  position:absolute;border-radius:50%;
-  animation:orb-drift linear infinite;
-  filter:blur(1px);
-}
-@keyframes orb-drift{
-  0%  {transform:translate(0,0) scale(1);   opacity:0;}
-  8%  {opacity:1;}
-  92% {opacity:.6;}
-  100%{transform:translate(var(--tx),var(--ty)) scale(var(--ts)); opacity:0;}
-}
-
-/* ══════════════════ GLASS FORM CARD ══════════════════ */
-.glass-form-card{
-  background:rgba(8,14,28,.82);
-  backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);
-  border-radius:32px;
-  padding:48px 44px 40px;
-  position:relative;z-index:2;
-  box-shadow:
-    0 0 0 1px rgba(14,165,233,.18),
-    0 32px 80px rgba(0,0,0,.65),
-    inset 0 1px 0 rgba(255,255,255,.07),
-    0 0 60px rgba(14,165,233,.04);
-  overflow:hidden;
-}
-.glass-form-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(14,165,233,.5),rgba(99,102,241,.4),transparent);
-}
-.glass-form-card::after{
-  content:'';position:absolute;top:-60%;left:-20%;width:140%;height:80%;
-  background:radial-gradient(ellipse,rgba(14,165,233,.04) 0%,transparent 70%);
-  pointer-events:none;
+/* Corner brackets */
+.hero-main::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: 
+    linear-gradient(to right, var(--neon-cyan) 2px, transparent 2px) 0 0 / 30px 30px no-repeat,
+    linear-gradient(to bottom, var(--neon-cyan) 2px, transparent 2px) 0 0 / 30px 30px no-repeat,
+    linear-gradient(to left, var(--neon-cyan) 2px, transparent 2px) 100% 0 / 30px 30px no-repeat,
+    linear-gradient(to bottom, var(--neon-cyan) 2px, transparent 2px) 100% 0 / 30px 30px no-repeat,
+    linear-gradient(to right, var(--neon-cyan) 2px, transparent 2px) 0 100% / 30px 30px no-repeat,
+    linear-gradient(to top, var(--neon-cyan) 2px, transparent 2px) 0 100% / 30px 30px no-repeat,
+    linear-gradient(to left, var(--neon-cyan) 2px, transparent 2px) 100% 100% / 30px 30px no-repeat,
+    linear-gradient(to top, var(--neon-cyan) 2px, transparent 2px) 100% 100% / 30px 30px no-repeat;
+  opacity: 0.4;
+  pointer-events: none;
 }
 
-.gfc-icon-wrap{
-  width:80px;height:80px;border-radius:22px;margin:0 auto 24px;
-  display:flex;align-items:center;justify-content:center;font-size:36px;
-  background:linear-gradient(135deg,#0ea5e9,#3b82f6,#6366f1);
-  box-shadow:0 16px 48px rgba(14,165,233,.4);
-  animation:gfc-float 4s ease-in-out infinite;
-  position:relative;z-index:1;
+.hero-eyebrow {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--neon-cyan);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
 }
-@keyframes gfc-float{
-  0%,100%{transform:translateY(0) rotate(0deg);}
-  33%{transform:translateY(-8px) rotate(-3deg);}
-  66%{transform:translateY(-4px) rotate(3deg);}
-}
-
-.gfc-title{
-  font-family:'Syne',sans-serif;font-size:28px;font-weight:800;
-  text-align:center;letter-spacing:-.03em;margin-bottom:8px;
-  background:linear-gradient(135deg,#e2e8f0 0%,#38bdf8 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  position:relative;z-index:1;
-}
-.gfc-sub{
-  font-size:13.5px;color:#334155;text-align:center;
-  line-height:1.75;margin-bottom:32px;position:relative;z-index:1;
+.hero-eyebrow::before, .hero-eyebrow::after {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: var(--neon-cyan);
+  opacity: 0.5;
 }
 
-/* Bubble pill divider */
-.gfc-divider{
-  display:flex;align-items:center;gap:12px;margin-bottom:20px;
-}
-.gfc-divider-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(14,165,233,.15),transparent);}
-.gfc-divider-pill{
-  font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
-  color:#1e3a5f;font-family:'JetBrains Mono',monospace;
-  background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.1);
-  padding:4px 12px;border-radius:20px;white-space:nowrap;
+.hero-logo-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 24px;
+  z-index: 1;
 }
 
-/* Demo chip */
-.demo-chip-wrap{
-  text-align:center;margin-top:20px;
-  font-size:11.5px;color:#1e3a5f;
-  font-family:'JetBrains Mono',monospace;
-  position:relative;z-index:1;
+.hero-logo-ring {
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,245,255,0.2);
+  animation: ring-spin 12s linear infinite;
 }
-.demo-chip{
-  background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.18);
-  padding:3px 10px;border-radius:6px;color:#38bdf8;font-weight:700;
-  letter-spacing:.04em;
+.hero-logo-ring::after {
+  content: '';
+  position: absolute;
+  top: -3px; left: 50%;
+  width: 6px; height: 6px;
+  background: var(--neon-cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
+  transform: translateX(-50%);
+}
+@keyframes ring-spin { to { transform: rotate(360deg); } }
+
+.hero-logo-ring-2 {
+  position: absolute;
+  inset: -28px;
+  border-radius: 50%;
+  border: 1px solid rgba(191,0,255,0.15);
+  animation: ring-spin 20s linear infinite reverse;
+}
+.hero-logo-ring-2::after {
+  content: '';
+  position: absolute;
+  bottom: -3px; left: 30%;
+  width: 4px; height: 4px;
+  background: var(--neon-purple);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--neon-purple);
+  transform: translateX(-50%);
 }
 
-/* Floating tag bubbles in login screens */
-.float-tags{
-  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:28px;
-  position:relative;z-index:1;
+.hero-logo-hex {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, #001830, #002040);
+  border: 2px solid var(--neon-cyan);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  box-shadow: 
+    0 0 30px rgba(0,245,255,0.4),
+    0 0 60px rgba(0,245,255,0.15),
+    inset 0 0 30px rgba(0,245,255,0.05);
+  animation: logo-pulse 3s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
 }
-.ftag{
-  font-size:10.5px;font-weight:600;padding:5px 13px;border-radius:20px;
-  border:1px solid;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;
-  animation:ftag-bob 3s ease-in-out infinite;
+@keyframes logo-pulse {
+  0%, 100% { box-shadow: 0 0 30px rgba(0,245,255,0.4), 0 0 60px rgba(0,245,255,0.15), inset 0 0 30px rgba(0,245,255,0.05); }
+  50% { box-shadow: 0 0 50px rgba(0,245,255,0.6), 0 0 100px rgba(0,245,255,0.25), inset 0 0 40px rgba(0,245,255,0.1); }
 }
-.ftag:nth-child(2){animation-delay:.4s;}
-.ftag:nth-child(3){animation-delay:.8s;}
-.ftag-blue{color:#38bdf8;border-color:rgba(14,165,233,.25);background:rgba(14,165,233,.07);}
-.ftag-purple{color:#c084fc;border-color:rgba(192,132,252,.25);background:rgba(192,132,252,.07);}
-.ftag-green{color:#4ade80;border-color:rgba(74,222,128,.25);background:rgba(74,222,128,.07);}
-@keyframes ftag-bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
 
-/* Login back button */
-.login-back-btn > div > .stButton > button {
-  background: rgba(255,255,255,.04) !important;
-  border: 1px solid rgba(255,255,255,.08) !important;
-  color: #475569 !important;
-  border-radius: 12px !important;
+.hero-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 72px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(135deg, 
+    #ffffff 0%, 
+    var(--neon-cyan) 35%, 
+    #60a0ff 65%,
+    var(--neon-purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 30px rgba(0,245,255,0.3));
+  animation: title-shimmer 4s ease-in-out infinite;
+}
+@keyframes title-shimmer {
+  0%, 100% { filter: drop-shadow(0 0 20px rgba(0,245,255,0.3)); }
+  50% { filter: drop-shadow(0 0 40px rgba(0,245,255,0.6)); }
+}
+
+.hero-subtitle {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  color: rgba(232,244,255,0.6);
+  letter-spacing: 0.1em;
+  margin-bottom: 28px;
+  position: relative;
+  z-index: 1;
+  text-transform: uppercase;
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  position: relative;
+  z-index: 1;
+  margin-top: 24px;
+}
+.hero-stat {
+  text-align: center;
+  padding: 12px 24px;
+  border: 1px solid rgba(0,245,255,0.1);
+  border-radius: 12px;
+  background: rgba(0,245,255,0.03);
+  backdrop-filter: blur(10px);
+}
+.hero-stat-num {
+  font-family: 'Orbitron', monospace;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--neon-cyan);
+  display: block;
+}
+.hero-stat-lbl {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* ══════════════════ TOPBAR ══════════════════ */
+.topbar-cyber {
+  background: rgba(4, 8, 16, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0,245,255,0.12);
+  border-left: none;
+  border-right: none;
+  border-top: 3px solid transparent;
+  background-clip: padding-box;
+  border-image: linear-gradient(90deg, transparent, var(--neon-cyan), transparent) 1;
+  padding: 14px 32px;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.8), 0 0 0 1px rgba(0,245,255,0.06);
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.topbar-icon-hex {
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, rgba(0,245,255,0.15), rgba(0,128,255,0.1));
+  border: 1px solid rgba(0,245,255,0.35);
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 0 15px rgba(0,245,255,0.2);
+  animation: icon-glow 3s ease-in-out infinite alternate;
+}
+@keyframes icon-glow {
+  from { box-shadow: 0 0 10px rgba(0,245,255,0.2); }
+  to { box-shadow: 0 0 25px rgba(0,245,255,0.5), inset 0 0 10px rgba(0,245,255,0.1); }
+}
+.topbar-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+}
+.topbar-sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--neon-cyan);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-top: 1px;
+  opacity: 0.7;
+}
+
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+
+.sys-status {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--neon-green);
+  background: rgba(0,255,136,0.05);
+  border: 1px solid rgba(0,255,136,0.2);
+  padding: 7px 16px;
+  border-radius: 20px;
+  letter-spacing: 0.15em;
+}
+.status-led {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--neon-green);
+  box-shadow: 0 0 8px var(--neon-green);
+  animation: led-blink 1.5s ease-in-out infinite;
+}
+@keyframes led-blink {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--neon-green); }
+  50% { opacity: 0.3; box-shadow: none; }
+}
+
+.topbar-ticker {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 0.12em;
+  border-left: 1px solid rgba(0,245,255,0.1);
+  padding-left: 16px;
+}
+
+/* ══════════════════ WELCOME CHOICE CARDS ══════════════════ */
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin: 32px 0;
+}
+
+.choice-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 0;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  cursor: pointer;
+}
+.choice-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--card-accent, linear-gradient(90deg, var(--neon-cyan), var(--neon-blue)));
+  box-shadow: 0 0 20px var(--card-accent-color, var(--neon-cyan));
+}
+.choice-card:hover {
+  border-color: rgba(0,245,255,0.35);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px var(--card-glow, rgba(0,245,255,0.1));
+}
+.choice-card-inner {
+  padding: 36px 28px 32px;
+  text-align: center;
+}
+
+/* Holographic scan effect */
+.choice-card::after {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: 0; right: 0;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, rgba(0,245,255,0.04), transparent);
+  transition: top 0.6s ease;
+}
+.choice-card:hover::after { top: 100%; }
+
+.card-badge {
+  position: absolute;
+  top: 18px; right: 18px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid;
+}
+.badge-new { color: var(--neon-green); border-color: rgba(0,255,136,0.3); background: rgba(0,255,136,0.05); }
+.badge-secure { color: var(--neon-purple); border-color: rgba(191,0,255,0.3); background: rgba(191,0,255,0.05); }
+
+.card-icon-wrap {
+  width: 80px; height: 80px;
+  border-radius: 20px;
+  margin: 0 auto 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  position: relative;
+}
+.icon-cyan {
+  background: linear-gradient(135deg, rgba(0,245,255,0.12), rgba(0,128,255,0.08));
+  border: 1px solid rgba(0,245,255,0.25);
+  box-shadow: 0 0 30px rgba(0,245,255,0.1);
+}
+.icon-green {
+  background: linear-gradient(135deg, rgba(0,255,136,0.12), rgba(0,200,100,0.08));
+  border: 1px solid rgba(0,255,136,0.25);
+  box-shadow: 0 0 30px rgba(0,255,136,0.1);
+}
+.icon-purple {
+  background: linear-gradient(135deg, rgba(191,0,255,0.12), rgba(100,0,200,0.08));
+  border: 1px solid rgba(191,0,255,0.25);
+  box-shadow: 0 0 30px rgba(191,0,255,0.1);
+}
+
+.card-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+.card-desc {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+.card-features {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+.card-feature {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+}
+.feature-dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-cyan { background: var(--neon-cyan); box-shadow: 0 0 6px var(--neon-cyan); }
+.dot-green { background: var(--neon-green); box-shadow: 0 0 6px var(--neon-green); }
+.dot-purple { background: var(--neon-purple); box-shadow: 0 0 6px var(--neon-purple); }
+
+/* section label between hero and cards */
+.section-label {
+  text-align: center;
+  margin: 40px 0 24px;
+  position: relative;
+}
+.section-label-text {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+}
+.section-label-text::before, .section-label-text::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+  opacity: 0.3;
+}
+
+/* ══════════════════ STREAMLIT BUTTON OVERRIDES ══════════════════ */
+/* Default fallback button */
+.stButton > button {
+  background: linear-gradient(135deg, rgba(0,245,255,0.08), rgba(0,128,255,0.05)) !important;
+  border: 1px solid rgba(0,245,255,0.25) !important;
+  color: var(--neon-cyan) !important;
+  border-radius: 10px !important;
+  font-family: 'Share Tech Mono', monospace !important;
   font-size: 13px !important;
-  font-weight: 500 !important;
-  padding: 10px 18px !important;
-  box-shadow: none !important;
-  transition: all .2s !important;
-}
-.login-back-btn > div > .stButton > button:hover {
-  background: rgba(255,255,255,.07) !important;
-  color: #94a3b8 !important;
-  transform: translateX(-2px) !important;
-}
-
-/* Login primary button */
-.login-primary-btn > div > .stButton > button {
-  background: linear-gradient(135deg, #0ea5e9, #3b82f6, #6366f1) !important;
-  border: none !important;
-  color: white !important;
-  border-radius: 14px !important;
-  font-size: 14.5px !important;
-  font-weight: 700 !important;
-  padding: 14px 24px !important;
-  box-shadow: 0 8px 28px rgba(14,165,233,.3), inset 0 1px 0 rgba(255,255,255,.15) !important;
-  transition: all .25s !important;
-  letter-spacing: .01em !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.08em !important;
+  padding: 12px 20px !important;
+  transition: all 0.25s ease !important;
+  box-shadow: 0 0 0 rgba(0,245,255,0) !important;
+  width: 100% !important;
   position: relative !important;
   overflow: hidden !important;
 }
-.login-primary-btn > div > .stButton > button:hover {
-  transform: translateY(-3px) !important;
-  box-shadow: 0 14px 40px rgba(14,165,233,.45) !important;
-  background: linear-gradient(135deg, #38bdf8, #6366f1, #a78bfa) !important;
+.stButton > button:hover {
+  background: linear-gradient(135deg, rgba(0,245,255,0.15), rgba(0,128,255,0.1)) !important;
+  border-color: rgba(0,245,255,0.6) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 20px rgba(0,245,255,0.2), inset 0 0 20px rgba(0,245,255,0.03) !important;
+  transform: translateY(-2px) !important;
 }
-.login-primary-btn > div > .stButton > button:active {
-  transform: translateY(0) !important;
+.stButton > button:active { transform: translateY(0) !important; }
+
+/* ── Icon-only card button ── */
+.icon-card-btn > div > .stButton > button {
+  width: 80px !important;
+  height: 80px !important;
+  border-radius: 20px !important;
+  font-size: 36px !important;
+  padding: 0 !important;
+  margin: 0 auto 20px !important;
+  letter-spacing: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.icon-card-btn.cyan > div > .stButton > button {
+  background: linear-gradient(135deg, rgba(0,245,255,0.12), rgba(0,128,255,0.08)) !important;
+  border: 1px solid rgba(0,245,255,0.3) !important;
+  box-shadow: 0 0 20px rgba(0,245,255,0.1) !important;
+}
+.icon-card-btn.cyan > div > .stButton > button:hover {
+  background: linear-gradient(135deg, #00f5ff, #0080ff) !important;
+  box-shadow: 0 0 40px rgba(0,245,255,0.5), 0 0 0 6px rgba(0,245,255,0.08) !important;
+  transform: translateY(-8px) scale(1.08) !important;
+}
+.icon-card-btn.green > div > .stButton > button {
+  background: linear-gradient(135deg, rgba(0,255,136,0.12), rgba(0,200,100,0.08)) !important;
+  border: 1px solid rgba(0,255,136,0.3) !important;
+  box-shadow: 0 0 20px rgba(0,255,136,0.1) !important;
+}
+.icon-card-btn.green > div > .stButton > button:hover {
+  background: linear-gradient(135deg, #00ff88, #00c864) !important;
+  box-shadow: 0 0 40px rgba(0,255,136,0.5), 0 0 0 6px rgba(0,255,136,0.08) !important;
+  transform: translateY(-8px) scale(1.08) !important;
+}
+.icon-card-btn.purple > div > .stButton > button {
+  background: linear-gradient(135deg, rgba(191,0,255,0.12), rgba(100,0,200,0.08)) !important;
+  border: 1px solid rgba(191,0,255,0.3) !important;
+  box-shadow: 0 0 20px rgba(191,0,255,0.1) !important;
+}
+.icon-card-btn.purple > div > .stButton > button:hover {
+  background: linear-gradient(135deg, #bf00ff, #6400c8) !important;
+  box-shadow: 0 0 40px rgba(191,0,255,0.5), 0 0 0 6px rgba(191,0,255,0.08) !important;
+  transform: translateY(-8px) scale(1.08) !important;
 }
 
-/* Register submit button */
-.reg-submit-btn > div > .stButton > button,
-div[data-testid="stForm"] .stButton > button {
-  background: linear-gradient(135deg, #0ea5e9, #6366f1) !important;
+/* Back button */
+.back-btn > div > .stButton > button {
+  background: rgba(255,255,255,0.03) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  color: var(--text-muted) !important;
+  font-size: 12px !important;
+  padding: 10px 16px !important;
+}
+.back-btn > div > .stButton > button:hover {
+  background: rgba(255,255,255,0.05) !important;
+  color: var(--text-primary) !important;
+  transform: translateX(-3px) !important;
+  box-shadow: none !important;
+}
+
+/* Primary action button */
+.primary-btn > div > .stButton > button {
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue)) !important;
   border: none !important;
-  color: white !important;
-  border-radius: 14px !important;
-  font-size: 14.5px !important;
+  color: #000d1a !important;
+  font-family: 'Orbitron', monospace !important;
+  font-size: 12px !important;
   font-weight: 700 !important;
-  padding: 14px !important;
-  box-shadow: 0 8px 28px rgba(14,165,233,.3) !important;
-  transition: all .25s !important;
-  width: 100% !important;
+  letter-spacing: 0.1em !important;
+  padding: 15px 24px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 0 30px rgba(0,245,255,0.3), inset 0 1px 0 rgba(255,255,255,0.2) !important;
 }
-div[data-testid="stForm"] .stButton > button:hover {
+.primary-btn > div > .stButton > button:hover {
+  background: linear-gradient(135deg, #40ffff, #40a0ff) !important;
+  box-shadow: 0 0 50px rgba(0,245,255,0.6), 0 8px 30px rgba(0,0,0,0.5) !important;
   transform: translateY(-3px) !important;
-  box-shadow: 0 14px 40px rgba(14,165,233,.45) !important;
+  color: #000408 !important;
 }
 
-/* Input fields in login screens */
-.glass-form-card .stTextInput>div>div>input{
-  background:rgba(255,255,255,.04) !important;
-  border:1px solid rgba(14,165,233,.18) !important;
-  border-radius:14px !important;
-  color:#f1f5f9 !important;
-  font-family:'DM Sans',sans-serif !important;
-  padding:14px 16px !important;
-  font-size:15px !important;
-  transition:all .25s !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.03) !important;
+/* Danger/logout */
+.danger-btn > div > .stButton > button {
+  background: rgba(255,51,85,0.06) !important;
+  border: 1px solid rgba(255,51,85,0.25) !important;
+  color: var(--neon-red) !important;
+  font-size: 11px !important;
 }
-.glass-form-card .stTextInput>div>div>input:focus{
-  border-color:#0ea5e9 !important;
-  background:rgba(14,165,233,.05) !important;
-  box-shadow:0 0 0 4px rgba(14,165,233,.1), inset 0 1px 0 rgba(255,255,255,.05) !important;
+.danger-btn > div > .stButton > button:hover {
+  background: rgba(255,51,85,0.12) !important;
+  border-color: var(--neon-red) !important;
+  box-shadow: 0 0 20px rgba(255,51,85,0.2) !important;
 }
 
-/* ══════════════════ FORM BOX (kept for any remaining usage) ══════════════════ */
-.form-box{
-  background:linear-gradient(150deg,#0d1524,#0f1d35);
-  border:1px solid rgba(14,165,233,.16);border-radius:24px;
-  padding:40px 36px;max-width:480px;margin:0 auto;
-  box-shadow:0 16px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04);
+/* ══════════════════ GLASS FORM CARD ══════════════════ */
+.glass-card {
+  background: rgba(4, 10, 22, 0.92);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(0,245,255,0.12);
+  border-radius: 28px;
+  padding: 48px 44px 40px;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(0,245,255,0.06),
+    0 40px 100px rgba(0,0,0,0.8),
+    0 0 80px rgba(0,245,255,0.03);
 }
-.form-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:#f1f5f9;margin-bottom:8px;}
-.form-sub{font-size:14px;color:#475569;margin-bottom:28px;line-height:1.75;}
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+  opacity: 0.5;
+}
+.glass-card::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -20%;
+  width: 140%; height: 70%;
+  background: radial-gradient(ellipse, rgba(0,245,255,0.03) 0%, transparent 70%);
+  pointer-events: none;
+}
 
-/* ══════════════════ CUSTOMER CARD ══════════════════ */
-.cust-card{
-  background:linear-gradient(150deg,#0d1524,#0f1d35);
-  border:1px solid rgba(14,165,233,.16);border-radius:20px;
-  padding:22px 28px;margin-bottom:24px;
-  box-shadow:0 8px 32px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.04);
+.gc-icon {
+  width: 72px; height: 72px;
+  border-radius: 18px;
+  margin: 0 auto 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+  position: relative; z-index: 1;
+  animation: gc-float 4s ease-in-out infinite;
 }
-.cust-name{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#f1f5f9;margin-bottom:14px;letter-spacing:-.02em;}
-.cust-meta{display:flex;gap:8px;flex-wrap:wrap;}
-.cust-chip{
-  background:rgba(255,255,255,.04);border:1px solid rgba(14,165,233,.1);
-  border-radius:10px;padding:7px 13px;font-size:12px;color:#475569;
-  font-family:'JetBrains Mono',monospace;
+.gc-icon-cyan {
+  background: linear-gradient(135deg, rgba(0,245,255,0.15), rgba(0,80,160,0.1));
+  border: 1px solid rgba(0,245,255,0.3);
+  box-shadow: 0 0 30px rgba(0,245,255,0.2);
 }
-.cust-chip span{color:#e2e8f0;margin-left:4px;font-weight:600;}
-.outage-warn{
-  background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);
-  border-radius:10px;padding:10px 16px;font-size:13px;color:#fca5a5;margin-top:12px;font-weight:600;
+.gc-icon-green {
+  background: linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,100,80,0.1));
+  border: 1px solid rgba(0,255,136,0.3);
+  box-shadow: 0 0 30px rgba(0,255,136,0.2);
+}
+@keyframes gc-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33% { transform: translateY(-8px) rotate(-2deg); }
+  66% { transform: translateY(-4px) rotate(2deg); }
 }
 
-/* ══════════════════ SECTION HEADER ══════════════════ */
-.sec-hdr{
-  font-size:10px;font-weight:800;color:#1e3a5f;letter-spacing:.2em;text-transform:uppercase;
-  font-family:'JetBrains Mono',monospace;margin:24px 0 14px;
-  padding-bottom:8px;border-bottom:1px solid rgba(14,165,233,.07);
+.gc-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 24px;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--text-primary), var(--neon-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative; z-index: 1;
+}
+.gc-sub {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.75;
+  margin-bottom: 28px;
+  position: relative; z-index: 1;
+}
+
+.gc-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px;
+}
+.gc-divider-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,245,255,0.2), transparent);
+}
+.gc-divider-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--neon-cyan);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+/* Floating capability tags */
+.cap-tags {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  justify-content: center;
+  margin-bottom: 28px;
+  position: relative; z-index: 1;
+}
+.cap-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid;
+  letter-spacing: 0.08em;
+  animation: tag-float 3s ease-in-out infinite;
+}
+.cap-tag:nth-child(2) { animation-delay: 0.5s; }
+.cap-tag:nth-child(3) { animation-delay: 1s; }
+@keyframes tag-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.tag-c { color: var(--neon-cyan); border-color: rgba(0,245,255,0.25); background: rgba(0,245,255,0.06); }
+.tag-g { color: var(--neon-green); border-color: rgba(0,255,136,0.25); background: rgba(0,255,136,0.06); }
+.tag-p { color: var(--neon-purple); border-color: rgba(191,0,255,0.25); background: rgba(191,0,255,0.06); }
+.tag-a { color: var(--neon-amber); border-color: rgba(255,170,0,0.25); background: rgba(255,170,0,0.06); }
+
+/* ══════════════════ INPUT OVERRIDES ══════════════════ */
+.stTextInput > div > div > input,
+.stSelectbox > div > div > div,
+.stTextArea > div > div > textarea {
+  background: rgba(0, 245, 255, 0.03) !important;
+  border: 1px solid rgba(0,245,255,0.15) !important;
+  border-radius: 10px !important;
+  color: var(--text-primary) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  padding: 12px 15px !important;
+  transition: all 0.2s !important;
+}
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus {
+  border-color: var(--neon-cyan) !important;
+  background: rgba(0,245,255,0.05) !important;
+  box-shadow: 0 0 0 3px rgba(0,245,255,0.08), 0 0 20px rgba(0,245,255,0.1) !important;
+}
+.stTextInput > div > div > input::placeholder { color: rgba(58,90,122,0.8) !important; }
+
+label {
+  color: rgba(0,245,255,0.6) !important;
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 10px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase !important;
+}
+
+/* ══════════════════ CUSTOMER DASHBOARD CARD ══════════════════ */
+.profile-banner {
+  background: linear-gradient(135deg, rgba(0,10,25,0.95), rgba(0,20,40,0.9));
+  border: 1px solid rgba(0,245,255,0.15);
+  border-top: 2px solid rgba(0,245,255,0.4);
+  border-radius: 20px;
+  padding: 28px 32px;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 40px rgba(0,245,255,0.04);
+}
+.profile-banner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(0,245,255,0.06), transparent);
+  pointer-events: none;
+}
+.profile-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+  margin-bottom: 16px;
+}
+.profile-chips {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.profile-chip {
+  background: rgba(0,245,255,0.04);
+  border: 1px solid rgba(0,245,255,0.1);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.profile-chip span { color: var(--text-primary); margin-left: 5px; font-weight: 600; }
+
+.outage-alert {
+  background: rgba(255,51,85,0.06);
+  border: 1px solid rgba(255,51,85,0.25);
+  border-left: 3px solid var(--neon-red);
+  border-radius: 10px;
+  padding: 12px 18px;
+  margin-top: 14px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: #ff8099;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ══════════════════ TABS ══════════════════ */
+.stTabs [data-baseweb="tab-list"] {
+  background: rgba(0,5,15,0.8) !important;
+  border: 1px solid rgba(0,245,255,0.1) !important;
+  border-radius: 14px !important;
+  padding: 5px !important;
+  gap: 4px !important;
+}
+.stTabs [data-baseweb="tab"] {
+  background: transparent !important;
+  color: var(--text-dim) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  border-radius: 10px !important;
+  padding: 10px 20px !important;
+  border: none !important;
+  transition: all 0.2s !important;
+  letter-spacing: 0.05em !important;
+}
+.stTabs [data-baseweb="tab"]:hover {
+  background: rgba(0,245,255,0.05) !important;
+  color: var(--text-muted) !important;
+}
+.stTabs [aria-selected="true"] {
+  background: linear-gradient(135deg, rgba(0,245,255,0.12), rgba(0,128,255,0.08)) !important;
+  color: var(--neon-cyan) !important;
+  border: 1px solid rgba(0,245,255,0.2) !important;
+  box-shadow: 0 0 15px rgba(0,245,255,0.08) !important;
+}
+.stTabs [data-baseweb="tab-highlight"],
+.stTabs [data-baseweb="tab-border"] { display: none !important; }
+
+/* ══════════════════ SECTION HEADERS ══════════════════ */
+.sec-hdr {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--neon-cyan);
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  margin: 24px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0,245,255,0.1);
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sec-hdr::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(0,245,255,0.1), transparent);
 }
 
 /* ══════════════════ CHAT BANNER ══════════════════ */
-.chat-banner{
-  background:linear-gradient(135deg,rgba(14,165,233,.07),rgba(99,102,241,.04));
-  border:1px solid rgba(14,165,233,.16);border-radius:16px;
-  padding:16px 22px;margin-bottom:18px;display:flex;align-items:center;gap:16px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+.chat-head {
+  background: linear-gradient(135deg, rgba(0,10,25,0.9), rgba(0,15,35,0.9));
+  border: 1px solid rgba(0,245,255,0.12);
+  border-left: 3px solid var(--neon-cyan);
+  border-radius: 16px;
+  padding: 18px 24px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  position: relative;
+  overflow: hidden;
 }
-.chat-banner-icon{
-  width:44px;height:44px;
-  background:linear-gradient(135deg,#0ea5e9,#3b82f6);
-  border-radius:13px;display:flex;align-items:center;justify-content:center;
-  font-size:22px;flex-shrink:0;box-shadow:0 4px 14px rgba(14,165,233,.3);
+.chat-head::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 200px; height: 100%;
+  background: radial-gradient(ellipse at right, rgba(0,245,255,0.04), transparent);
 }
-.chat-banner-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#38bdf8;margin-bottom:3px;}
-.chat-banner-sub{font-size:12.5px;color:#334155;line-height:1.6;}
-.online-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#4ade80;margin-right:5px;animation:blink 2s infinite;vertical-align:middle;}
+.chat-head-icon {
+  width: 46px; height: 46px;
+  background: linear-gradient(135deg, rgba(0,245,255,0.15), rgba(0,80,160,0.1));
+  border: 1px solid rgba(0,245,255,0.3);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+  box-shadow: 0 0 20px rgba(0,245,255,0.15);
+}
+.chat-head-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--neon-cyan);
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+.chat-head-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  font-family: 'Rajdhani', sans-serif;
+}
+.ai-live {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--neon-green);
+  letter-spacing: 0.2em;
+  flex-shrink: 0;
+}
 
 /* ══════════════════ PLAN CARDS ══════════════════ */
-.plan-card{
-  background:linear-gradient(150deg,#0d1524,#0f1d35);
-  border:1px solid rgba(14,165,233,.1);border-radius:18px;
-  padding:22px 18px;text-align:center;transition:all .28s;
-  position:relative;overflow:hidden;
+.plan-card {
+  background: linear-gradient(150deg, rgba(4,8,20,0.95), rgba(6,12,28,0.9));
+  border: 1px solid rgba(0,245,255,0.08);
+  border-radius: 18px;
+  padding: 24px 18px;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
-.plan-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:var(--plan-accent,linear-gradient(90deg,#0ea5e9,#3b82f6));
-  opacity:.6;
+.plan-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--plan-gradient, linear-gradient(90deg, var(--neon-cyan), var(--neon-blue)));
 }
-.plan-card:hover{border-color:rgba(14,165,233,.38);transform:translateY(-4px);box-shadow:0 14px 40px rgba(14,165,233,.1);}
-.plan-card.selected,.plan-card.current{border-color:#0ea5e9;background:rgba(14,165,233,.05);}
-.plan-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:4px;}
-.plan-speed{font-size:11px;color:#0ea5e9;font-family:'JetBrains Mono',monospace;margin-bottom:12px;letter-spacing:.06em;}
-.plan-price{font-size:24px;font-weight:800;color:#fbbf24;letter-spacing:-.03em;}
-.plan-per{font-size:10.5px;color:#334155;margin-top:3px;margin-bottom:14px;font-family:'JetBrains Mono',monospace;}
-.plan-features{list-style:none;text-align:left;margin-bottom:0;}
-.plan-features li{
-  font-size:12px;color:#475569;padding:5px 0;
-  border-bottom:1px solid rgba(255,255,255,.03);
-  display:flex;align-items:center;gap:7px;
+.plan-card:hover {
+  border-color: rgba(0,245,255,0.3);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px var(--plan-glow, rgba(0,245,255,0.08));
 }
-.plan-features li:last-child{border-bottom:none;}
-.plan-features li::before{content:'✓';color:#0ea5e9;font-weight:700;font-size:11px;flex-shrink:0;}
-.plan-current-badge{
-  display:inline-block;font-size:9px;font-weight:800;
-  color:#0ea5e9;font-family:'JetBrains Mono',monospace;
-  letter-spacing:.08em;margin-top:10px;padding:3px 10px;
-  background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.2);border-radius:10px;
+.plan-card.current-plan {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 30px rgba(0,245,255,0.1), inset 0 0 30px rgba(0,245,255,0.02);
+}
+.plan-icon { font-size: 30px; margin-bottom: 10px; }
+.plan-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.plan-speed {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--neon-cyan);
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+  opacity: 0.8;
+}
+.plan-price {
+  font-family: 'Orbitron', monospace;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--neon-amber);
+  letter-spacing: -0.02em;
+}
+.plan-period {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  letter-spacing: 0.1em;
+}
+.plan-features {
+  list-style: none;
+  text-align: left;
+}
+.plan-features li {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  display: flex; align-items: center; gap: 7px;
+}
+.plan-features li:last-child { border-bottom: none; }
+.plan-features li::before {
+  content: '◆';
+  color: var(--neon-cyan);
+  font-size: 7px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+.current-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--neon-cyan);
+  border: 1px solid rgba(0,245,255,0.3);
+  background: rgba(0,245,255,0.06);
+  padding: 3px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-top: 10px;
+  letter-spacing: 0.15em;
 }
 
 /* ══════════════════ BILL CARD ══════════════════ */
-.bill-card{
-  background:linear-gradient(150deg,#0d1524,#0f1d35);
-  border:1px solid rgba(251,191,36,.16);border-radius:18px;
-  padding:26px 28px;margin-bottom:20px;
-  box-shadow:0 8px 32px rgba(0,0,0,.4);
+.bill-panel {
+  background: linear-gradient(135deg, rgba(4,8,20,0.95), rgba(8,14,30,0.9));
+  border: 1px solid rgba(255,170,0,0.15);
+  border-top: 2px solid rgba(255,170,0,0.4);
+  border-radius: 18px;
+  padding: 28px 32px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
 }
-.bill-amount{font-family:'Syne',sans-serif;font-size:48px;font-weight:800;color:#fbbf24;letter-spacing:-.04em;}
-.bill-currency{font-size:18px;color:#64748b;margin-right:5px;font-weight:400;}
-.bill-due{font-size:12px;color:#475569;margin-top:6px;font-family:'JetBrains Mono',monospace;}
-.bill-status-ok{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.22);color:#4ade80;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block;margin-top:12px;font-family:'JetBrains Mono',monospace;}
-.bill-status-due{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.22);color:#f87171;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block;margin-top:12px;font-family:'JetBrains Mono',monospace;}
+.bill-panel::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 120px; height: 120px;
+  background: radial-gradient(circle, rgba(255,170,0,0.06), transparent);
+}
+.bill-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: rgba(255,170,0,0.6);
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.bill-amount {
+  font-family: 'Orbitron', monospace;
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--neon-amber);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.bill-currency {
+  font-size: 16px;
+  font-weight: 400;
+  color: rgba(255,170,0,0.5);
+  margin-right: 6px;
+}
+.bill-due {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+.status-ok {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(0,255,136,0.06);
+  border: 1px solid rgba(0,255,136,0.2);
+  color: var(--neon-green);
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  margin-top: 14px;
+}
+.status-due {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,51,85,0.06);
+  border: 1px solid rgba(255,51,85,0.2);
+  color: var(--neon-red);
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  margin-top: 14px;
+}
 
-/* ══════════════════ TICKET CARD ══════════════════ */
-.ticket-card{
-  background:#0a1120;border:1px solid rgba(14,165,233,.08);
-  border-radius:14px;padding:16px 20px;margin-bottom:10px;
-  border-left:3px solid #1e293b;transition:all .22s;
+/* ══════════════════ TICKET CARDS ══════════════════ */
+.ticket-node {
+  background: rgba(4, 8, 20, 0.9);
+  border: 1px solid rgba(0,245,255,0.07);
+  border-left: 3px solid var(--ticket-accent, #1a3050);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+  position: relative;
 }
-.ticket-card:hover{box-shadow:0 8px 24px rgba(14,165,233,.06);transform:translateX(2px);}
-.ticket-card.high{border-left-color:#f87171;}
-.ticket-card.medium{border-left-color:#fbbf24;}
-.ticket-card.low{border-left-color:#4ade80;}
-.ticket-card.resolved{border-left-color:#1e293b;opacity:.55;}
-.ticket-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.ticket-id{font-family:'JetBrains Mono',monospace;font-size:11px;color:#334155;font-weight:600;}
-.ticket-status{font-size:10px;font-weight:700;padding:3px 10px;border-radius:18px;}
-.s-open{background:rgba(14,165,233,.09);color:#7dd3fc;border:1px solid rgba(14,165,233,.15);}
-.s-resolved{background:rgba(51,65,85,.3);color:#475569;border:1px solid rgba(51,65,85,.4);}
-.ticket-issue{font-size:14px;font-weight:700;color:#e2e8f0;margin-bottom:8px;}
-.ticket-meta{display:flex;gap:6px;flex-wrap:wrap;}
-.tag{font-size:10px;font-weight:700;padding:3px 9px;border-radius:18px;font-family:'JetBrains Mono',monospace;}
-.tag-high{background:rgba(248,113,113,.09);color:#f87171;border:1px solid rgba(248,113,113,.18);}
-.tag-medium{background:rgba(251,191,36,.09);color:#fbbf24;border:1px solid rgba(251,191,36,.18);}
-.tag-low{background:rgba(74,222,128,.07);color:#4ade80;border:1px solid rgba(74,222,128,.18);}
-.tag-sent{background:rgba(100,116,139,.08);color:#475569;border:1px solid rgba(100,116,139,.16);}
+.ticket-node:hover {
+  border-color: rgba(0,245,255,0.2);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+  transform: translateX(3px);
+}
+.ticket-node.high { --ticket-accent: var(--neon-red); }
+.ticket-node.medium { --ticket-accent: var(--neon-amber); }
+.ticket-node.low { --ticket-accent: var(--neon-green); }
+.ticket-node.resolved { --ticket-accent: #1a2a3a; opacity: 0.55; }
+.ticket-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.ticket-id {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+.ticket-status-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.1em;
+}
+.s-open { background: rgba(0,245,255,0.08); color: var(--neon-cyan); border: 1px solid rgba(0,245,255,0.15); }
+.s-resolved { background: rgba(26,42,60,0.3); color: #2a4060; border: 1px solid rgba(26,42,60,0.4); }
+.ticket-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.ticket-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.t-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  letter-spacing: 0.08em;
+  border: 1px solid;
+}
+.t-high { color: var(--neon-red); border-color: rgba(255,51,85,0.2); background: rgba(255,51,85,0.05); }
+.t-med { color: var(--neon-amber); border-color: rgba(255,170,0,0.2); background: rgba(255,170,0,0.05); }
+.t-low { color: var(--neon-green); border-color: rgba(0,255,136,0.2); background: rgba(0,255,136,0.05); }
+.t-info { color: var(--text-muted); border-color: rgba(58,90,122,0.2); background: transparent; }
 
 /* ══════════════════ METRIC GRID ══════════════════ */
-.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
-.metric-card{
-  background:linear-gradient(150deg,#0d1524,#0f1d35);
-  border:1px solid rgba(14,165,233,.1);border-radius:16px;padding:20px 22px;
-  transition:border-color .2s;
+.metric-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+.metric-node {
+  background: linear-gradient(150deg, rgba(4,8,20,0.95), rgba(6,12,28,0.9));
+  border: 1px solid rgba(0,245,255,0.08);
+  border-radius: 16px;
+  padding: 22px 24px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
 }
-.metric-card:hover{border-color:rgba(14,165,233,.25);}
-.metric-num{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:#f1f5f9;}
-.metric-num.blue{color:#0ea5e9;}.metric-num.yellow{color:#fbbf24;}.metric-num.red{color:#f87171;}.metric-num.green{color:#4ade80;}
-.metric-lbl{font-size:10px;color:#1e3a5f;font-family:'JetBrains Mono',monospace;margin-top:7px;letter-spacing:.12em;text-transform:uppercase;}
-
-/* ══════════════════ QUICK TOPIC BUTTONS ══════════════════ */
-.stButton.quick-wrap > button {
-  background:rgba(14,165,233,.07) !important;
-  border:1px solid rgba(14,165,233,.18) !important;
-  color:#93c5fd !important;
-  border-radius:10px !important;
-  font-size:13px !important;
-  font-weight:500 !important;
-  padding:10px 12px !important;
-  box-shadow:none !important;
-  transition:all .2s !important;
+.metric-node::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--metric-bar, linear-gradient(90deg, transparent, var(--neon-cyan), transparent));
+  opacity: 0.4;
 }
-.stButton.quick-wrap > button:hover{
-  background:rgba(14,165,233,.15) !important;
-  border-color:rgba(14,165,233,.38) !important;
-  color:#bae6fd !important;
-  transform:translateY(-1px) !important;
-  box-shadow:0 4px 12px rgba(14,165,233,.12) !important;
+.metric-node:hover { border-color: rgba(0,245,255,0.2); }
+.metric-num {
+  font-family: 'Orbitron', monospace;
+  font-size: 38px;
+  font-weight: 900;
+  color: var(--text-primary);
+  line-height: 1;
 }
-
-/* ══════════════════ STREAMLIT OVERRIDES ══════════════════ */
-.stTextInput>div>div>input,
-.stSelectbox>div>div>div,
-.stTextArea>div>div>textarea{
-  background:#0a1120 !important;
-  border:1px solid rgba(14,165,233,.18) !important;
-  border-radius:12px !important;color:#f1f5f9 !important;
-  font-family:'DM Sans',sans-serif !important;
-  padding:11px 15px !important;font-size:14px !important;
-  transition:all .2s !important;
-}
-.stTextInput>div>div>input:focus,.stTextArea>div>div>textarea:focus{
-  border-color:#0ea5e9 !important;
-  box-shadow:0 0 0 3px rgba(14,165,233,.1) !important;
-}
-label{
-  color:#334155 !important;font-size:11px !important;font-weight:700 !important;
-  letter-spacing:.1em !important;text-transform:uppercase !important;
-  font-family:'JetBrains Mono',monospace !important;
+.metric-num.c { color: var(--neon-cyan); }
+.metric-num.g { color: var(--neon-green); }
+.metric-num.a { color: var(--neon-amber); }
+.metric-num.r { color: var(--neon-red); }
+.metric-lbl {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 8px;
 }
 
-/* Tabs */
-.stTabs [data-baseweb="tab-list"]{
-  background:rgba(255,255,255,.03);
-  border:1px solid rgba(14,165,233,.1);
-  border-radius:14px;padding:5px;gap:4px;
+/* ══════════════════ QUICK TOPICS ══════════════════ */
+.stButton.qt-btn > button {
+  background: rgba(0,245,255,0.04) !important;
+  border: 1px solid rgba(0,245,255,0.12) !important;
+  color: rgba(0,245,255,0.7) !important;
+  border-radius: 10px !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.03em !important;
+  padding: 10px 12px !important;
+  box-shadow: none !important;
+  transition: all 0.2s !important;
 }
-.stTabs [data-baseweb="tab"]{
-  background:transparent !important;
-  color:#334155 !important;
-  font-family:'DM Sans',sans-serif !important;font-weight:600 !important;font-size:13.5px !important;
-  border-radius:10px !important;padding:10px 18px !important;
-  border:none !important;transition:all .2s !important;
-}
-.stTabs [data-baseweb="tab"]:hover{
-  background:rgba(255,255,255,.05) !important;
-  color:#94a3b8 !important;
-}
-.stTabs [aria-selected="true"]{
-  background:rgba(14,165,233,.12) !important;
-  color:#38bdf8 !important;
-  border:1px solid rgba(14,165,233,.22) !important;
-}
-.stTabs [data-baseweb="tab-highlight"]{display:none !important;}
-.stTabs [data-baseweb="tab-border"]{display:none !important;}
-
-/* Alerts */
-.stSuccess{background:rgba(74,222,128,.06) !important;border:1px solid rgba(74,222,128,.2) !important;color:#4ade80 !important;border-radius:12px !important;}
-.stError{background:rgba(248,113,113,.06) !important;border:1px solid rgba(248,113,113,.2) !important;color:#f87171 !important;border-radius:12px !important;}
-.stInfo{background:rgba(14,165,233,.06) !important;border:1px solid rgba(14,165,233,.2) !important;color:#7dd3fc !important;border-radius:12px !important;}
-
-/* Chat input */
-div[data-testid="stChatInput"]{background:#0a1120 !important;}
-div[data-testid="stChatInput"] textarea{
-  background:#0a1120 !important;
-  border:1px solid rgba(14,165,233,.16) !important;
-  color:#f1f5f9 !important;border-radius:14px !important;
-  font-family:'DM Sans',sans-serif !important;font-size:14px !important;
+.stButton.qt-btn > button:hover {
+  background: rgba(0,245,255,0.1) !important;
+  border-color: rgba(0,245,255,0.35) !important;
+  color: var(--neon-cyan) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 15px rgba(0,245,255,0.1) !important;
 }
 
-/* Dataframe */
-.stDataFrame{border-radius:14px !important;overflow:hidden;}
-
-/* Spinner */
-.stSpinner > div{border-top-color:#0ea5e9 !important;}
-
-/* General button fallback */
-.stButton > button {
-  background:linear-gradient(135deg,#0ea5e9,#3b82f6) !important;
-  color:white !important;border:none !important;
-  border-radius:12px !important;
-  font-family:'DM Sans',sans-serif !important;font-weight:600 !important;font-size:14px !important;
-  padding:12px 24px !important;transition:all .25s !important;width:100% !important;
-  box-shadow:0 4px 18px rgba(14,165,233,.22) !important;
+/* ══════════════════ ALERTS ══════════════════ */
+.stSuccess {
+  background: rgba(0,255,136,0.05) !important;
+  border: 1px solid rgba(0,255,136,0.2) !important;
+  border-radius: 12px !important;
+  color: var(--neon-green) !important;
 }
-.stButton > button:hover{
-  transform:translateY(-2px) !important;
-  box-shadow:0 8px 28px rgba(14,165,233,.35) !important;
-  background:linear-gradient(135deg,#38bdf8,#6366f1) !important;
+.stError {
+  background: rgba(255,51,85,0.05) !important;
+  border: 1px solid rgba(255,51,85,0.2) !important;
+  border-radius: 12px !important;
+  color: var(--neon-red) !important;
 }
-.stButton > button:active{transform:translateY(0) !important;}
+.stInfo {
+  background: rgba(0,245,255,0.05) !important;
+  border: 1px solid rgba(0,245,255,0.15) !important;
+  border-radius: 12px !important;
+  color: var(--neon-cyan) !important;
+}
+
+/* ══════════════════ CHAT INPUT ══════════════════ */
+div[data-testid="stChatInput"] {
+  background: rgba(4,8,20,0.9) !important;
+  border-top: 1px solid rgba(0,245,255,0.08) !important;
+}
+div[data-testid="stChatInput"] textarea {
+  background: rgba(0,245,255,0.03) !important;
+  border: 1px solid rgba(0,245,255,0.12) !important;
+  color: var(--text-primary) !important;
+  border-radius: 12px !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 14px !important;
+}
+
+/* ══════════════════ FORM SUBMIT ══════════════════ */
+div[data-testid="stForm"] .stButton > button {
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue)) !important;
+  border: none !important;
+  color: #000d1a !important;
+  font-family: 'Orbitron', monospace !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em !important;
+  border-radius: 12px !important;
+  padding: 14px !important;
+  box-shadow: 0 0 30px rgba(0,245,255,0.25) !important;
+}
+div[data-testid="stForm"] .stButton > button:hover {
+  background: linear-gradient(135deg, #40ffff, #40a0ff) !important;
+  box-shadow: 0 0 50px rgba(0,245,255,0.5) !important;
+  transform: translateY(-3px) !important;
+}
+
+/* ══════════════════ ADMIN SECTION ══════════════════ */
+.admin-login-wrap {
+  background: rgba(4,8,20,0.9);
+  border: 1px solid rgba(191,0,255,0.15);
+  border-top: 2px solid rgba(191,0,255,0.4);
+  border-radius: 24px;
+  padding: 48px 44px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.admin-login-wrap::before {
+  content: '';
+  position: absolute; top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--neon-purple), transparent);
+  opacity: 0.5;
+}
+
+/* ══════════════════ DATAFRAME ══════════════════ */
+.stDataFrame { border-radius: 14px !important; overflow: hidden !important; }
+
+/* ══════════════════ SPINNER ══════════════════ */
+.stSpinner > div { border-top-color: var(--neon-cyan) !important; }
+
+/* ══════════════════ SELECTBOX ══════════════════ */
+.stSelectbox > div > div { 
+  background: rgba(0,245,255,0.03) !important; 
+  border: 1px solid rgba(0,245,255,0.15) !important;
+  border-radius: 10px !important;
+  color: var(--text-primary) !important;
+}
+
+/* ══════════════════ DEMO HINT ══════════════════ */
+.demo-hint {
+  text-align: center;
+  margin-top: 18px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+.demo-code {
+  font-family: 'Share Tech Mono', monospace;
+  background: rgba(0,245,255,0.06);
+  border: 1px solid rgba(0,245,255,0.15);
+  color: var(--neon-cyan);
+  padding: 2px 10px;
+  border-radius: 5px;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+
+/* ══════════════════ CONNECTION REQUEST CARD ══════════════════ */
+.conn-info {
+  background: rgba(0,245,255,0.03);
+  border: 1px solid rgba(0,245,255,0.1);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin: 10px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.conn-info strong { color: var(--neon-cyan); }
 </style>
 """, unsafe_allow_html=True)
 
@@ -660,25 +1438,29 @@ PAKISTAN_LOCATIONS = [
 PLANS_LIST = [
     {
         "name": "Basic Home",   "speed": "25 Mbps",  "price": "PKR 2,000", "icon": "🏠",
-        "color": "#3b82f6",
+        "gradient": "linear-gradient(90deg, #0080ff, #00c8ff)",
+        "glow": "rgba(0,128,255,0.15)",
         "features": ["25 Mbps Download", "10 Mbps Upload", "100 GB Fair Use",
                      "Email Support", "Standard Installation"],
     },
     {
         "name": "Gaming Pro",   "speed": "100 Mbps", "price": "PKR 4,000", "icon": "🎮",
-        "color": "#8b5cf6",
+        "gradient": "linear-gradient(90deg, #bf00ff, #8040ff)",
+        "glow": "rgba(191,0,255,0.15)",
         "features": ["100 Mbps Download", "50 Mbps Upload", "Unlimited Data",
                      "Priority 24/7 Support", "Static IP Address", "Free Router"],
     },
     {
         "name": "Ultra Fiber",  "speed": "250 Mbps", "price": "PKR 6,500", "icon": "⚡",
-        "color": "#06b6d4",
+        "gradient": "linear-gradient(90deg, #00f5ff, #0080ff)",
+        "glow": "rgba(0,245,255,0.15)",
         "features": ["250 Mbps Download", "100 Mbps Upload", "Unlimited Data",
                      "VIP Support Line", "2 Static IPs", "Premium Router", "Free Installation"],
     },
     {
         "name": "Extreme Fiber","speed": "500 Mbps", "price": "PKR 9,000", "icon": "🚀",
-        "color": "#f59e0b",
+        "gradient": "linear-gradient(90deg, #ffaa00, #ff6600)",
+        "glow": "rgba(255,170,0,0.15)",
         "features": ["500 Mbps Download", "250 Mbps Upload", "Unlimited Data",
                      "Dedicated Support", "3 Static IPs", "Router + Mesh WiFi",
                      "Free Installation", "SLA Guarantee"],
@@ -822,12 +1604,13 @@ def process_ticket(llm, phone, customer_type, name, package, area,
     except Exception as e:
         return None, str(e)
 
+
 def pri_tag(p):
-    cls = {"High":"tag-high","Medium":"tag-medium","Low":"tag-low"}.get(p,"tag-low")
-    return f'<span class="tag {cls}">{htmllib.escape(p)}</span>'
+    cls = {"High":"t-high","Medium":"t-med","Low":"t-low"}.get(p,"t-low")
+    return f'<span class="t-tag {cls}">{htmllib.escape(p)}</span>'
 
 def sent_tag(s):
-    return f'<span class="tag tag-sent">{htmllib.escape(s)}</span>'
+    return f'<span class="t-tag t-info">{htmllib.escape(s)}</span>'
 
 
 # ══════════════════════════════════════════════
@@ -836,11 +1619,12 @@ def sent_tag(s):
 def render_chat(chat_list):
     if not chat_list:
         st.markdown("""
-        <div style="background:rgba(255,255,255,.02);border:1px solid rgba(14,165,233,.08);
+        <div style="background:rgba(0,245,255,0.02);border:1px solid rgba(0,245,255,0.07);
              border-radius:16px;padding:60px 20px;text-align:center;">
-          <div style="font-size:48px;margin-bottom:16px;opacity:.15;">💬</div>
-          <div style="font-size:13px;color:#1e3a5f;font-family:'JetBrains Mono',monospace;letter-spacing:.06em;">
-            SELECT A QUICK TOPIC ABOVE OR TYPE BELOW TO BEGIN
+          <div style="font-size:40px;margin-bottom:16px;opacity:0.2;">◈</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#1a3050;
+               letter-spacing:0.35em;text-transform:uppercase;">
+            SELECT A QUICK TOPIC OR TYPE TO INITIALIZE SEQUENCE
           </div>
         </div>""", unsafe_allow_html=True)
         return
@@ -855,9 +1639,9 @@ def render_chat(chat_list):
             <div class="row user-row">
               <div class="umsg">
                 <div class="ubub">{txt}</div>
-                <div class="utime">{htmllib.escape(ts)} · You</div>
+                <div class="utime">{htmllib.escape(ts)} · YOU</div>
               </div>
-              <div class="av uav">👤</div>
+              <div class="av uav">◈</div>
             </div>"""
 
         elif msg["role"] == "ai":
@@ -866,8 +1650,8 @@ def render_chat(chat_list):
                 err = htmllib.escape(str(msg["error"]))
                 msgs_html += f"""
                 <div class="row bot-row">
-                  <div class="av bav">🤖</div>
-                  <div class="ebub">⚠️ Something went wrong: {err}</div>
+                  <div class="av bav">⬡</div>
+                  <div class="ebub">⚠ ERROR: {err}</div>
                 </div>"""
                 continue
 
@@ -880,21 +1664,21 @@ def render_chat(chat_list):
             tech   = str(r.get("technician","Not Assigned"))
             tid    = htmllib.escape(str(r.get("ticket_id","")))
 
-            PRI_C = {
-                "High":   ("#f87171","rgba(248,113,113,.1)","rgba(248,113,113,.25)"),
-                "Medium": ("#fbbf24","rgba(251,191,36,.1)","rgba(251,191,36,.25)"),
-                "Low":    ("#4ade80","rgba(74,222,128,.08)","rgba(74,222,128,.2)"),
+            PRI_COLORS = {
+                "High":   ("#ff3355","rgba(255,51,85,0.08)","rgba(255,51,85,0.25)"),
+                "Medium": ("#ffaa00","rgba(255,170,0,0.08)","rgba(255,170,0,0.25)"),
+                "Low":    ("#00ff88","rgba(0,255,136,0.06)","rgba(0,255,136,0.2)"),
             }
-            pc, pbg, pbo = PRI_C.get(pri, PRI_C["Low"])
+            pc, pbg, pbo = PRI_COLORS.get(pri, PRI_COLORS["Low"])
             pri_e = htmllib.escape(pri)
 
             sl = sent.lower()
             if any(x in sl for x in ["pos","happy"]):
-                sc, sbg = "#4ade80","rgba(74,222,128,.09)"
+                sc, sbg = "#00ff88","rgba(0,255,136,0.07)"
             elif any(x in sl for x in ["frust","angry","neg"]):
-                sc, sbg = "#f87171","rgba(248,113,113,.09)"
+                sc, sbg = "#ff3355","rgba(255,51,85,0.07)"
             else:
-                sc, sbg = "#94a3b8","rgba(148,163,184,.07)"
+                sc, sbg = "#94a3b8","rgba(148,163,184,0.06)"
             sent_e = htmllib.escape(sent)
 
             rec_html = ""
@@ -904,19 +1688,23 @@ def render_chat(chat_list):
                 amt = f"{int(bd.get('amount',0)):,}"
                 dd  = htmllib.escape(str(bd.get("due_date","N/A")))
                 if bd.get("overdue"):
-                    st_c, st_bg, st_bo, st_txt = "#f87171","rgba(248,113,113,.09)","rgba(248,113,113,.22)","⚠️ OVERDUE"
+                    st_c, st_bg, st_bo, st_txt = "#ff3355","rgba(255,51,85,0.07)","rgba(255,51,85,0.2)","⚠ OVERDUE"
                 else:
-                    st_c, st_bg, st_bo, st_txt = "#4ade80","rgba(74,222,128,.07)","rgba(74,222,128,.2)","✅ CURRENT"
+                    st_c, st_bg, st_bo, st_txt = "#00ff88","rgba(0,255,136,0.06)","rgba(0,255,136,0.2)","✓ CURRENT"
                 rec_html = f"""
                 <div class="rec-card">
-                  <div class="rec-lbl">💳 BILLING INFORMATION</div>
+                  <div class="rec-lbl">◈ BILLING DATA</div>
                   <div style="display:flex;align-items:baseline;gap:6px;margin:10px 0 6px;">
-                    <span style="font-size:12px;color:#334155;font-family:monospace;">PKR</span>
-                    <span style="font-size:30px;font-weight:800;color:#fbbf24;letter-spacing:-.03em;">{amt}</span>
+                    <span style="font-family:'Share Tech Mono',monospace;font-size:12px;color:#2a4060;">PKR</span>
+                    <span style="font-family:'Orbitron',monospace;font-size:28px;font-weight:900;
+                      color:#ffaa00;letter-spacing:-0.03em;">{amt}</span>
                   </div>
-                  <div style="font-size:11px;color:#334155;font-family:monospace;margin-bottom:10px;">📅 Due: {dd}</div>
-                  <span style="font-size:10px;font-weight:800;padding:3px 11px;border-radius:12px;
-                    background:{st_bg};color:{st_c};border:1px solid {st_bo};font-family:monospace;letter-spacing:.06em;">{st_txt}</span>
+                  <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#2a4060;margin-bottom:10px;">
+                    DUE: {dd}
+                  </div>
+                  <span style="font-family:'Share Tech Mono',monospace;font-size:9px;font-weight:700;
+                    padding:3px 12px;border-radius:10px;letter-spacing:0.12em;
+                    background:{st_bg};color:{st_c};border:1px solid {st_bo};">{st_txt}</span>
                 </div>"""
 
             elif r.get("tickets_data"):
@@ -926,63 +1714,70 @@ def render_chat(chat_list):
                     tid2 = htmllib.escape(str(t.get("ticket_id","")))
                     sts  = htmllib.escape(str(t.get("status","Open")))
                     p2   = str(t.get("priority","Low"))
-                    tc   = {"High":"#f87171","Medium":"#fbbf24","Low":"#4ade80"}.get(p2,"#4ade80")
+                    accent = {"High":"#ff3355","Medium":"#ffaa00","Low":"#00ff88"}.get(p2,"#00ff88")
                     rows += f"""
                     <div style="display:flex;justify-content:space-between;align-items:center;
-                         padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03);">
+                         padding:8px 0;border-bottom:1px solid rgba(0,245,255,0.05);">
                       <div>
-                        <div style="font-size:13px;font-weight:600;color:#e2e8f0;">{iss}</div>
-                        <div style="font-size:9px;color:#1e3a5f;font-family:monospace;margin-top:2px;">{tid2}</div>
+                        <div style="font-family:'Rajdhani',sans-serif;font-size:13px;
+                             font-weight:600;color:#c8d8e8;">{iss}</div>
+                        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;
+                             color:#1a3050;margin-top:2px;letter-spacing:0.1em;">{tid2}</div>
                       </div>
-                      <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;
-                        background:rgba(14,165,233,.08);color:#38bdf8;white-space:nowrap;border:1px solid rgba(14,165,233,.14);">{sts}</span>
+                      <span style="font-family:'Share Tech Mono',monospace;font-size:9px;
+                        padding:2px 8px;border-radius:8px;letter-spacing:0.08em;
+                        background:rgba(0,245,255,0.06);color:#00d4e8;border:1px solid rgba(0,245,255,0.12);
+                        white-space:nowrap;">{sts}</span>
                     </div>"""
                 rec_html = f"""
                 <div class="rec-card">
-                  <div class="rec-lbl">🎫 RECENT SUPPORT TICKETS</div>
-                  {rows if rows else '<div style="font-size:12px;color:#1e3a5f;padding:8px 0;font-family:monospace;">No tickets found.</div>'}
+                  <div class="rec-lbl">◈ TICKET HISTORY</div>
+                  {rows if rows else '<div style="font-family:Share Tech Mono,monospace;font-size:10px;color:#1a3050;padding:8px 0;letter-spacing:0.1em;">NO RECORDS FOUND</div>'}
                 </div>"""
 
             elif r.get("plans_data"):
                 pcards = ""
                 for p in PLANS_LIST:
-                    feats = "".join([f'<li style="font-size:10px;color:#475569;padding:3px 0;list-style:none;display:flex;align-items:center;gap:5px;"><span style="color:{p["color"]};font-size:9px;">✓</span>{htmllib.escape(f)}</li>' for f in p["features"][:4]])
+                    feats = "".join([f'<li style="font-size:10px;color:#2a4060;padding:3px 0;list-style:none;display:flex;align-items:center;gap:5px;font-family:Rajdhani,sans-serif;"><span style="font-size:8px;opacity:0.7;">◆</span>{htmllib.escape(f)}</li>' for f in p["features"][:4]])
                     pcards += f"""
-                    <div style="background:rgba(0,0,0,.3);border:1px solid rgba(14,165,233,.1);
-                         border-radius:10px;padding:12px;text-align:left;border-top:2px solid {p['color']};">
-                      <div style="font-size:10px;margin-bottom:4px;">{p['icon']}</div>
-                      <div style="font-size:11px;font-weight:700;color:#f1f5f9;">{htmllib.escape(p['name'])}</div>
-                      <div style="font-size:18px;font-weight:800;color:{p['color']};margin:4px 0 2px;">{htmllib.escape(p['speed'])}</div>
-                      <div style="font-size:12px;font-weight:700;color:#fbbf24;margin-bottom:8px;">{htmllib.escape(p['price'])}<span style="font-size:9px;color:#334155;font-family:monospace;">/mo</span></div>
+                    <div style="background:rgba(0,0,0,0.4);border:1px solid rgba(0,245,255,0.08);
+                         border-radius:10px;padding:12px;text-align:left;
+                         border-top:2px solid;border-image:{p['gradient']} 1;">
+                      <div style="font-size:18px;margin-bottom:4px;">{p['icon']}</div>
+                      <div style="font-family:'Orbitron',monospace;font-size:11px;font-weight:700;color:#c8d8e8;
+                           letter-spacing:0.05em;">{htmllib.escape(p['name'])}</div>
+                      <div style="font-family:'Share Tech Mono',monospace;font-size:16px;font-weight:900;
+                           color:#ffaa00;margin:4px 0 8px;">{htmllib.escape(p['speed'])}</div>
                       <ul style="padding:0;">{feats}</ul>
                     </div>"""
                 rec_html = f"""
                 <div class="rec-card">
-                  <div class="rec-lbl">📶 AVAILABLE PLANS</div>
+                  <div class="rec-lbl">◈ AVAILABLE PLANS</div>
                   <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px;">{pcards}</div>
                 </div>"""
 
             upd_html = ""
             if r.get("record_updated"):
                 upd   = r["record_updated"]
-                field = htmllib.escape(str(upd.get("field","Record")).title())
+                field = htmllib.escape(str(upd.get("field","Record")).upper())
                 val   = htmllib.escape(str(upd.get("value","")))
                 upd_html = f"""
                 <div style="margin-top:10px;padding:10px 14px;border-radius:10px;
-                     background:rgba(74,222,128,.05);border:1px solid rgba(74,222,128,.16);
-                     font-size:12.5px;color:#4ade80;">
-                  ✅ <strong>{field}</strong> updated to <strong>"{val}"</strong>
+                     background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.15);
+                     font-family:'Share Tech Mono',monospace;font-size:11px;color:#00ff88;
+                     letter-spacing:0.08em;">
+                  ✓ {field} → UPDATED TO "{val}"
                 </div>"""
 
-            tech_chip = (f'<span class="tc">🔧 {htmllib.escape(tech)}</span>' if tech != "Not Assigned" else "")
-            tid_chip  = (f'<span class="idc">🎫 {htmllib.escape(tid)}</span>' if tid else "")
+            tech_chip = (f'<span class="fc">⬡ {htmllib.escape(tech)}</span>' if tech != "Not Assigned" else "")
+            tid_chip  = (f'<span class="idc">◈ {htmllib.escape(tid)}</span>' if tid else "")
 
             msgs_html += f"""
             <div class="row bot-row">
-              <div class="av bav">🤖</div>
+              <div class="av bav">⬡</div>
               <div class="acard">
                 <div class="ahdr">
-                  <span class="albl">✦ FiberISP AI</span>
+                  <span class="albl">FIBERISP · NEURAL AI</span>
                   <span class="pbadge" style="background:{pbg};color:{pc};border:1px solid {pbo};">{pri_e}</span>
                   <span class="sbadge" style="background:{sbg};color:{sc};">{sent_e}</span>
                 </div>
@@ -995,7 +1790,7 @@ def render_chat(chat_list):
                   <span class="cc">{cat}</span>
                   {tech_chip}
                   {tid_chip}
-                  <span class="ts-chip">{htmllib.escape(ts)}</span>
+                  <span class="ts">{htmllib.escape(ts)}</span>
                 </div>
               </div>
             </div>"""
@@ -1017,53 +1812,137 @@ def render_chat(chat_list):
 <head>
 <meta charset="utf-8">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;600;700;800&family=Share+Tech+Mono&display=swap');
 *{{margin:0;padding:0;box-sizing:border-box;}}
-body{{background:#06090f;font-family:'DM Sans',sans-serif;height:{height}px;overflow:hidden;}}
-.cw{{height:{height}px;overflow-y:auto;padding:18px 16px;display:flex;flex-direction:column;gap:16px;scroll-behavior:smooth;}}
-.cw::-webkit-scrollbar{{width:3px;}}
-.cw::-webkit-scrollbar-thumb{{background:rgba(14,165,233,.2);border-radius:4px;}}
-.row{{display:flex;align-items:flex-end;gap:10px;animation:su .25s ease both;}}
+body{{
+  background:#020408;
+  font-family:'Rajdhani',sans-serif;
+  height:{height}px;
+  overflow:hidden;
+  background-image:
+    linear-gradient(rgba(0,245,255,0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,245,255,0.012) 1px, transparent 1px);
+  background-size:60px 60px;
+}}
+.cw{{
+  height:{height}px;
+  overflow-y:auto;
+  padding:18px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  scroll-behavior:smooth;
+}}
+.cw::-webkit-scrollbar{{width:2px;}}
+.cw::-webkit-scrollbar-thumb{{background:rgba(0,245,255,0.15);border-radius:4px;}}
+.row{{display:flex;align-items:flex-end;gap:10px;animation:su .3s ease both;}}
 .user-row{{flex-direction:row-reverse;}}
-.bot-row{{flex-direction:row;}}
-@keyframes su{{from{{opacity:0;transform:translateY(12px)}}to{{opacity:1;transform:translateY(0)}}}}
-.av{{width:33px;height:33px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}}
-.uav{{background:linear-gradient(135deg,#1e3a8a,#2563eb);}}
-.bav{{background:linear-gradient(135deg,#0f766e,#0ea5e9);box-shadow:0 4px 12px rgba(14,165,233,.25);}}
+@keyframes su{{from{{opacity:0;transform:translateY(14px)}}to{{opacity:1;transform:translateY(0)}}}}
+.av{{
+  width:32px;height:32px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;font-family:'Share Tech Mono',monospace;
+}}
+.uav{{
+  background:linear-gradient(135deg,rgba(0,128,255,0.2),rgba(0,80,160,0.15));
+  border:1px solid rgba(0,128,255,0.3);
+  color:#0080ff;
+  box-shadow:0 0 12px rgba(0,128,255,0.15);
+}}
+.bav{{
+  background:linear-gradient(135deg,rgba(0,245,255,0.15),rgba(0,80,160,0.1));
+  border:1px solid rgba(0,245,255,0.3);
+  color:#00f5ff;
+  box-shadow:0 0 12px rgba(0,245,255,0.15);
+}}
 .umsg{{display:flex;flex-direction:column;align-items:flex-end;max-width:70%;}}
 .ubub{{
-  background:linear-gradient(135deg,#1e3461,#1d4ed8);
-  color:#dbeafe;border-radius:18px 18px 4px 18px;
-  padding:11px 16px;font-size:13.5px;line-height:1.7;word-break:break-word;
-  box-shadow:0 4px 18px rgba(29,78,216,.2);
+  background:linear-gradient(135deg,rgba(0,30,80,0.9),rgba(0,50,120,0.8));
+  border:1px solid rgba(0,128,255,0.25);
+  border-radius:14px 14px 4px 14px;
+  padding:12px 16px;
+  font-size:14px;
+  line-height:1.7;
+  color:#b8d4f0;
+  word-break:break-word;
+  box-shadow:0 4px 20px rgba(0,80,180,0.2);
+  font-family:'Rajdhani',sans-serif;
+  font-weight:500;
 }}
-.utime{{font-size:9.5px;color:#1e3461;font-family:'JetBrains Mono',monospace;margin-top:4px;}}
-.ebub{{max-width:74%;background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.18);border-radius:14px;padding:12px 15px;font-size:13px;color:#f87171;}}
+.utime{{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;color:#1a3050;
+  margin-top:5px;letter-spacing:0.12em;
+}}
+.ebub{{
+  max-width:74%;
+  background:rgba(255,51,85,0.06);
+  border:1px solid rgba(255,51,85,0.2);
+  border-left:3px solid #ff3355;
+  border-radius:12px;
+  padding:12px 16px;
+  font-size:13px;color:#ff8099;
+  font-family:'Share Tech Mono',monospace;
+  letter-spacing:0.05em;
+}}
 .acard{{
   max-width:82%;
-  background:linear-gradient(150deg,#0c1220,#101c34);
-  border:1px solid rgba(14,165,233,.14);
-  border-radius:4px 18px 18px 18px;
-  overflow:hidden;box-shadow:0 10px 35px rgba(0,0,0,.55);
+  background:linear-gradient(150deg,rgba(4,8,20,0.97),rgba(6,12,30,0.95));
+  border:1px solid rgba(0,245,255,0.12);
+  border-radius:4px 14px 14px 14px;
+  overflow:hidden;
+  box-shadow:0 10px 40px rgba(0,0,0,0.7),0 0 30px rgba(0,245,255,0.02);
 }}
 .ahdr{{
-  background:linear-gradient(90deg,rgba(14,165,233,.08),rgba(99,102,241,.04));
-  border-bottom:1px solid rgba(14,165,233,.08);
-  padding:8px 14px;display:flex;align-items:center;gap:7px;
+  background:linear-gradient(90deg,rgba(0,245,255,0.06),transparent);
+  border-bottom:1px solid rgba(0,245,255,0.07);
+  padding:8px 14px;
+  display:flex;align-items:center;gap:7px;
 }}
-.albl{{font-size:10px;font-weight:700;color:#1e3a5f;flex:1;font-family:'JetBrains Mono',monospace;letter-spacing:.08em;}}
-.pbadge,.sbadge{{font-size:9px;font-weight:800;padding:2px 8px;border-radius:14px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.05em;}}
-.sbadge{{border:1px solid rgba(255,255,255,.06);}}
-.abody{{padding:13px 15px;}}
-.reply{{font-size:13.5px;line-height:1.75;color:#94a3b8;}}
-.rec-card{{margin-top:12px;background:rgba(0,0,0,.35);border:1px solid rgba(14,165,233,.09);border-radius:12px;padding:13px;}}
-.rec-lbl{{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#1e3a5f;font-family:'JetBrains Mono',monospace;margin-bottom:7px;}}
-.aftr{{padding:8px 12px;border-top:1px solid rgba(255,255,255,.04);display:flex;gap:5px;flex-wrap:wrap;align-items:center;}}
-.cc,.tc,.idc,.ts-chip{{font-size:9.5px;font-weight:600;font-family:'JetBrains Mono',monospace;padding:2px 8px;border-radius:9px;}}
-.cc{{background:rgba(255,255,255,.04);color:#1e3a5f;border:1px solid rgba(255,255,255,.06);}}
-.tc{{background:rgba(167,139,250,.07);color:#a78bfa;border:1px solid rgba(167,139,250,.14);}}
-.idc{{background:rgba(14,165,233,.06);color:#38bdf8;border:1px solid rgba(14,165,233,.13);}}
-.ts-chip{{background:transparent;color:#1e3461;border:none;}}
+.albl{{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;font-weight:700;color:#1a3a5a;
+  flex:1;letter-spacing:0.15em;
+}}
+.pbadge,.sbadge{{
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px;font-weight:700;
+  padding:2px 8px;border-radius:10px;
+  letter-spacing:0.1em;text-transform:uppercase;
+}}
+.sbadge{{border:1px solid rgba(255,255,255,0.05);}}
+.abody{{padding:14px 16px;}}
+.reply{{
+  font-family:'Rajdhani',sans-serif;
+  font-size:14px;line-height:1.75;
+  color:#8aa8c8;font-weight:400;
+}}
+.rec-card{{
+  margin-top:12px;
+  background:rgba(0,245,255,0.025);
+  border:1px solid rgba(0,245,255,0.08);
+  border-radius:12px;padding:13px;
+}}
+.rec-lbl{{
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px;font-weight:700;
+  letter-spacing:0.25em;text-transform:uppercase;
+  color:#0a3050;margin-bottom:8px;
+}}
+.aftr{{
+  padding:8px 12px;
+  border-top:1px solid rgba(0,245,255,0.05);
+  display:flex;gap:6px;flex-wrap:wrap;align-items:center;
+}}
+.cc,.fc,.idc,.ts{{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;padding:2px 8px;border-radius:6px;
+  letter-spacing:0.08em;
+}}
+.cc{{background:rgba(0,245,255,0.04);color:#1a3a5a;border:1px solid rgba(0,245,255,0.08);}}
+.fc{{background:rgba(191,0,255,0.06);color:#8040c0;border:1px solid rgba(191,0,255,0.12);}}
+.idc{{background:rgba(0,245,255,0.05);color:#006080;border:1px solid rgba(0,245,255,0.1);}}
+.ts{{background:transparent;color:#0a2030;border:none;}}
 </style>
 </head>
 <body>
@@ -1162,165 +2041,221 @@ def _handle_result(result, err, phone):
 
 
 # ══════════════════════════════════════════════
-#  TOP BAR  (all screens except welcome)
+#  TOP BAR — all screens except welcome
 # ══════════════════════════════════════════════
 if st.session_state.screen != "welcome":
-    st.markdown("""
-    <div class="topbar">
-      <div style="display:flex;align-items:center;gap:14px;">
-        <div class="topbar-icon">⚡</div>
+    now_str = datetime.datetime.now().strftime("%Y.%m.%d · %H:%M")
+    st.markdown(f"""
+    <div class="topbar-cyber">
+      <div class="topbar-brand">
+        <div class="topbar-icon-hex">⚡</div>
         <div>
-          <div class="topbar-title">FiberISP</div>
-          <div class="topbar-sub">AI-POWERED CUSTOMER SUPPORT</div>
+          <div class="topbar-name">FIBER<span style="color:var(--neon-cyan);">ISP</span></div>
+          <div class="topbar-sub">NEURAL SUPPORT SYSTEM · v4.2</div>
         </div>
       </div>
-      <div class="status-pill">
-        <div class="status-dot"></div>SYSTEM ONLINE
+      <div class="topbar-right">
+        <div class="sys-status">
+          <div class="status-led"></div>
+          SYS ONLINE
+        </div>
+        <div class="topbar-ticker">{now_str}</div>
       </div>
-    </div>""", unsafe_allow_html=True)
+    </div>
+    <div class="data-stream-bar"></div>
+    """, unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════
-#  SCREEN: WELCOME  ← ICON-ONLY CLICK
+#  SCREEN: WELCOME
 # ══════════════════════════════════════════════
 if st.session_state.screen == "welcome":
-    st.markdown("""
-    <div class="welcome-hero">
-      <div class="welcome-logo-wrap">⚡</div>
-      <div class="welcome-title">FiberISP</div>
-      <div class="welcome-subtitle">Ultra-Fast Fiber Internet Across Pakistan</div>
-      <div class="welcome-tagline">AI-POWERED SUPPORT &nbsp;·&nbsp; 24/7 ASSISTANCE &nbsp;·&nbsp; LIGHTNING SPEED</div>
-    </div>""", unsafe_allow_html=True)
 
-    st.markdown(
-        "<div style='text-align:center;margin:0 0 32px;'>"
-        "<span style='font-size:12px;color:#1e3a5f;font-family:JetBrains Mono,monospace;"
-        "letter-spacing:.18em;text-transform:uppercase;'>CHOOSE YOUR ACCOUNT TYPE</span></div>",
-        unsafe_allow_html=True
-    )
+    st.markdown('<div class="data-stream-bar"></div>', unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="hero-main">
+      <div class="hero-eyebrow">PAKISTAN'S FASTEST FIBER NETWORK</div>
+
+      <div class="hero-logo-container">
+        <div class="hero-logo-ring"></div>
+        <div class="hero-logo-ring-2"></div>
+        <div class="hero-logo-hex">⚡</div>
+      </div>
+
+      <div class="hero-title">FiberISP</div>
+      <div class="hero-subtitle">Ultra-Fast Fiber · Nationwide Coverage · AI-Powered Support</div>
+
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="hero-stat-num">500</span>
+          <span class="hero-stat-lbl">Mbps Max Speed</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">24/7</span>
+          <span class="hero-stat-lbl">Neural AI Support</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">99.9%</span>
+          <span class="hero-stat-lbl">Uptime SLA</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">60+</span>
+          <span class="hero-stat-lbl">Cities Covered</span>
+        </div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="section-label">
+      <span class="section-label-text">SELECT ACCESS MODE</span>
+    </div>
+    """, unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns(3, gap="large")
 
-    # ── Card 1: Existing Customer ──
     with c1:
-        st.markdown('<div class="welcome-choice-card">', unsafe_allow_html=True)
-        # Icon is the ONLY clickable element
-        st.markdown('<div class="icon-btn-only" style="display:flex;justify-content:center;">', unsafe_allow_html=True)
-        if st.button("👤", key="btn_existing"):
+        st.markdown("""
+        <div class="choice-card" style="--card-accent:linear-gradient(90deg,#00f5ff,#0080ff);
+             --card-accent-color:#00f5ff;--card-glow:rgba(0,245,255,0.12);">
+          <div class="choice-card-inner">
+        """, unsafe_allow_html=True)
+        st.markdown('<div class="icon-card-btn cyan" style="display:flex;justify-content:center;">', unsafe_allow_html=True)
+        if st.button("◈", key="btn_existing"):
             st.session_state.screen = "customer_login"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
         st.markdown("""
-          <div class="wcc-title">Existing Customer</div>
-          <div class="wcc-desc">Login with your phone number and access your full AI support dashboard.</div>
+            <div class="card-title">Existing Customer</div>
+            <div class="card-desc">Login with your registered phone number and access your full support dashboard.</div>
+            <div class="card-features">
+              <div class="card-feature"><div class="feature-dot dot-cyan"></div>REAL-TIME TICKET TRACKING</div>
+              <div class="card-feature"><div class="feature-dot dot-cyan"></div>AI DIAGNOSTIC SUPPORT</div>
+              <div class="card-feature"><div class="feature-dot dot-cyan"></div>BILLING MANAGEMENT</div>
+            </div>
+          </div>
         </div>""", unsafe_allow_html=True)
 
-    # ── Card 2: New Customer ──
     with c2:
-        st.markdown('<div class="welcome-choice-card">', unsafe_allow_html=True)
-        st.markdown('<span class="wcc-badge">NEW</span>', unsafe_allow_html=True)
-        st.markdown('<div class="icon-btn-only" style="display:flex;justify-content:center;">', unsafe_allow_html=True)
-        if st.button("✨", key="btn_new"):
+        st.markdown("""
+        <div class="choice-card" style="--card-accent:linear-gradient(90deg,#00ff88,#00c864);
+             --card-accent-color:#00ff88;--card-glow:rgba(0,255,136,0.1);">
+          <span class="card-badge badge-new">NEW</span>
+          <div class="choice-card-inner">
+        """, unsafe_allow_html=True)
+        st.markdown('<div class="icon-card-btn green" style="display:flex;justify-content:center;">', unsafe_allow_html=True)
+        if st.button("✦", key="btn_new"):
             st.session_state.screen = "new_customer_register"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
         st.markdown("""
-          <div class="wcc-title">New Customer</div>
-          <div class="wcc-desc">Register for a new connection and get instant AI-powered support.</div>
+            <div class="card-title">New Customer</div>
+            <div class="card-desc">Register your account and get connected with ultra-fast fiber internet today.</div>
+            <div class="card-features">
+              <div class="card-feature"><div class="feature-dot dot-green"></div>INSTANT AI ONBOARDING</div>
+              <div class="card-feature"><div class="feature-dot dot-green"></div>PLAN SELECTION GUIDE</div>
+              <div class="card-feature"><div class="feature-dot dot-green"></div>24HR INSTALLATION SLA</div>
+            </div>
+          </div>
         </div>""", unsafe_allow_html=True)
 
-    # ── Card 3: Admin ──
     with c3:
-        st.markdown('<div class="welcome-choice-card">', unsafe_allow_html=True)
-        st.markdown('<div class="icon-btn-admin" style="display:flex;justify-content:center;">', unsafe_allow_html=True)
-        if st.button("🛠️", key="btn_admin"):
+        st.markdown("""
+        <div class="choice-card" style="--card-accent:linear-gradient(90deg,#bf00ff,#6400c8);
+             --card-accent-color:#bf00ff;--card-glow:rgba(191,0,255,0.1);">
+          <span class="card-badge badge-secure">SECURE</span>
+          <div class="choice-card-inner">
+        """, unsafe_allow_html=True)
+        st.markdown('<div class="icon-card-btn purple" style="display:flex;justify-content:center;">', unsafe_allow_html=True)
+        if st.button("⬡", key="btn_admin"):
             st.session_state.screen = "admin_login"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
         st.markdown("""
-          <div class="wcc-title">Admin Panel</div>
-          <div class="wcc-desc">Manage customers, tickets, outages, and system operations.</div>
+            <div class="card-title">Admin Panel</div>
+            <div class="card-desc">Manage customers, tickets, network outages, and system operations.</div>
+            <div class="card-features">
+              <div class="card-feature"><div class="feature-dot dot-purple"></div>NETWORK OPERATIONS</div>
+              <div class="card-feature"><div class="feature-dot dot-purple"></div>CUSTOMER DATABASE</div>
+              <div class="card-feature"><div class="feature-dot dot-purple"></div>TICKET MANAGEMENT</div>
+            </div>
+          </div>
         </div>""", unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════
-#  SCREEN: CUSTOMER LOGIN  ← BUBBLE REDESIGN
+#  SCREEN: CUSTOMER LOGIN
 # ══════════════════════════════════════════════
 elif st.session_state.screen == "customer_login":
 
-    # Animated bubble background
+    # Animated background orbs
     st.markdown("""
     <style>
-    @keyframes orb1{0%{transform:translate(0,0) scale(1);opacity:0;}
-      10%{opacity:.55;}90%{opacity:.25;}100%{transform:translate(120px,-400px) scale(1.4);opacity:0;}}
-    @keyframes orb2{0%{transform:translate(0,0) scale(1);opacity:0;}
-      10%{opacity:.4;}90%{opacity:.2;}100%{transform:translate(-80px,-520px) scale(.8);opacity:0;}}
-    @keyframes orb3{0%{transform:translate(0,0);opacity:0;}
-      10%{opacity:.6;}90%{opacity:.15;}100%{transform:translate(60px,-460px) scale(1.2);opacity:0;}}
-    @keyframes orb4{0%{transform:translate(0,0);opacity:0;}
-      10%{opacity:.35;}90%{opacity:.1;}100%{transform:translate(-140px,-380px);opacity:0;}}
-    .login-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(2px);}
-    .lo1{width:140px;height:140px;background:radial-gradient(circle,rgba(14,165,233,.35),transparent);
-         bottom:5%;left:8%;animation:orb1 7s ease-in infinite;}
-    .lo2{width:90px;height:90px;background:radial-gradient(circle,rgba(99,102,241,.4),transparent);
-         bottom:12%;left:55%;animation:orb2 9s ease-in infinite 1.5s;}
-    .lo3{width:60px;height:60px;background:radial-gradient(circle,rgba(56,189,248,.45),transparent);
-         bottom:3%;left:30%;animation:orb3 6s ease-in infinite 3s;}
-    .lo4{width:110px;height:110px;background:radial-gradient(circle,rgba(167,139,250,.3),transparent);
-         bottom:18%;left:80%;animation:orb4 8s ease-in infinite .8s;}
-    .lo5{width:50px;height:50px;background:radial-gradient(circle,rgba(74,222,128,.35),transparent);
-         bottom:8%;left:18%;animation:orb1 10s ease-in infinite 4s;}
-    .lo6{width:75px;height:75px;background:radial-gradient(circle,rgba(14,165,233,.3),transparent);
-         bottom:25%;left:42%;animation:orb2 7.5s ease-in infinite 2.2s;}
+    @keyframes orb-rise{
+      0%{transform:translate(0,0) scale(1);opacity:0;}
+      10%{opacity:.5;}90%{opacity:.2;}
+      100%{transform:translate(var(--tx),var(--ty)) scale(var(--ts));opacity:0;}
+    }
+    .orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(3px);
+         animation:orb-rise var(--dur) ease-in infinite var(--delay);}
+    .o1{width:100px;height:100px;bottom:5%;left:8%;
+        background:radial-gradient(circle,rgba(0,245,255,0.3),transparent);
+        --tx:80px;--ty:-500px;--ts:1.4;--dur:8s;--delay:0s;}
+    .o2{width:70px;height:70px;bottom:12%;left:60%;
+        background:radial-gradient(circle,rgba(0,128,255,0.35),transparent);
+        --tx:-60px;--ty:-600px;--ts:.8;--dur:10s;--delay:2s;}
+    .o3{width:50px;height:50px;bottom:3%;left:35%;
+        background:radial-gradient(circle,rgba(0,245,255,0.4),transparent);
+        --tx:40px;--ty:-450px;--ts:1.1;--dur:7s;--delay:4s;}
+    .o4{width:80px;height:80px;bottom:20%;left:85%;
+        background:radial-gradient(circle,rgba(191,0,255,0.25),transparent);
+        --tx:-100px;--ty:-400px;--ts:1.2;--dur:9s;--delay:1s;}
+    .o5{width:40px;height:40px;bottom:8%;left:20%;
+        background:radial-gradient(circle,rgba(0,255,136,0.3),transparent);
+        --tx:20px;--ty:-550px;--ts:.9;--dur:11s;--delay:5s;}
+    .o6{width:60px;height:60px;bottom:30%;left:48%;
+        background:radial-gradient(circle,rgba(0,245,255,0.25),transparent);
+        --tx:-80px;--ty:-480px;--ts:1.3;--dur:8.5s;--delay:2.5s;}
     </style>
-    <div class="login-orb lo1"></div>
-    <div class="login-orb lo2"></div>
-    <div class="login-orb lo3"></div>
-    <div class="login-orb lo4"></div>
-    <div class="login-orb lo5"></div>
-    <div class="login-orb lo6"></div>
+    <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+    <div class="orb o4"></div><div class="orb o5"></div><div class="orb o6"></div>
     """, unsafe_allow_html=True)
 
-    _, col, _ = st.columns([1, 1.6, 1])
+    _, col, _ = st.columns([1, 1.5, 1])
     with col:
-        st.markdown('<div class="glass-form-card">', unsafe_allow_html=True)
+        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 
-        # Floating icon
-        st.markdown('<div class="gfc-icon-wrap">📱</div>', unsafe_allow_html=True)
+        st.markdown('<div class="gc-icon gc-icon-cyan" style="text-align:center;">📡</div>', unsafe_allow_html=True)
+        st.markdown('<div class="gc-title">SYSTEM ACCESS</div>', unsafe_allow_html=True)
+        st.markdown('<div class="gc-sub">Enter your registered phone number to authenticate and access the support neural network.</div>', unsafe_allow_html=True)
 
-        # Title
-        st.markdown('<div class="gfc-title">Welcome Back</div>', unsafe_allow_html=True)
-        st.markdown('<div class="gfc-sub">Enter your registered phone number to access your AI support dashboard.</div>', unsafe_allow_html=True)
-
-        # Feature pills
         st.markdown("""
-        <div class="float-tags">
-          <span class="ftag ftag-blue">⚡ Instant Access</span>
-          <span class="ftag ftag-purple">🤖 AI Support</span>
-          <span class="ftag ftag-green">🔒 Secure</span>
+        <div class="cap-tags">
+          <span class="cap-tag tag-c">⚡ INSTANT ACCESS</span>
+          <span class="cap-tag tag-g">◈ AI DIAGNOSTICS</span>
+          <span class="cap-tag tag-a">🔒 ENCRYPTED</span>
         </div>""", unsafe_allow_html=True)
 
-        # Divider
         st.markdown("""
-        <div class="gfc-divider">
-          <div class="gfc-divider-line"></div>
-          <div class="gfc-divider-pill">YOUR PHONE NUMBER</div>
-          <div class="gfc-divider-line"></div>
+        <div class="gc-divider">
+          <div class="gc-divider-line"></div>
+          <div class="gc-divider-label">PHONE NUMBER</div>
+          <div class="gc-divider-line"></div>
         </div>""", unsafe_allow_html=True)
 
-        phone = st.text_input("", placeholder="📞  03001234567", key="login_phone",
+        phone = st.text_input("", placeholder="03001234567", key="login_phone",
                               label_visibility="collapsed")
 
-        # Buttons
-        st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
         bc1, bc2 = st.columns([2, 1])
         with bc1:
-            st.markdown('<div class="login-primary-btn">', unsafe_allow_html=True)
-            login_clicked = st.button("🔑  Login to Dashboard", key="do_login", use_container_width=True)
+            st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
+            login_clicked = st.button("AUTHENTICATE →", key="do_login", use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
         with bc2:
-            st.markdown('<div class="login-back-btn">', unsafe_allow_html=True)
-            back_clicked = st.button("← Back", key="back_login", use_container_width=True)
+            st.markdown('<div class="back-btn">', unsafe_allow_html=True)
+            back_clicked = st.button("← BACK", key="back_login", use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
         if login_clicked:
@@ -1347,112 +2282,91 @@ elif st.session_state.screen == "customer_login":
                     st.session_state.screen = "customer_dashboard"
                     st.rerun()
                 else:
-                    st.error("❌ Phone number not registered. Please register as a new customer.")
+                    st.error("⚠ Phone number not found. Please register as a new customer.")
             else:
-                st.error("⚠️ Please enter your phone number.")
+                st.error("⚠ Phone number required.")
 
         if back_clicked:
             st.session_state.screen = "welcome"
             st.rerun()
 
-        # Demo hint
         st.markdown("""
-        <div class="demo-chip-wrap">
-          Try demo: <span class="demo-chip">03001234567</span>
+        <div class="demo-hint">
+          DEMO ACCESS: <span class="demo-code">03001234567</span> or <span class="demo-code">03146532146</span>
         </div>""", unsafe_allow_html=True)
 
-        st.markdown('</div>', unsafe_allow_html=True)  # close glass-form-card
+        st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════
-#  SCREEN: NEW CUSTOMER REGISTER  ← BUBBLE REDESIGN
+#  SCREEN: NEW CUSTOMER REGISTER
 # ══════════════════════════════════════════════
 elif st.session_state.screen == "new_customer_register":
 
-    # Bubble background (different color palette — greens + purples)
     st.markdown("""
     <style>
-    @keyframes nOrb1{0%{transform:translate(0,0) scale(1);opacity:0;}
-      10%{opacity:.5;}90%{opacity:.2;}100%{transform:translate(-100px,-430px) scale(1.3);opacity:0;}}
-    @keyframes nOrb2{0%{transform:translate(0,0);opacity:0;}
-      10%{opacity:.45;}90%{opacity:.15;}100%{transform:translate(90px,-500px) scale(.9);opacity:0;}}
-    @keyframes nOrb3{0%{transform:translate(0,0);opacity:0;}
-      10%{opacity:.55;}90%{opacity:.2;}100%{transform:translate(50px,-380px) scale(1.1);opacity:0;}}
-    .reg-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(2px);}
-    .ro1{width:130px;height:130px;background:radial-gradient(circle,rgba(74,222,128,.3),transparent);
-         bottom:4%;left:10%;animation:nOrb1 8s ease-in infinite;}
-    .ro2{width:100px;height:100px;background:radial-gradient(circle,rgba(192,132,252,.35),transparent);
-         bottom:15%;left:60%;animation:nOrb2 10s ease-in infinite 1s;}
-    .ro3{width:65px;height:65px;background:radial-gradient(circle,rgba(56,189,248,.4),transparent);
-         bottom:6%;left:35%;animation:nOrb3 7s ease-in infinite 2.5s;}
-    .ro4{width:85px;height:85px;background:radial-gradient(circle,rgba(251,191,36,.25),transparent);
-         bottom:20%;left:80%;animation:nOrb1 9s ease-in infinite .5s;}
-    .ro5{width:55px;height:55px;background:radial-gradient(circle,rgba(74,222,128,.3),transparent);
-         bottom:10%;left:20%;animation:nOrb2 6.5s ease-in infinite 3.5s;}
-    .ro6{width:90px;height:90px;background:radial-gradient(circle,rgba(99,102,241,.3),transparent);
-         bottom:28%;left:48%;animation:nOrb3 8.5s ease-in infinite 1.8s;}
+    @keyframes orb-rise2{
+      0%{transform:translate(0,0) scale(1);opacity:0;}
+      10%{opacity:.45;}90%{opacity:.18;}
+      100%{transform:translate(var(--tx2),var(--ty2)) scale(var(--ts2));opacity:0;}
+    }
+    .orb2{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(3px);
+          animation:orb-rise2 var(--dur2) ease-in infinite var(--del2);}
+    .r1{width:90px;height:90px;bottom:6%;left:12%;
+        background:radial-gradient(circle,rgba(0,255,136,0.3),transparent);
+        --tx2:-70px;--ty2:-500px;--ts2:1.3;--dur2:9s;--del2:0s;}
+    .r2{width:65px;height:65px;bottom:18%;left:65%;
+        background:radial-gradient(circle,rgba(191,0,255,0.32),transparent);
+        --tx2:60px;--ty2:-550px;--ts2:.9;--dur2:11s;--del2:1.5s;}
+    .r3{width:45px;height:45px;bottom:4%;left:40%;
+        background:radial-gradient(circle,rgba(255,170,0,0.3),transparent);
+        --tx2:30px;--ty2:-430px;--ts2:1.1;--dur2:7s;--del2:3s;}
+    .r4{width:75px;height:75px;bottom:25%;left:82%;
+        background:radial-gradient(circle,rgba(0,245,255,0.25),transparent);
+        --tx2:-90px;--ty2:-460px;--ts2:1.2;--dur2:8s;--del2:.7s;}
     </style>
-    <div class="reg-orb ro1"></div>
-    <div class="reg-orb ro2"></div>
-    <div class="reg-orb ro3"></div>
-    <div class="reg-orb ro4"></div>
-    <div class="reg-orb ro5"></div>
-    <div class="reg-orb ro6"></div>
+    <div class="orb2 r1"></div><div class="orb2 r2"></div>
+    <div class="orb2 r3"></div><div class="orb2 r4"></div>
     """, unsafe_allow_html=True)
 
-    _, col, _ = st.columns([1, 1.6, 1])
+    _, col, _ = st.columns([1, 1.5, 1])
     with col:
-        st.markdown('<div class="glass-form-card">', unsafe_allow_html=True)
+        st.markdown('<div class="glass-card" style="border-color:rgba(0,255,136,0.12);border-top-color:rgba(0,255,136,0.4);">', unsafe_allow_html=True)
 
-        # Floating icon
+        st.markdown('<div class="gc-icon gc-icon-green" style="text-align:center;">✦</div>', unsafe_allow_html=True)
+        st.markdown('<div class="gc-title" style="background:linear-gradient(135deg,#e8f4ff,#00ff88);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">NEW CONNECTION</div>', unsafe_allow_html=True)
+        st.markdown('<div class="gc-sub">Register your account to join FiberISP\'s neural support network and get connected.</div>', unsafe_allow_html=True)
+
         st.markdown("""
-        <div class="gfc-icon-wrap" style="background:linear-gradient(135deg,#10b981,#3b82f6,#8b5cf6);">
-          ✨
+        <div class="cap-tags">
+          <span class="cap-tag tag-g">🚀 FAST SETUP</span>
+          <span class="cap-tag tag-c">📡 60+ CITIES</span>
+          <span class="cap-tag tag-p">💎 PREMIUM PLANS</span>
         </div>""", unsafe_allow_html=True)
 
-        st.markdown('<div class="gfc-title">Create Account</div>', unsafe_allow_html=True)
-        st.markdown('<div class="gfc-sub">Join FiberISP and enjoy ultra-fast fiber internet with 24/7 AI-powered support.</div>', unsafe_allow_html=True)
-
-        # Feature pills
         st.markdown("""
-        <div class="float-tags">
-          <span class="ftag ftag-green">🚀 Fast Setup</span>
-          <span class="ftag ftag-blue">📡 Wide Coverage</span>
-          <span class="ftag ftag-purple">💎 Premium Plans</span>
-        </div>""", unsafe_allow_html=True)
-
-        # Form
-        st.markdown("""
-        <div class="gfc-divider">
-          <div class="gfc-divider-line"></div>
-          <div class="gfc-divider-pill">YOUR DETAILS</div>
-          <div class="gfc-divider-line"></div>
+        <div class="gc-divider" style="--gc-color:rgba(0,255,136,0.2);">
+          <div class="gc-divider-line" style="background:linear-gradient(90deg,transparent,rgba(0,255,136,0.2),transparent);"></div>
+          <div class="gc-divider-label" style="color:var(--neon-green);">REGISTRATION DATA</div>
+          <div class="gc-divider-line" style="background:linear-gradient(90deg,transparent,rgba(0,255,136,0.2),transparent);"></div>
         </div>""", unsafe_allow_html=True)
 
         with st.form("reg_form"):
-            # Row 1: Name + Phone
             nc1, nc2 = st.columns(2)
             with nc1:
                 name = st.text_input("Full Name", placeholder="Muhammad Ali")
             with nc2:
                 phone = st.text_input("Phone Number", placeholder="03001234567")
 
-            # Area
-            area = st.selectbox("Your Area", PAKISTAN_LOCATIONS)
+            area = st.selectbox("Service Area", PAKISTAN_LOCATIONS)
 
-            # Info bubble
             st.markdown("""
-            <div style="background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.14);
-                 border-radius:12px;padding:11px 15px;margin:8px 0 4px;
-                 display:flex;align-items:center;gap:10px;">
-              <span style="font-size:18px;">💡</span>
-              <span style="font-size:12px;color:#334155;line-height:1.6;">
-                Our team will contact you within <strong style="color:#38bdf8;">24 hours</strong>
-                to confirm your connection details.
-              </span>
+            <div class="conn-info">
+              <span style="font-size:20px;flex-shrink:0;">◈</span>
+              <span>Our team will contact you within <strong>24 hours</strong> to confirm and schedule installation at your location.</span>
             </div>""", unsafe_allow_html=True)
 
-            submitted = st.form_submit_button("✨  Create My Account  →", use_container_width=True)
+            submitted = st.form_submit_button("✦  INITIALIZE ACCOUNT  →", use_container_width=True)
 
             if submitted:
                 if name.strip() and phone.strip():
@@ -1475,25 +2389,17 @@ elif st.session_state.screen == "new_customer_register":
                         st.session_state.screen = "customer_dashboard"
                         st.rerun()
                     except sqlite3.IntegrityError:
-                        st.error("❌ This phone number is already registered. Please login instead.")
+                        st.error("⚠ Phone number already registered. Please use the login screen.")
                 else:
-                    st.error("⚠️ Please fill in all fields.")
+                    st.error("⚠ All fields are required.")
 
         st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
-        st.markdown('<div class="login-back-btn">', unsafe_allow_html=True)
-        if st.button("← Back to Home", key="back_reg", use_container_width=True):
+        st.markdown('<div class="back-btn">', unsafe_allow_html=True)
+        if st.button("← BACK TO HOME", key="back_reg", use_container_width=True):
             st.session_state.screen = "welcome"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
-
-        # Already have account hint
-        st.markdown("""
-        <div class="demo-chip-wrap" style="margin-top:14px;">
-          Already registered?
-          <span class="demo-chip" style="cursor:pointer;">Login instead</span>
-        </div>""", unsafe_allow_html=True)
-
-        st.markdown('</div>', unsafe_allow_html=True)  # close glass-form-card
+        st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════
@@ -1505,72 +2411,75 @@ elif st.session_state.screen == "customer_dashboard":
 
     outage_html = ""
     if st.session_state.network_status == "DOWN":
-        outage_html = (
-            f'<div class="outage-warn">⚠️ <strong>Network Outage in {htmllib.escape(cust["area"])}</strong>'
-            f' — Expected fix: {htmllib.escape(st.session_state.fix_time)}</div>'
-        )
+        outage_html = f"""
+        <div class="outage-alert">
+          <span style="font-size:18px;">⚠</span>
+          <span>NETWORK OUTAGE DETECTED IN {htmllib.escape(cust["area"].upper())} — ETA: {htmllib.escape(st.session_state.fix_time)}</span>
+        </div>"""
 
-    lang_badge = (
-        '<span style="font-size:11px;background:rgba(14,165,233,.08);'
-        'border:1px solid rgba(14,165,233,.16);padding:5px 14px;border-radius:20px;'
-        'color:#38bdf8;font-family:JetBrains Mono,monospace;font-weight:700;">🇬🇧 English</span>'
-    )
+    net_color = "var(--neon-red)" if st.session_state.network_status == "DOWN" else "var(--neon-green)"
+    net_icon  = "▼" if st.session_state.network_status == "DOWN" else "▲"
 
     st.markdown(f"""
-    <div class="cust-card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
-        <div class="cust-name">👋 Welcome, {htmllib.escape(cust["name"])}</div>
-        {lang_badge}
+    <div class="profile-banner">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+        <div class="profile-name">◈ {htmllib.escape(cust["name"])}</div>
+        <div style="display:flex;align-items:center;gap:8px;
+             font-family:'Share Tech Mono',monospace;font-size:10px;
+             color:{net_color};letter-spacing:0.2em;">
+          {net_icon} NET {htmllib.escape(st.session_state.network_status)}
+        </div>
       </div>
-      <div class="cust-meta">
-        <div class="cust-chip">📱 <span>{htmllib.escape(phone)}</span></div>
-        <div class="cust-chip">📦 <span>{htmllib.escape(cust["package"])}</span></div>
-        <div class="cust-chip">📍 <span>{htmllib.escape(cust["area"])}</span></div>
-        <div class="cust-chip">💳 <span>{htmllib.escape(st.session_state.bill_info)}</span></div>
+      <div class="profile-chips">
+        <div class="profile-chip">📱<span>{htmllib.escape(phone)}</span></div>
+        <div class="profile-chip">◈<span>{htmllib.escape(cust["package"])}</span></div>
+        <div class="profile-chip">📍<span>{htmllib.escape(cust["area"])}</span></div>
+        <div class="profile-chip">💳<span>{htmllib.escape(st.session_state.bill_info)}</span></div>
       </div>
       {outage_html}
     </div>""", unsafe_allow_html=True)
 
-    col_out, _ = st.columns([1, 8])
+    col_out, _ = st.columns([1, 9])
     with col_out:
-        if st.button("🚪 Logout", key="logout"):
+        st.markdown('<div class="danger-btn">', unsafe_allow_html=True)
+        if st.button("⬡ EXIT", key="logout"):
             for k in defaults:
                 st.session_state[k] = defaults[k]
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
     tab1, tab2, tab3, tab4 = st.tabs([
-        "💬  AI Support Chat",
-        "🔌  New Connection",
-        "💳  My Bill & Tickets",
-        "⬆️  Upgrade Plan",
+        "⬡  AI Support",
+        "◈  New Connection",
+        "▲  Billing & Tickets",
+        "✦  Upgrade Plan",
     ])
 
     with tab1:
         st.markdown("""
-        <div class="chat-banner">
-          <div class="chat-banner-icon">🤖</div>
+        <div class="chat-head">
+          <div class="chat-head-icon">⬡</div>
           <div style="flex:1;">
-            <div class="chat-banner-title">FiberISP AI Assistant</div>
-            <div class="chat-banner-sub">
-              Ask about your bill, connection issues, or say things like
-              <em style="color:#475569;">"change my name to Ahmed"</em> or
-              <em style="color:#475569;">"show me my tickets"</em>
+            <div class="chat-head-name">FIBERISP NEURAL AI</div>
+            <div class="chat-head-desc">
+              Ask about your bill, diagnose connectivity issues, or say
+              <em style="color:#1a3a5a;">"change my name to Ahmed"</em> or
+              <em style="color:#1a3a5a;">"show my tickets"</em>
             </div>
           </div>
-          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-            <span class="online-dot"></span>
-            <span style="font-size:11px;color:#4ade80;font-family:JetBrains Mono,monospace;font-weight:600;">ONLINE</span>
+          <div class="ai-live">
+            <div class="status-led"></div>LIVE
           </div>
         </div>""", unsafe_allow_html=True)
 
-        st.markdown("<div class='sec-hdr'>Quick Topics</div>", unsafe_allow_html=True)
+        st.markdown('<div class="sec-hdr">QUICK COMMANDS</div>', unsafe_allow_html=True)
 
         quick_topics = [
-            ("🐌","Slow internet speed"),("📡","WiFi not working"),
-            ("⛔","No internet connection"),("💳","Show my bill"),
-            ("⬆️","Upgrade my plan"),("🔁","How to restart my router"),
-            ("📶","Weak WiFi signal"),("🔧","Request a technician"),
-            ("📋","Show my tickets"),("📦","What plans are available"),
+            ("▼","Slow internet speed"),("◈","WiFi not working"),
+            ("⬡","No internet connection"),("💳","Show my bill"),
+            ("✦","Upgrade my plan"),("↻","How to restart router"),
+            ("▲","Weak WiFi signal"),("⬢","Request a technician"),
+            ("◈","Show my tickets"),("▦","Available plans"),
         ]
         cols = st.columns(5)
         for i, (icon, label) in enumerate(quick_topics):
@@ -1578,7 +2487,7 @@ elif st.session_state.screen == "customer_dashboard":
                 if st.button(f"{icon} {label}", key=f"qt_{i}", use_container_width=True):
                     now = datetime.datetime.now().strftime("%I:%M %p")
                     st.session_state.chat.append({"role":"user","text":label,"time":now})
-                    with st.spinner("AI is thinking…"):
+                    with st.spinner("Neural AI processing..."):
                         result, err = process_ticket(
                             None, phone, st.session_state.customer_type,
                             cust["name"], cust["package"], cust["area"],
@@ -1588,14 +2497,14 @@ elif st.session_state.screen == "customer_dashboard":
                     _handle_result(result, err, phone)
                     st.rerun()
 
-        st.markdown("<div class='sec-hdr'>Conversation</div>", unsafe_allow_html=True)
+        st.markdown('<div class="sec-hdr">CONVERSATION STREAM</div>', unsafe_allow_html=True)
         render_chat(st.session_state.chat)
 
-        user_msg = st.chat_input("Type your message… (e.g. 'change my name to Ahmed')")
+        user_msg = st.chat_input("Transmit message to Neural AI...")
         if user_msg and user_msg.strip():
             now = datetime.datetime.now().strftime("%I:%M %p")
             st.session_state.chat.append({"role":"user","text":user_msg.strip(),"time":now})
-            with st.spinner("AI is thinking…"):
+            with st.spinner("Neural AI processing..."):
                 result, err = process_ticket(
                     None, phone, st.session_state.customer_type,
                     cust["name"], cust["package"], cust["area"],
@@ -1606,60 +2515,64 @@ elif st.session_state.screen == "customer_dashboard":
             st.rerun()
 
         if st.session_state.chat:
-            if st.button("🗑️ Clear Chat", key="clear_chat"):
+            if st.button("⬡ PURGE CONVERSATION", key="clear_chat"):
                 st.session_state.chat = []
                 st.rerun()
 
     with tab2:
         st.markdown("""
-        <div style="background:linear-gradient(150deg,#0d1524,#0f1d35);
-             border:1px solid rgba(14,165,233,.14);border-radius:18px;
-             padding:24px 28px;margin-bottom:24px;
-             box-shadow:inset 0 1px 0 rgba(255,255,255,.04);">
-          <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#f1f5f9;margin-bottom:6px;">
-            🔌 Request a New Internet Connection
+        <div style="background:linear-gradient(135deg,rgba(0,245,255,0.04),rgba(0,80,160,0.03));
+             border:1px solid rgba(0,245,255,0.12);border-top:2px solid rgba(0,245,255,0.3);
+             border-radius:18px;padding:24px 28px;margin-bottom:28px;">
+          <div style="font-family:'Orbitron',monospace;font-size:18px;font-weight:700;
+               color:var(--text-primary);letter-spacing:0.05em;margin-bottom:6px;">
+            ◈ REQUEST NEW CONNECTION
           </div>
-          <div style="font-size:13.5px;color:#475569;line-height:1.7;">
-            Our team will contact you within 24 hours to schedule installation.
+          <div style="font-size:14px;color:var(--text-muted);font-family:'Rajdhani',sans-serif;line-height:1.6;">
+            Submit your installation request and our team will contact you within 24 hours.
           </div>
         </div>""", unsafe_allow_html=True)
 
-        st.markdown("<div class='sec-hdr'>Select a Plan</div>", unsafe_allow_html=True)
+        st.markdown('<div class="sec-hdr">SELECT PLAN</div>', unsafe_allow_html=True)
         pcols = st.columns(4)
         for i, p in enumerate(PLANS_LIST):
             with pcols[i]:
-                sel_cls = "selected" if st.session_state.selected_plan == p["name"] else ""
+                sel_cls = "current-plan" if st.session_state.selected_plan == p["name"] else ""
                 features_html = "".join([f'<li>{htmllib.escape(f)}</li>' for f in p["features"][:4]])
                 st.markdown(f"""
-                <div class="plan-card {sel_cls}" style="--plan-accent:{p['color']};">
-                  <div style="font-size:28px;margin-bottom:8px;">{p['icon']}</div>
+                <div class="plan-card {sel_cls}"
+                     style="--plan-gradient:{p['gradient']};--plan-glow:{p['glow']};">
+                  <div class="plan-icon">{p['icon']}</div>
                   <div class="plan-name">{htmllib.escape(p['name'])}</div>
                   <div class="plan-speed">{htmllib.escape(p['speed'])}</div>
                   <div class="plan-price">{htmllib.escape(p['price'])}</div>
-                  <div class="plan-per">/month</div>
+                  <div class="plan-period">/MONTH</div>
                   <ul class="plan-features">{features_html}</ul>
                 </div>""", unsafe_allow_html=True)
-                if st.button("Select", key=f"plan_{i}", use_container_width=True):
+                if st.button("SELECT", key=f"plan_{i}", use_container_width=True):
                     st.session_state.selected_plan = p["name"]
                     st.rerun()
 
         if st.session_state.selected_plan:
             st.markdown(
-                f"<div style='background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.18);"
-                f"border-radius:10px;padding:10px 16px;font-size:13px;color:#4ade80;margin:12px 0;'>"
-                f"✅ Selected: <strong>{htmllib.escape(st.session_state.selected_plan)}</strong></div>",
+                f"<div style='background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.15);"
+                f"border-left:3px solid var(--neon-green);border-radius:10px;padding:12px 18px;"
+                f"font-family:Share Tech Mono,monospace;font-size:11px;color:var(--neon-green);"
+                f"letter-spacing:0.1em;margin:12px 0;'>"
+                f"✓ SELECTED: {htmllib.escape(st.session_state.selected_plan)}</div>",
                 unsafe_allow_html=True
             )
 
-        st.markdown("<div class='sec-hdr'>Your Details</div>", unsafe_allow_html=True)
+        st.markdown('<div class="sec-hdr">INSTALLATION DETAILS</div>', unsafe_allow_html=True)
         with st.form("nc_form", clear_on_submit=True):
-            nc_name  = st.text_input("Full Name",         value=cust["name"])
-            nc_phone = st.text_input("Phone Number",      value=phone)
-            nc_area  = st.selectbox(
+            nc1, nc2 = st.columns(2)
+            with nc1: nc_name  = st.text_input("Full Name", value=cust["name"])
+            with nc2: nc_phone = st.text_input("Phone Number", value=phone)
+            nc_area = st.selectbox(
                 "Installation Area", PAKISTAN_LOCATIONS,
                 index=PAKISTAN_LOCATIONS.index(cust["area"]) if cust["area"] in PAKISTAN_LOCATIONS else 0
             )
-            if st.form_submit_button("📩 Submit Request"):
+            if st.form_submit_button("◈  SUBMIT REQUEST  →", use_container_width=True):
                 if nc_name.strip() and nc_phone.strip() and st.session_state.selected_plan:
                     db().execute(
                         "INSERT INTO new_connection_requests(name,phone,area,package,created_at) VALUES(?,?,?,?,?)",
@@ -1668,12 +2581,12 @@ elif st.session_state.screen == "customer_dashboard":
                          datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
                     )
                     conn.commit()
-                    st.success(f"✅ Request submitted! We'll contact {nc_phone.strip()} within 24 hours.")
+                    st.success(f"✓ Request transmitted. We'll contact {nc_phone.strip()} within 24 hours.")
                     st.session_state.selected_plan = ""
                 elif not st.session_state.selected_plan:
-                    st.error("⚠️ Please select a plan first.")
+                    st.error("⚠ Select a plan to proceed.")
                 else:
-                    st.error("⚠️ Please fill in all fields.")
+                    st.error("⚠ All fields are required.")
 
     with tab3:
         c = db()
@@ -1684,100 +2597,93 @@ elif st.session_state.screen == "customer_dashboard":
             amount, due_date = bill_row
             try:    overdue = datetime.date.today() > datetime.date.fromisoformat(due_date)
             except: overdue = False
-            st_html = (
-                '<span class="bill-status-due">⚠️ OVERDUE</span>'
+            status_html = (
+                '<div class="status-due">⚠ PAYMENT OVERDUE</div>'
                 if overdue else
-                '<span class="bill-status-ok">✅ CURRENT</span>'
+                '<div class="status-ok">✓ ACCOUNT CURRENT</div>'
             )
             st.markdown(f"""
-            <div class="bill-card">
-              <div style="font-size:10px;color:#1e3a5f;font-family:'JetBrains Mono',monospace;
-                letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;">
-                CURRENT BILL AMOUNT
-              </div>
+            <div class="bill-panel">
+              <div class="bill-label">CURRENT BILLING CYCLE</div>
               <div class="bill-amount">
                 <span class="bill-currency">PKR</span>{amount:,}
               </div>
-              <div class="bill-due">📅 Due Date: {htmllib.escape(due_date)}</div>
-              {st_html}
+              <div class="bill-due">DUE DATE · {htmllib.escape(due_date)}</div>
+              {status_html}
             </div>""", unsafe_allow_html=True)
         else:
-            st.info("💳 No billing record found.")
+            st.info("◈ No billing record on file.")
 
-        st.markdown("<div class='sec-hdr'>Recent Support Tickets</div>", unsafe_allow_html=True)
+        st.markdown('<div class="sec-hdr">SUPPORT TICKETS</div>', unsafe_allow_html=True)
         c.execute(
             "SELECT ticket_id,issue,priority,status,created_at FROM tickets "
-            "WHERE customer_phone=? ORDER BY created_at DESC LIMIT 5",
-            (phone,)
+            "WHERE customer_phone=? ORDER BY created_at DESC LIMIT 5", (phone,)
         )
         tickets = c.fetchall()
         if tickets:
             for tid, issue, priority, status, created in tickets:
                 card_cls = "resolved" if status == "Resolved" else priority.lower()
                 st.markdown(f"""
-                <div class="ticket-card {card_cls}">
-                  <div class="ticket-hdr">
+                <div class="ticket-node {card_cls}">
+                  <div class="ticket-header">
                     <span class="ticket-id">{htmllib.escape(tid)}</span>
-                    <span class="ticket-status {'s-resolved' if status=='Resolved' else 's-open'}">{htmllib.escape(status)}</span>
+                    <span class="ticket-status-badge {'s-resolved' if status=='Resolved' else 's-open'}">{htmllib.escape(status)}</span>
                   </div>
-                  <div class="ticket-issue">{htmllib.escape(issue)}</div>
-                  <div class="ticket-meta">
+                  <div class="ticket-title">{htmllib.escape(issue)}</div>
+                  <div class="ticket-tags">
                     {pri_tag(priority)}
-                    <span class="tag tag-sent">🕐 {htmllib.escape(created)}</span>
+                    <span class="t-tag t-info">◈ {htmllib.escape(created)}</span>
                   </div>
                 </div>""", unsafe_allow_html=True)
         else:
-            st.info("📋 No tickets found. Chat with AI Support to create one.")
+            st.info("◈ No support tickets. Use AI Chat to create one.")
 
     with tab4:
         st.markdown(f"""
-        <div style="background:linear-gradient(150deg,#0d1524,#0f1d35);
-             border:1px solid rgba(14,165,233,.14);border-radius:18px;
-             padding:24px 28px;margin-bottom:28px;
-             box-shadow:inset 0 1px 0 rgba(255,255,255,.04);">
-          <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#f1f5f9;margin-bottom:6px;">
-            ⬆️ Upgrade Your Plan
+        <div style="background:linear-gradient(135deg,rgba(0,245,255,0.04),rgba(0,80,160,0.03));
+             border:1px solid rgba(0,245,255,0.12);border-top:2px solid rgba(0,245,255,0.3);
+             border-radius:18px;padding:24px 28px;margin-bottom:28px;">
+          <div style="font-family:'Orbitron',monospace;font-size:18px;font-weight:700;
+               color:var(--text-primary);letter-spacing:0.05em;margin-bottom:6px;">
+            ✦ PLAN UPGRADE CENTER
           </div>
-          <div style="font-size:13.5px;color:#475569;">
-            Current Package: <strong style="color:#0ea5e9;">{htmllib.escape(cust["package"])}</strong>
+          <div style="font-size:14px;color:var(--text-muted);font-family:'Rajdhani',sans-serif;">
+            CURRENT PACKAGE: <span style="font-family:'Orbitron',monospace;font-size:13px;
+            color:var(--neon-cyan);font-weight:700;">{htmllib.escape(cust["package"])}</span>
           </div>
         </div>""", unsafe_allow_html=True)
 
         up_cols = st.columns(4)
         for i, p in enumerate(PLANS_LIST):
             with up_cols[i]:
-                is_cur    = p["name"].lower() in cust["package"].lower()
-                cur_badge = '<div class="plan-current-badge">✓ CURRENT PLAN</div>' if is_cur else ""
+                is_cur = p["name"].lower() in cust["package"].lower()
+                cur_badge = '<div class="current-badge">✓ ACTIVE PLAN</div>' if is_cur else ""
                 features_html = "".join([f'<li>{htmllib.escape(f)}</li>' for f in p["features"]])
-                border_style  = "border-color:#0ea5e9;" if is_cur else ""
                 st.markdown(f"""
-                <div class="plan-card {'current' if is_cur else ''}"
-                     style="--plan-accent:{p['color']};{border_style}">
-                  <div style="font-size:30px;margin-bottom:10px;">{p['icon']}</div>
+                <div class="plan-card {'current-plan' if is_cur else ''}"
+                     style="--plan-gradient:{p['gradient']};--plan-glow:{p['glow']};">
+                  <div class="plan-icon">{p['icon']}</div>
                   <div class="plan-name">{htmllib.escape(p['name'])}</div>
                   <div class="plan-speed">{htmllib.escape(p['speed'])}</div>
                   <div class="plan-price">{htmllib.escape(p['price'])}</div>
-                  <div class="plan-per">/month</div>
+                  <div class="plan-period">/MONTH</div>
                   <ul class="plan-features">{features_html}</ul>
                   {cur_badge}
                 </div>""", unsafe_allow_html=True)
                 if not is_cur:
-                    if st.button(f"⬆️ Upgrade", key=f"up_{i}", use_container_width=True):
-                        upgrade_msg = (
-                            f"I want to upgrade my plan from {cust['package']} to "
-                            f"{p['name']} ({p['speed']}, {p['price']}/month)"
-                        )
+                    if st.button(f"✦ UPGRADE", key=f"up_{i}", use_container_width=True):
+                        msg = f"I want to upgrade my plan from {cust['package']} to {p['name']} ({p['speed']}, {p['price']}/month)"
                         now = datetime.datetime.now().strftime("%I:%M %p")
-                        st.session_state.chat.append({"role":"user","text":upgrade_msg,"time":now})
-                        with st.spinner("Processing upgrade…"):
+                        st.session_state.chat.append({"role":"user","text":msg,"time":now})
+                        with st.spinner("Processing upgrade request..."):
                             result, err = process_ticket(
                                 None, phone, st.session_state.customer_type,
                                 cust["name"], cust["package"], cust["area"],
                                 st.session_state.network_status, st.session_state.fix_time,
-                                st.session_state.bill_info, st.session_state.history_text, upgrade_msg,
+                                st.session_state.bill_info, st.session_state.history_text, msg,
                             )
                         _handle_result(result, err, phone)
-                        st.success(f"✅ Upgrade to '{p['name']}' submitted! Check AI Chat for confirmation.")
+                        st.success(f"✓ Upgrade request to '{p['name']}' submitted.")
                         st.rerun()
 
 
@@ -1785,28 +2691,58 @@ elif st.session_state.screen == "customer_dashboard":
 #  SCREEN: ADMIN LOGIN
 # ══════════════════════════════════════════════
 elif st.session_state.screen == "admin_login":
-    _, col, _ = st.columns([1, 2, 1])
+    _, col, _ = st.columns([1, 1.5, 1])
     with col:
         st.markdown("""
-        <div class="form-box">
-          <div style="font-size:36px;margin-bottom:14px;">🔐</div>
-          <div class="form-title">Admin Access</div>
-          <div class="form-sub">Enter your administrator password to access the management dashboard.</div>
-        </div>""", unsafe_allow_html=True)
+        <div class="glass-card" style="border-color:rgba(191,0,255,0.12);
+             box-shadow:0 40px 100px rgba(0,0,0,0.8),0 0 80px rgba(191,0,255,0.04);">
+          <div style="text-align:center;">
+        """, unsafe_allow_html=True)
 
-        pwd = st.text_input("Admin Password", type="password", placeholder="Enter password")
-        c1, c2 = st.columns(2)
-        with c1:
-            if st.button("Login →", key="admin_go"):
-                if pwd == "admin123":
-                    st.session_state.screen = "admin"
-                    st.rerun()
-                else:
-                    st.error("❌ Incorrect password.")
-        with c2:
-            if st.button("← Back", key="back_admin"):
-                st.session_state.screen = "welcome"
+        st.markdown("""
+        <div class="gc-icon" style="background:linear-gradient(135deg,rgba(191,0,255,0.15),rgba(100,0,200,0.1));
+             border:1px solid rgba(191,0,255,0.3);box-shadow:0 0 30px rgba(191,0,255,0.2);
+             margin:0 auto 24px;">🔐</div>
+        <div class="gc-title" style="background:linear-gradient(135deg,#e8f4ff,#bf00ff);
+             -webkit-background-clip:text;-webkit-text-fill-color:transparent;">ADMIN ACCESS</div>
+        <div class="gc-sub">Restricted access. Authenticate with administrator credentials to proceed.</div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="gc-divider">
+          <div class="gc-divider-line" style="background:linear-gradient(90deg,transparent,rgba(191,0,255,0.2),transparent);"></div>
+          <div class="gc-divider-label" style="color:var(--neon-purple);">CREDENTIALS</div>
+          <div class="gc-divider-line" style="background:linear-gradient(90deg,transparent,rgba(191,0,255,0.2),transparent);"></div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        pwd = st.text_input("Admin Password", type="password", placeholder="••••••••••")
+        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
+        bc1, bc2 = st.columns([2, 1])
+        with bc1:
+            st.markdown('<div class="primary-btn" style="--p-c1:var(--neon-purple);--p-c2:#6400c8;">', unsafe_allow_html=True)
+            go = st.button("AUTHENTICATE →", key="admin_go", use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        with bc2:
+            st.markdown('<div class="back-btn">', unsafe_allow_html=True)
+            bk = st.button("← BACK", key="back_admin", use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        if go:
+            if pwd == "admin123":
+                st.session_state.screen = "admin"
                 st.rerun()
+            else:
+                st.error("⚠ Access denied. Invalid credentials.")
+        if bk:
+            st.session_state.screen = "welcome"
+            st.rerun()
+
+        st.markdown("""
+        <div class="demo-hint">DEMO: <span class="demo-code">admin123</span></div>
+        """, unsafe_allow_html=True)
+        st.markdown('</div></div>', unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════
@@ -1814,67 +2750,69 @@ elif st.session_state.screen == "admin_login":
 # ══════════════════════════════════════════════
 elif st.session_state.screen == "admin":
     c = db()
-    c.execute("SELECT COUNT(*) FROM customers");              total_cust = c.fetchone()[0]
-    c.execute("SELECT COUNT(*) FROM tickets");                total_tick = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM customers");               total_cust = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM tickets");                 total_tick = c.fetchone()[0]
     c.execute("SELECT COUNT(*) FROM tickets WHERE status='Open'"); open_tick = c.fetchone()[0]
     c.execute("SELECT COUNT(*) FROM tickets WHERE priority='High' AND status='Open'"); high_tick = c.fetchone()[0]
-    c.execute("SELECT COUNT(*) FROM new_connection_requests"); conn_reqs  = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM new_connection_requests"); conn_reqs = c.fetchone()[0]
 
-    col_out, _ = st.columns([1, 8])
+    col_out, _ = st.columns([1, 9])
     with col_out:
-        if st.button("← Logout", key="admin_logout"):
+        st.markdown('<div class="danger-btn">', unsafe_allow_html=True)
+        if st.button("⬡ EXIT", key="admin_logout"):
             st.session_state.screen = "welcome"
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown(f"""
-    <div class="metric-grid">
-      <div class="metric-card">
-        <div class="metric-num blue">{total_cust}</div>
-        <div class="metric-lbl">Total Customers</div>
+    <div class="metric-row">
+      <div class="metric-node" style="--metric-bar:linear-gradient(90deg,transparent,var(--neon-cyan),transparent);">
+        <div class="metric-num c">{total_cust}</div>
+        <div class="metric-lbl">TOTAL CUSTOMERS</div>
       </div>
-      <div class="metric-card">
+      <div class="metric-node" style="--metric-bar:linear-gradient(90deg,transparent,#6080c0,transparent);">
         <div class="metric-num">{total_tick}</div>
-        <div class="metric-lbl">Total Tickets</div>
+        <div class="metric-lbl">TOTAL TICKETS</div>
       </div>
-      <div class="metric-card">
-        <div class="metric-num yellow">{open_tick}</div>
-        <div class="metric-lbl">Open Tickets</div>
+      <div class="metric-node" style="--metric-bar:linear-gradient(90deg,transparent,var(--neon-amber),transparent);">
+        <div class="metric-num a">{open_tick}</div>
+        <div class="metric-lbl">OPEN TICKETS</div>
       </div>
-      <div class="metric-card">
-        <div class="metric-num red">{high_tick}</div>
-        <div class="metric-lbl">High Priority</div>
+      <div class="metric-node" style="--metric-bar:linear-gradient(90deg,transparent,var(--neon-red),transparent);">
+        <div class="metric-num r">{high_tick}</div>
+        <div class="metric-lbl">HIGH PRIORITY</div>
       </div>
     </div>""", unsafe_allow_html=True)
 
     t1, t2, t3, t4, t5 = st.tabs([
-        "🎫 Tickets", "👥 Customers", "📡 Outages", "🔌 New Requests", "⚙️ Manage",
+        "◈ Tickets", "⬡ Customers", "▲ Outages", "✦ Requests", "⬢ Manage",
     ])
 
     with t1:
-        st.markdown("<div class='sec-hdr'>All Tickets</div>", unsafe_allow_html=True)
+        st.markdown('<div class="sec-hdr">ALL SUPPORT TICKETS</div>', unsafe_allow_html=True)
         c.execute("SELECT * FROM tickets ORDER BY created_at DESC")
         for row in c.fetchall():
             tid, tphone, issue, priority, sentiment, tech, status, created = row
             card_cls = "resolved" if status == "Resolved" else priority.lower()
             st.markdown(f"""
-            <div class="ticket-card {card_cls}">
-              <div class="ticket-hdr">
-                <div style="display:flex;gap:10px;">
+            <div class="ticket-node {card_cls}">
+              <div class="ticket-header">
+                <div style="display:flex;gap:12px;align-items:center;">
                   <span class="ticket-id">{htmllib.escape(tid)}</span>
                   <span class="ticket-id">📱 {htmllib.escape(tphone)}</span>
                 </div>
-                <span class="ticket-status {'s-resolved' if status=='Resolved' else 's-open'}">{htmllib.escape(status)}</span>
+                <span class="ticket-status-badge {'s-resolved' if status=='Resolved' else 's-open'}">{htmllib.escape(status)}</span>
               </div>
-              <div class="ticket-issue">{htmllib.escape(issue)}</div>
-              <div class="ticket-meta">
+              <div class="ticket-title">{htmllib.escape(issue)}</div>
+              <div class="ticket-tags">
                 {pri_tag(priority)} {sent_tag(sentiment)}
-                <span class="tag tag-sent">🔧 {htmllib.escape(tech)}</span>
-                <span class="tag tag-sent">🕐 {htmllib.escape(created)}</span>
+                <span class="t-tag t-info">⬡ {htmllib.escape(tech)}</span>
+                <span class="t-tag t-info">◈ {htmllib.escape(created)}</span>
               </div>
             </div>""", unsafe_allow_html=True)
 
     with t2:
-        st.markdown("<div class='sec-hdr'>Registered Customers</div>", unsafe_allow_html=True)
+        st.markdown('<div class="sec-hdr">REGISTERED CUSTOMERS</div>', unsafe_allow_html=True)
         c.execute("SELECT name,phone,package,area FROM customers")
         rows = c.fetchall()
         if rows:
@@ -1884,45 +2822,44 @@ elif st.session_state.screen == "admin":
                 use_container_width=True, hide_index=True
             )
         else:
-            st.info("No customers found.")
+            st.info("No customer records.")
 
     with t3:
-        st.markdown("<div class='sec-hdr'>Active Outages</div>", unsafe_allow_html=True)
+        st.markdown('<div class="sec-hdr">NETWORK STATUS</div>', unsafe_allow_html=True)
         c.execute("SELECT * FROM outages")
         for area_n, status_n, fix_n in c.fetchall():
-            color = "#f87171" if status_n == "DOWN" else "#4ade80"
+            accent = "var(--neon-red)" if status_n == "DOWN" else "var(--neon-green)"
             st.markdown(f"""
-            <div style="background:#0a1120;border:1px solid rgba(14,165,233,.08);border-radius:12px;
-                 padding:14px 18px;margin-bottom:8px;border-left:3px solid {color};">
-              <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="ticket-node {'high' if status_n=='DOWN' else 'low'}">
+              <div class="ticket-header">
                 <div>
-                  <div style="font-size:14px;font-weight:700;color:#e2e8f0;">📍 {htmllib.escape(area_n)}</div>
-                  <div style="font-size:11px;color:#334155;font-family:monospace;margin-top:3px;">
-                    Fix ETA: {htmllib.escape(fix_n)}
-                  </div>
+                  <div class="ticket-title" style="font-size:14px;">📍 {htmllib.escape(area_n)}</div>
+                  <span class="ticket-id">ETA · {htmllib.escape(fix_n)}</span>
                 </div>
-                <span style="font-size:11px;font-weight:700;padding:4px 14px;border-radius:16px;
-                  background:{'rgba(248,113,113,.08)' if status_n=='DOWN' else 'rgba(74,222,128,.07)'};
-                  color:{color};font-family:monospace;border:1px solid {color+'44'};">{htmllib.escape(status_n)}</span>
+                <span style="font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;
+                  padding:4px 14px;border-radius:10px;letter-spacing:0.15em;
+                  color:{accent};background:transparent;border:1px solid {accent};opacity:0.8;">
+                  {htmllib.escape(status_n)}
+                </span>
               </div>
             </div>""", unsafe_allow_html=True)
 
-        st.markdown("<div class='sec-hdr'>Add / Update Outage</div>", unsafe_allow_html=True)
+        st.markdown('<div class="sec-hdr">ADD / UPDATE OUTAGE</div>', unsafe_allow_html=True)
         with st.form("add_outage"):
-            oa = st.text_input("Area",                placeholder="e.g. Karachi - DHA")
-            os = st.selectbox("Status",               ["DOWN","ACTIVE"])
-            of = st.text_input("Expected Fix Time",   placeholder="e.g. 3 Hours")
-            if st.form_submit_button("💾 Save Outage"):
+            oa = st.text_input("Area", placeholder="Karachi - DHA")
+            os = st.selectbox("Status", ["DOWN","ACTIVE"])
+            of = st.text_input("Expected Fix Time", placeholder="3 Hours")
+            if st.form_submit_button("◈  SAVE OUTAGE  →", use_container_width=True):
                 db().execute(
                     "INSERT OR REPLACE INTO outages(area,status,expected_fix_time) VALUES(?,?,?)",
                     (oa, os, of)
                 )
                 conn.commit()
-                st.success(f"Outage for {oa} saved.")
+                st.success(f"✓ Outage record saved for {oa}.")
                 st.rerun()
 
     with t4:
-        st.markdown("<div class='sec-hdr'>New Connection Requests</div>", unsafe_allow_html=True)
+        st.markdown('<div class="sec-hdr">NEW CONNECTION REQUESTS</div>', unsafe_allow_html=True)
         c.execute("SELECT name,phone,area,package,created_at FROM new_connection_requests ORDER BY created_at DESC")
         rows = c.fetchall()
         if rows:
@@ -1932,20 +2869,20 @@ elif st.session_state.screen == "admin":
                 use_container_width=True, hide_index=True
             )
         else:
-            st.info("No new requests yet.")
+            st.info("◈ No pending requests.")
 
     with t5:
-        st.markdown("<div class='sec-hdr'>Resolve a Ticket</div>", unsafe_allow_html=True)
+        st.markdown('<div class="sec-hdr">RESOLVE TICKET</div>', unsafe_allow_html=True)
         with st.form("resolve_form"):
             tid_input = st.text_input("Ticket ID", placeholder="FIB-2026-XXXX")
-            if st.form_submit_button("✓ Mark as Resolved"):
+            if st.form_submit_button("✓  MARK RESOLVED  →", use_container_width=True):
                 db().execute("UPDATE tickets SET status='Resolved' WHERE ticket_id=?", (tid_input,))
                 conn.commit()
-                st.success(f"Ticket {tid_input} resolved.")
+                st.success(f"✓ Ticket {tid_input} resolved.")
                 st.rerun()
 
-        st.markdown("<div class='sec-hdr'>API Key</div>", unsafe_allow_html=True)
+        st.markdown('<div class="sec-hdr">API CONFIGURATION</div>', unsafe_allow_html=True)
         new_key = st.text_input("Groq API Key", value=st.session_state.api_key, type="password")
-        if st.button("💾 Update Key"):
+        if st.button("◈  UPDATE KEY  →"):
             st.session_state.api_key = new_key
-            st.success("API key updated.")
+            st.success("✓ API key updated.")
