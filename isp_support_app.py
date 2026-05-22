@@ -535,9 +535,11 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
 .metric-num.blue { color: #0ea5e9; }
 
 /* ══════ STREAMLIT OVERRIDES ══════ */
-.stTextInput > div > div > input,
-.stTextArea > div > div > textarea,
-.stSelectbox > div > div > div {
+/* ══════ STREAMLIT INPUTS ══════ */
+
+/* TEXT INPUTS */
+.stTextInput input,
+.stTextArea textarea {
     background: #0f172a !important;
     border: 2px solid rgba(14,165,233,0.25) !important;
     border-radius: 14px !important;
@@ -546,11 +548,58 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
     padding: 14px 18px !important;
     font-size: 15px !important;
 }
-.stTextInput > div > div > input:focus,
-.stTextArea > div > div > textarea:focus {
+
+/* INPUT FOCUS */
+.stTextInput input:focus,
+.stTextArea textarea:focus {
     border-color: #0ea5e9 !important;
     box-shadow: 0 0 0 4px rgba(14,165,233,0.18) !important;
 }
+
+/* SELECTBOX FIX */
+div[data-baseweb="select"] > div {
+    background: #0f172a !important;
+    border: 2px solid rgba(14,165,233,0.25) !important;
+    border-radius: 14px !important;
+    min-height: 52px !important;
+    display: flex !important;
+    align-items: center !important;
+    padding-left: 8px !important;
+}
+
+/* SELECTED TEXT */
+div[data-baseweb="select"] span {
+    color: #f1f5f9 !important;
+    font-size: 15px !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* PLACEHOLDER */
+div[data-baseweb="select"] input {
+    color: #f1f5f9 !important;
+    font-size: 15px !important;
+}
+
+/* DROPDOWN MENU */
+ul[role="listbox"] {
+    background: #0f172a !important;
+    border: 1px solid rgba(14,165,233,0.25) !important;
+    border-radius: 12px !important;
+}
+
+/* OPTIONS */
+ul[role="listbox"] li {
+    color: #f1f5f9 !important;
+    background: transparent !important;
+    padding: 10px 14px !important;
+}
+
+/* OPTION HOVER */
+ul[role="listbox"] li:hover {
+    background: rgba(14,165,233,0.15) !important;
+}
+
+/* LABELS */
 label {
     color: #94a3b8 !important;
     font-size: 13px !important;
@@ -560,67 +609,7 @@ label {
     font-family: 'JetBrains Mono', monospace !important;
     margin-bottom: 8px !important;
 }
-.stButton > button {
-    background: linear-gradient(135deg, #0ea5e9, #3b82f6) !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 14px !important;
-    font-family: 'Inter', sans-serif !important;
-    font-weight: 700 !important;
-    font-size: 16px !important;
-    padding: 14px 32px !important;
-    transition: all 0.3s !important;
-    width: 100% !important;
-    box-shadow: 0 4px 16px rgba(14,165,233,0.3) !important;
-}
-.stButton > button:hover {
-    transform: translateY(-3px) !important;
-    box-shadow: 0 10px 36px rgba(14,165,233,0.4) !important;
-}
-.stTabs [data-baseweb="tab-list"] {
-    background: #0f172a;
-    border-bottom: 2px solid rgba(14,165,233,0.2);
-    gap: 0;
-    border-radius: 0;
-}
-.stTabs [data-baseweb="tab"] {
-    background: transparent;
-    color: #64748b !important;
-    font-family: 'Inter', sans-serif !important;
-    font-weight: 700 !important;
-    font-size: 15px !important;
-    border-bottom: 3px solid transparent !important;
-    padding: 16px 28px !important;
-}
-.stTabs [aria-selected="true"] {
-    color: #0ea5e9 !important;
-    border-bottom-color: #0ea5e9 !important;
-    background: transparent !important;
-}
-div[data-testid="stChatMessageContent"] {
-    background: transparent !important;
-}
-div[data-testid="stChatMessage"] {
-    padding: 14px 0 !important;
-}
-.stSuccess {
-    background: rgba(74,222,128,0.1) !important;
-    border: 1px solid rgba(74,222,128,0.3) !important;
-    color: #4ade80 !important;
-    border-radius: 12px !important;
-}
-.stError {
-    background: rgba(248,113,113,0.1) !important;
-    border: 1px solid rgba(248,113,113,0.3) !important;
-    color: #f87171 !important;
-    border-radius: 12px !important;
-}
-.stInfo {
-    background: rgba(14,165,233,0.1) !important;
-    border: 1px solid rgba(14,165,233,0.3) !important;
-    color: #7dd3fc !important;
-    border-radius: 12px !important;
-}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -1066,58 +1055,114 @@ elif st.session_state.screen == "customer_login":
 
 # NEW CUSTOMER REGISTRATION (NO OTP)
 elif st.session_state.screen == "new_customer_register":
-    _, col, _ = st.columns([1,2,1])
+
+    _, col, _ = st.columns([1, 2, 1])
+
     with col:
+
         st.markdown("""
         <div class="form-box">
-          <div class="form-title">🆕 New Customer Registration</div>
-          <div class="form-sub">Complete your profile to start using FiberISP services</div>
+            <div class="form-title">🆕 New Customer Registration</div>
+            <div class="form-sub">
+                Complete your profile to start using FiberISP services
+            </div>
         </div>
         """, unsafe_allow_html=True)
-        
-       with st.form("new_cust_form")
-    name = st.text_input("Full Name", placeholder="Type your full name here")
-    phone = st.text_input("Phone Number", placeholder="Type your number")
-    area = st.selectbox("Select Your Area", PAKISTAN_LOCATIONS, index=None, placeholder="Choose your area")
-    submit = st.form_submit_button("✅ Register")
-    
-    if submit:
-        if name.strip() and phone.strip() and area is not None:
-            
-        else:
-            st.error("⚠️ Please fill all fields and select a valid area.")
-            
+
+        # FORM
+        with st.form("new_cust_form"):
+
+            name = st.text_input(
+                "FULL NAME",
+                placeholder="e.g. Muhammad Ali"
+            )
+
+            phone = st.text_input(
+                "PHONE NUMBER",
+                placeholder="03001234567"
+            )
+
+            area = st.selectbox(
+                "YOUR AREA",
+                PAKISTAN_LOCATIONS,
+                index=None,
+                placeholder="Choose your area"
+            )
+
+            submit = st.form_submit_button("✅ Create Account")
+
             if submit:
-                if name.strip() and phone.strip() and area != "-- Select your area --":
+
+                if name.strip() and phone.strip() and area is not None:
+
                     c = db()
+
                     try:
-                        c.execute("INSERT INTO customers(name, phone, package, area) VALUES(?,?,?,?)",
-                                  (name.strip(), phone.strip(), "No Package", area))
+                        c.execute(
+                            """
+                            INSERT INTO customers(name, phone, package, area)
+                            VALUES(?,?,?,?)
+                            """,
+                            (
+                                name.strip(),
+                                phone.strip(),
+                                "No Package",
+                                area
+                            )
+                        )
+
                         conn.commit()
+
                         st.session_state.phone = phone.strip()
-                        st.session_state.customer = {"name": name.strip(), "package": "No Package", "area": area}
+
+                        st.session_state.customer = {
+                            "name": name.strip(),
+                            "package": "No Package",
+                            "area": area
+                        }
+
                         st.session_state.customer_type = "New Customer"
                         st.session_state.bill_info = "No billing record"
-                        c.execute("SELECT status, expected_fix_time FROM outages WHERE area=?", (area,))
+
+                        c.execute(
+                            """
+                            SELECT status, expected_fix_time
+                            FROM outages
+                            WHERE area=?
+                            """,
+                            (area,)
+                        )
+
                         out = c.fetchone()
+
                         if out:
                             st.session_state.network_status = out[0]
                             st.session_state.fix_time = out[1]
+
                         st.session_state.history_text = "No previous tickets."
                         st.session_state.first_message_sent = False
                         st.session_state.chat = []
-                        st.success("✅ Registration successful! Welcome to FiberISP!")
+
+                        st.success(
+                            "✅ Registration successful! Welcome to FiberISP!"
+                        )
+
                         st.session_state.screen = "customer_dashboard"
                         st.rerun()
+
                     except sqlite3.IntegrityError:
-                        st.error("❌ This phone number is already registered. Please login instead.")
+                        st.error(
+                            "❌ This phone number is already registered."
+                        )
+
                 else:
-                    st.error("⚠️ Please fill all fields and select a valid area.")
-        
+                    st.error(
+                        "⚠️ Please fill all fields and select a valid area."
+                    )
+
         if st.button("← Back", key="back_new_reg"):
             st.session_state.screen = "welcome"
             st.rerun()
-
 # ADMIN LOGIN
 elif st.session_state.screen == "admin_login":
     _, col, _ = st.columns([1,2,1])
