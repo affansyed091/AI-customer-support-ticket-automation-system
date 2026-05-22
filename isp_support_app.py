@@ -901,11 +901,66 @@ def process_ticket(llm, phone, customer_type, name, current_package,
                 st.session_state.fix_time = out[1]
             result["record_updated"] = {"field":"area","value":new_val}
         elif action == "update_package" and new_val:
-            db().execute("UPDATE customers SET package=? WHERE phone=?", (new_val, phone))
-            conn.commit()
-            if st.session_state.customer:
-                st.session_state.customer["package"] = new_val
-            result["record_updated"] = {"field":"package","value":new_val}
+
+    # PLAN PRICE MAPPING
+    package_prices = {
+        "Basic Home": 2000,
+        "Gaming Pro": 4000,
+        "Ultra Fiber": 6500,
+        "Extreme Fiber": 9000
+    }
+
+    # GET NEW PLAN PRICE
+    new_amount = package_prices.get(new_val, 0)
+
+    # UPDATE CUSTOMER PACKAGE
+    db().execute(
+        "UPDATE customers SET package=? WHERE phone=?",
+        (new_val, phone)
+    )
+
+    # NEW DUE DATE
+    new_due_date = (
+        datetime.date.today() + datetime.timedelta(days=30)
+    ).isoformat()
+
+    # UPDATE / CREATE BILL
+    db().execute("""
+        INSERT OR REPLACE INTO bills(
+            customer_phone,
+            amount,
+            due_date
+        )
+        VALUES(?,?,?)
+    """, (
+        phone,
+        new_amount,
+        new_due_date
+    ))
+
+    conn.commit()
+
+    # UPDATE SESSION STATE
+    if st.session_state.customer:
+        st.session_state.customer["package"] = new_val
+
+    # UPDATE BILL INFO ON DASHBOARD
+    st.session_state.bill_info = (
+        f"PKR {new_amount:,}, Due: {new_due_date}"
+    )
+
+    # SHOW BILL IN AI CHAT
+    result["bill_data"] = {
+        "amount": new_amount,
+        "due_date": new_due_date,
+        "overdue": False
+    }
+
+    # SHOW SUCCESS MESSAGE
+    result["record_updated"] = {
+        "field": "package",
+        "value": new_val
+    }
         
         # Process data display
         show = result.get("show_records", "none")
