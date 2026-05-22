@@ -300,24 +300,9 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
     overflow-y: auto;
     padding: 20px;
     margin-bottom: 20px;
-    background: linear-gradient(135deg, rgba(15,23,42,0.5) 0%, rgba(30,41,59,0.5) 100%);
+    background: linear-gradient(135deg, rgba(15,23,42,0.3) 0%, rgba(30,41,59,0.3) 100%);
     border-radius: 20px;
-    border: 2px solid rgba(14,165,233,0.2);
-    box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
-}
-.chat-container::-webkit-scrollbar {
-    width: 8px;
-}
-.chat-container::-webkit-scrollbar-track {
-    background: rgba(15,23,42,0.5);
-    border-radius: 10px;
-}
-.chat-container::-webkit-scrollbar-thumb {
-    background: rgba(14,165,233,0.5);
-    border-radius: 10px;
-}
-.chat-container::-webkit-scrollbar-thumb:hover {
-    background: rgba(14,165,233,0.7);
+    border: 1px solid rgba(14,165,233,0.15);
 }
 .chat-message {
     margin-bottom: 24px;
@@ -405,38 +390,36 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
 
 /* ══════ RECORD DISPLAY TABLE ══════ */
 .record-table {
-    background: rgba(15,23,42,0.8);
-    border: 2px solid rgba(14,165,233,0.3);
-    border-radius: 16px;
+    background: rgba(15,23,42,0.6);
+    border: 1px solid rgba(14,165,233,0.2);
+    border-radius: 14px;
     margin: 16px 0;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(14,165,233,0.15);
 }
 .record-row {
     display: flex;
-    padding: 16px 24px;
-    border-bottom: 1px solid rgba(14,165,233,0.15);
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(14,165,233,0.1);
     transition: background 0.2s;
-    align-items: center;
 }
 .record-row:hover {
-    background: rgba(14,165,233,0.08);
+    background: rgba(14,165,233,0.05);
 }
 .record-row:last-child {
     border-bottom: none;
 }
 .record-label {
-    flex: 0 0 180px;
+    flex: 0 0 160px;
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 700;
     color: #64748b;
     font-family: 'JetBrains Mono', monospace;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.05em;
 }
 .record-value {
     flex: 1;
-    font-size: 16px;
+    font-size: 15px;
     color: #f1f5f9;
     font-weight: 600;
 }
@@ -696,25 +679,6 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
 .metric-num.green { color: #4ade80; }
 .metric-num.blue { color: #0ea5e9; }
 
-/* ══════ SUCCESS NOTIFICATION ══════ */
-.success-notification {
-    margin-top: 16px;
-    padding: 14px 20px;
-    background: rgba(74,222,128,0.12);
-    border: 2px solid rgba(74,222,128,0.3);
-    border-radius: 14px;
-    color: #4ade80;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    animation: slideIn 0.4s ease-out;
-}
-@keyframes slideIn {
-    from { transform: translateY(-10px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
 /* ══════ STREAMLIT COMPONENT OVERRIDES ══════ */
 .stTextInput > div > div > input,
 .stTextArea > div > div > textarea,
@@ -802,6 +766,14 @@ div[data-testid="stChatMessage"] {
     border: 1px solid rgba(14,165,233,0.3) !important;
     color: #7dd3fc !important;
     border-radius: 12px !important;
+}
+
+/* Hide Streamlit default chat styling */
+.stChatFloatingInputContainer {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    border: 2px solid rgba(14,165,233,0.25) !important;
+    border-radius: 18px !important;
+    padding: 8px !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -901,8 +873,6 @@ def get_db():
     )""")
     
     c.execute("""CREATE TABLE IF NOT EXISTS new_connection_requests (
-        id INTEGER PRIMARY KEY
-        c.execute("""CREATE TABLE IF NOT EXISTS new_connection_requests (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
         phone TEXT,
@@ -951,10 +921,10 @@ def get_llm(api_key):
     )
 
 PLANS = """
- Basic Home     25 Mbps   PKR 2,000/month
- Gaming Pro     100 Mbps PKR 4,000/month
- Ultra Fiber   250 Mbps PKR 6,500/month
- Extreme Fiber  500 Mbps  PKR 9,000/month
+• Basic Home    → 25 Mbps  → PKR 2,000/month
+• Gaming Pro    → 100 Mbps → PKR 4,000/month
+• Ultra Fiber   → 250 Mbps → PKR 6,500/month
+• Extreme Fiber → 500 Mbps → PKR 9,000/month
 """
 
 PROMPT_TEMPLATE = PromptTemplate(
@@ -1182,7 +1152,7 @@ def render_custom_chat(chat_list, customer_info):
                 
                 # Show name update confirmation
                 if r.get("name_updated"):
-                    reply_text += f'<div class="success-notification">✓ Name successfully updated to: <strong>{htmllib.escape(r["new_name"])}</strong></div>'
+                    reply_text += f'<div style="margin-top:12px;padding:12px;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.3);border-radius:12px;color:#4ade80;font-weight:600;">✓ Name successfully updated to: {htmllib.escape(r["new_name"])}</div>'
                 
                 chat_html += f"""
                 <div class="chat-message assistant">
@@ -1701,64 +1671,389 @@ elif st.session_state.screen == "customer_dashboard":
         else:
             st.info("📋 No support tickets found.")
     
-       # ══════ TAB 4: UPGRADE PLAN ══════
+    # ══════ TAB 4: UPGRADE PLAN ══════
     with tab4:
         st.markdown(f"""
-        <div style="background:linear-gradient(135deg,#0f172a,#1e293b);
-                    border:2px solid rgba(14,165,233,.25);
-                    border-radius:20px;
-                    padding:28px 32px;
-                    margin-bottom:24px;">
-          <div style="font-size:24px;
-                      font-weight:800;
-                      color:#f1f5f9;
-                      margin-bottom:10px;">
-            📶 Upgrade Your Internet Plan
+        <div style="background:linear-gradient(135deg,#0f172a,#1e293b);border:2px solid rgba(14,165,233,.25);border-radius:20px;padding:28px 32px;margin-bottom:24px;">
+          <div style="font-size:22px;font-weight:800;color:#f1f5f9;margin-bottom:8px;">📶 Upgrade Your Internet Plan</div>
+          <div style="font-size:15px;color:#94a3b8;">
+            Current plan: <strong style="color:#0ea5e9;">{htmllib.escape(cust["package"])}</strong><br>
+            Select a new plan below to upgrade your connection speed
           </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        up_cols = st.columns(4)
+        for i, (pname, speed, price) in enumerate(plans_data):
+            with up_cols[i]:
+                is_current = pname in cust["package"]
+                border = "border-color:#0ea5e9;box-shadow:0 0 30px rgba(14,165,233,0.2);" if is_current else ""
+                current_badge = '<div style="font-size:11px;color:#0ea5e9;font-family:monospace;margin-top:10px;font-weight:800;">✓ CURRENT PLAN</div>' if is_current else ""
+                
+                st.markdown(f"""
+                <div class="plan-card" style="{border}">
+                  <div class="plan-name">{pname}</div>
+                  <div class="plan-speed">{speed}</div>
+                  <div class="plan-price">{price}</div>
+                  <div class="plan-per">/month</div>
+                  {current_badge}
+                </div>
+                """, unsafe_allow_html=True)
+                
+                if not is_current:
+                    if st.button(f"⬆️ Upgrade", key=f"up_{i}"):
+                        upgrade_msg = f"I want to upgrade my plan from {cust['package']} to {pname} ({speed}, {price}/month)"
+                        st.session_state.chat.append({"role": "user", "text": upgrade_msg})
+                        
+                        with st.spinner("🤖 Processing upgrade request..."):
+                            is_first = not st.session_state.first_message_sent
+                            result, err = process_ticket(
+                                llm, phone,
+)
+                        with st.spinner("🤖 Processing upgrade request..."):
+                            is_first = not st.session_state.first_message_sent
+                            result, err = process_ticket(
+                                llm, phone,
+                                st.session_state.customer_type,
+                                cust["name"], cust["package"], cust["area"],
+                                st.session_state.network_status, st.session_state.fix_time,
+                                st.session_state.bill_info, st.session_state.history_text,
+                                upgrade_msg, is_first, "upgrade"
+                            )
+                            st.session_state.first_message_sent = True
+                        
+                        if result:
+                            # Actually update the plan in DB
+                            c = db()
+                            c.execute("UPDATE customers SET package=? WHERE phone=?", (pname, phone))
+                            conn.commit()
+                            st.session_state.customer["package"] = pname
+                            st.session_state.chat.append({"role": "ai", "result": result})
+                        else:
+                            st.session_state.chat.append({"role": "ai", "error": err})
+                        st.rerun()
+                else:
+                    st.markdown('<div style="text-align:center;margin-top:12px;font-size:13px;color:#0ea5e9;font-weight:700;">Active Plan</div>', unsafe_allow_html=True)
 
-          <div style="font-size:15px;
-                      color:#94a3b8;
-                      line-height:1.7;">
-            Current Package:
-            <strong style="color:#0ea5e9;">
-                {cust["package"]}
-            </strong>
+# ╔═══════════════════════════════════════════════════════════════╗
+# ║ SCREEN: ADMIN PANEL                                           ║
+# ╚═══════════════════════════════════════════════════════════════╝
+elif st.session_state.screen == "admin_panel":
+    # Admin password check
+    if "admin_authenticated" not in st.session_state:
+        st.session_state.admin_authenticated = False
+
+    if not st.session_state.admin_authenticated:
+        _, col, _ = st.columns([1, 2, 1])
+        with col:
+            st.markdown("""
+            <div class="form-box">
+              <div class="form-title">🔐 Admin Access</div>
+              <div class="form-sub">Enter administrator credentials to access the management panel</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            admin_pass = st.text_input("Admin Password", type="password", placeholder="Enter password")
+            
+            c1, c2 = st.columns(2)
+            with c1:
+                if st.button("✓ Login", key="admin_login_btn"):
+                    if admin_pass == "admin123":
+                        st.session_state.admin_authenticated = True
+                        st.rerun()
+                    else:
+                        st.error("❌ Incorrect password.")
+            with c2:
+                if st.button("← Back", key="back_admin"):
+                    st.session_state.screen = "welcome"
+                    st.rerun()
+    else:
+        # Admin is authenticated - show full panel
+        col_hdr, col_logout = st.columns([5, 1])
+        with col_logout:
+            if st.button("🚪 Logout", key="admin_logout"):
+                st.session_state.admin_authenticated = False
+                st.session_state.screen = "welcome"
+                st.rerun()
+
+        # Pull live stats
+        c = db()
+        c.execute("SELECT COUNT(*) FROM customers")
+        total_customers = c.fetchone()[0]
+
+        c.execute("SELECT COUNT(*) FROM tickets WHERE status='Open'")
+        open_tickets = c.fetchone()[0]
+
+        c.execute("SELECT COUNT(*) FROM tickets WHERE priority='High' AND status='Open'")
+        high_priority = c.fetchone()[0]
+
+        c.execute("SELECT COUNT(*) FROM new_connection_requests")
+        new_requests = c.fetchone()[0]
+
+        # Metric cards
+        st.markdown(f"""
+        <div class="metric-grid">
+          <div class="metric-card">
+            <div class="metric-num blue">{total_customers}</div>
+            <div class="metric-lbl">Total Customers</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-num yellow">{open_tickets}</div>
+            <div class="metric-lbl">Open Tickets</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-num red">{high_priority}</div>
+            <div class="metric-lbl">High Priority</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-num green">{new_requests}</div>
+            <div class="metric-lbl">New Requests</div>
           </div>
         </div>
         """, unsafe_allow_html=True)
 
-        upgrade_cols = st.columns(4)
+        # Admin tabs
+        atab1, atab2, atab3, atab4, atab5 = st.tabs([
+            "👥  Customers",
+            "🎫  All Tickets",
+            "📡  Outages",
+            "📋  New Requests",
+            "💳  Billing"
+        ])
 
-        upgrade_plans = [
-            ("Basic Home", "25 Mbps", "PKR 2,000"),
-            ("Gaming Pro", "100 Mbps", "PKR 4,000"),
-            ("Ultra Fiber", "250 Mbps", "PKR 6,500"),
-            ("Extreme Fiber", "500 Mbps", "PKR 9,000"),
-        ]
+        # ── Admin Tab 1: Customers ──
+        with atab1:
+            st.markdown("<div class='sec-hdr'>All Registered Customers</div>", unsafe_allow_html=True)
+            c.execute("SELECT id, name, phone, package, area FROM customers ORDER BY id DESC")
+            rows = c.fetchall()
+            if rows:
+                for cid, cname, cphone, cpkg, carea in rows:
+                    st.markdown(f"""
+                    <div class="ticket-card" style="border-left-color:#0ea5e9;">
+                      <div class="ticket-hdr">
+                        <span class="ticket-id">ID #{cid} — {htmllib.escape(cphone)}</span>
+                        <span class="ticket-status s-open">Active</span>
+                      </div>
+                      <div class="ticket-issue">{htmllib.escape(cname)}</div>
+                      <div class="ticket-meta">
+                        <span class="tag tag-tech">📦 {htmllib.escape(cpkg)}</span>
+                        <span class="tag tag-cat">📍 {htmllib.escape(carea)}</span>
+                      </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.info("No customers registered yet.")
 
-        for i, (pname, speed, price) in enumerate(upgrade_plans):
-            with upgrade_cols[i]:
-                st.markdown(f"""
-                <div class="plan-card">
-                    <div class="plan-name">{pname}</div>
-                    <div class="plan-speed">{speed}</div>
-                    <div class="plan-price">{price}</div>
-                    <div class="plan-per">/month</div>
-                </div>
-                """, unsafe_allow_html=True)
+            st.markdown("<div class='sec-hdr'>Add New Customer</div>", unsafe_allow_html=True)
+            with st.form("add_cust_form"):
+                ac_name = st.text_input("Full Name")
+                ac_phone = st.text_input("Phone Number")
+                ac_pkg = st.selectbox("Package", ["Basic Home 25Mbps", "Gaming Pro 100Mbps", "Ultra Fiber 250Mbps", "Extreme Fiber 500Mbps"])
+                ac_area = st.selectbox("Area", PAKISTAN_LOCATIONS)
+                if st.form_submit_button("➕ Add Customer"):
+                    if ac_name.strip() and ac_phone.strip():
+                        try:
+                            c.execute("INSERT INTO customers(name,phone,package,area) VALUES(?,?,?,?)",
+                                      (ac_name.strip(), ac_phone.strip(), ac_pkg, ac_area))
+                            conn.commit()
+                            st.success(f"✅ Customer {ac_name} added successfully.")
+                            st.rerun()
+                        except sqlite3.IntegrityError:
+                            st.error("❌ Phone number already exists.")
+                    else:
+                        st.error("⚠️ Name and phone are required.")
 
-                if st.button(f"Upgrade to {pname}", key=f"upgrade_{i}"):
+        # ── Admin Tab 2: All Tickets ──
+        with atab2:
+            st.markdown("<div class='sec-hdr'>All Support Tickets</div>", unsafe_allow_html=True)
+            
+            col_f1, col_f2 = st.columns(2)
+            with col_f1:
+                filter_status = st.selectbox("Filter by Status", ["All", "Open", "Resolved"])
+            with col_f2:
+                filter_priority = st.selectbox("Filter by Priority", ["All", "High", "Medium", "Low"])
 
-                    c = db()
+            query = "SELECT ticket_id, customer_phone, issue, priority, sentiment, technician, status, created_at FROM tickets"
+            conditions = []
+            params = []
+            if filter_status != "All":
+                conditions.append("status=?")
+                params.append(filter_status)
+            if filter_priority != "All":
+                conditions.append("priority=?")
+                params.append(filter_priority)
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
+            query += " ORDER BY created_at DESC"
 
-                    c.execute(
-                        "UPDATE customers SET package=? WHERE phone=?",
-                        (pname, phone)
-                    )
+            c.execute(query, params)
+            tickets = c.fetchall()
 
+            if tickets:
+                for tid, tphone, tissue, tpri, tsent, ttech, tstatus, tcreated in tickets:
+                    card_cls = "resolved" if tstatus == "Resolved" else tpri.lower()
+                    status_cls = "s-resolved" if tstatus == "Resolved" else "s-open"
+                    st.markdown(f"""
+                    <div class="ticket-card {card_cls}">
+                      <div class="ticket-hdr">
+                        <span class="ticket-id">{htmllib.escape(tid)} — {htmllib.escape(tphone)}</span>
+                        <span class="ticket-status {status_cls}">{tstatus}</span>
+                      </div>
+                      <div class="ticket-issue">{htmllib.escape(tissue)}</div>
+                      <div class="ticket-meta">
+                        <span class="tag tag-{tpri.lower()}">{tpri}</span>
+                        <span class="tag tag-tech">🔧 {htmllib.escape(ttech)}</span>
+                        <span class="tag tag-cat">😊 {htmllib.escape(tsent)}</span>
+                        <span class="tag tag-sent">🕐 {htmllib.escape(tcreated)}</span>
+                      </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    # Resolve button
+                    if tstatus == "Open":
+                        if st.button(f"✓ Mark Resolved", key=f"resolve_{tid}"):
+                            c.execute("UPDATE tickets SET status='Resolved' WHERE ticket_id=?", (tid,))
+                            conn.commit()
+                            st.success(f"✅ Ticket {tid} marked as resolved.")
+                            st.rerun()
+            else:
+                st.info("No tickets found matching your filters.")
+
+        # ── Admin Tab 3: Outages ──
+        with atab3:
+            st.markdown("<div class='sec-hdr'>Current Network Outages</div>", unsafe_allow_html=True)
+            c.execute("SELECT area, status, expected_fix_time FROM outages")
+            outages = c.fetchall()
+            if outages:
+                for oarea, ostatus, ofix in outages:
+                    color = "#f87171" if ostatus == "DOWN" else "#4ade80"
+                    st.markdown(f"""
+                    <div class="ticket-card" style="border-left-color:{color};">
+                      <div class="ticket-hdr">
+                        <span class="ticket-id">📍 {htmllib.escape(oarea)}</span>
+                        <span class="ticket-status" style="background:rgba(248,113,113,0.15);color:{color};">{ostatus}</span>
+                      </div>
+                      <div class="ticket-meta">
+                        <span class="tag" style="background:rgba(251,191,36,0.12);color:#fbbf24;">⏱ Fix: {htmllib.escape(ofix)}</span>
+                      </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.success("✅ No active outages reported.")
+
+            st.markdown("<div class='sec-hdr'>Add / Update Outage</div>", unsafe_allow_html=True)
+            with st.form("outage_form"):
+                out_area = st.selectbox("Affected Area", PAKISTAN_LOCATIONS)
+                out_status = st.selectbox("Status", ["DOWN", "DEGRADED", "ACTIVE"])
+                out_fix = st.text_input("Expected Fix Time", placeholder="e.g. 2 Hours")
+                if st.form_submit_button("💾 Save Outage"):
+                    c.execute("INSERT INTO outages(area,status,expected_fix_time) VALUES(?,?,?) ON CONFLICT(area) DO UPDATE SET status=excluded.status, expected_fix_time=excluded.expected_fix_time",
+                              (out_area, out_status, out_fix))
                     conn.commit()
+                    st.success(f"✅ Outage updated for {out_area}.")
+                    st.rerun()
 
-                    st.session_state.customer["package"] = pname
+            st.markdown("<div class='sec-hdr'>Remove Outage</div>", unsafe_allow_html=True)
+            if outages:
+                outage_areas = [o[0] for o in outages]
+                del_area = st.selectbox("Select area to remove", outage_areas, key="del_area")
+                if st.button("🗑️ Remove Outage", key="del_outage"):
+                    c.execute("DELETE FROM outages WHERE area=?", (del_area,))
+                    conn.commit()
+                    st.success(f"✅ Outage removed for {del_area}.")
+                    st.rerun()
 
-                    st.success(f"✅ Successfully upgraded to {pname}")
+        # ── Admin Tab 4: New Connection Requests ──
+        with atab4:
+            st.markdown("<div class='sec-hdr'>New Connection Requests</div>", unsafe_allow_html=True)
+            c.execute("SELECT id, name, phone, area, package, created_at FROM new_connection_requests ORDER BY created_at DESC")
+            reqs = c.fetchall()
+            if reqs:
+                for rid, rname, rphone, rarea, rpkg, rcreated in reqs:
+                    st.markdown(f"""
+                    <div class="ticket-card" style="border-left-color:#8b5cf6;">
+                      <div class="ticket-hdr">
+                        <span class="ticket-id">REQ #{rid} — {htmllib.escape(rphone)}</span>
+                        <span class="ticket-status s-open">Pending</span>
+                      </div>
+                      <div class="ticket-issue">{htmllib.escape(rname)}</div>
+                      <div class="ticket-meta">
+                        <span class="tag tag-tech">📦 {htmllib.escape(rpkg)}</span>
+                        <span class="tag tag-cat">📍 {htmllib.escape(rarea)}</span>
+                        <span class="tag tag-sent">🕐 {htmllib.escape(rcreated)}</span>
+                      </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    col_approve, col_del = st.columns([1, 1])
+                    with col_approve:
+                        if st.button(f"✅ Approve & Create Account", key=f"approve_{rid}"):
+                            try:
+                                c.execute("INSERT INTO customers(name,phone,package,area) VALUES(?,?,?,?)",
+                                          (rname, rphone, rpkg, rarea))
+                                c.execute("DELETE FROM new_connection_requests WHERE id=?", (rid,))
+                                conn.commit()
+                                st.success(f"✅ Account created for {rname}.")
+                                st.rerun()
+                            except sqlite3.IntegrityError:
+                                st.error("❌ Phone number already registered.")
+                    with col_del:
+                        if st.button(f"🗑️ Reject", key=f"reject_{rid}"):
+                            c.execute("DELETE FROM new_connection_requests WHERE id=?", (rid,))
+                            conn.commit()
+                            st.info(f"Request #{rid} rejected and removed.")
+                            st.rerun()
+            else:
+                st.info("📋 No new connection requests.")
+
+        # ── Admin Tab 5: Billing ──
+        with atab5:
+            st.markdown("<div class='sec-hdr'>All Billing Records</div>", unsafe_allow_html=True)
+            c.execute("""
+                SELECT b.customer_phone, cu.name, b.amount, b.due_date
+                FROM bills b
+                LEFT JOIN customers cu ON b.customer_phone = cu.phone
+                ORDER BY b.due_date ASC
+            """)
+            bills = c.fetchall()
+            if bills:
+                today = datetime.date.today()
+                for bphone, bname, bamount, bdue in bills:
+                    try:
+                        due_dt = datetime.date.fromisoformat(bdue)
+                        overdue = today > due_dt
+                    except:
+                        overdue = False
+                    status_color = "#f87171" if overdue else "#4ade80"
+                    status_text = "OVERDUE" if overdue else "CURRENT"
+                    st.markdown(f"""
+                    <div class="ticket-card" style="border-left-color:{status_color};">
+                      <div class="ticket-hdr">
+                        <span class="ticket-id">{htmllib.escape(bphone)} — {htmllib.escape(bname or 'Unknown')}</span>
+                        <span class="ticket-status" style="background:rgba(74,222,128,0.12);color:{status_color};">{status_text}</span>
+                      </div>
+                      <div class="ticket-issue" style="color:#fbbf24;">PKR {bamount:,}</div>
+                      <div class="ticket-meta">
+                        <span class="tag tag-sent">📅 Due: {htmllib.escape(bdue)}</span>
+                      </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.info("💳 No billing records found.")
+
+            st.markdown("<div class='sec-hdr'>Add / Update Bill</div>", unsafe_allow_html=True)
+            with st.form("bill_form"):
+                c.execute("SELECT phone, name FROM customers")
+                cust_list = c.fetchall()
+                cust_options = {f"{cn} ({cp})": cp for cp, cn in cust_list}
+                selected_cust = st.selectbox("Customer", list(cust_options.keys()))
+                bill_amount = st.number_input("Bill Amount (PKR)", min_value=0, step=500, value=2000)
+                bill_due = st.date_input("Due Date")
+                if st.form_submit_button("💾 Save Bill"):
+                    bphone_sel = cust_options[selected_cust]
+                    c.execute("""INSERT INTO bills(customer_phone, amount, due_date) VALUES(?,?,?)
+                                 ON CONFLICT(customer_phone) DO UPDATE SET amount=excluded.amount, due_date=excluded.due_date""",
+                              (bphone_sel, bill_amount, str(bill_due)))
+                    conn.commit()
+                    st.success("✅ Bill saved successfully.")
                     st.rerun()
