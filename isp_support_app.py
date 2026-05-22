@@ -916,3 +916,796 @@ def get_llm(api_key):
     return ChatOpenAI(
         api_key=api_key,
         base_url="https://api.groq.com/openai/v1",
+        model="llama-3.3-70b-versatile",
+        temperature=0.3
+    )
+
+PLANS = """
+• Basic Home    → 25 Mbps  → PKR 2,000/month
+• Gaming Pro    → 100 Mbps → PKR 4,000/month
+• Ultra Fiber   → 250 Mbps → PKR 6,500/month
+• Extreme Fiber → 500 Mbps → PKR 9,000/month
+"""
+
+PROMPT_TEMPLATE = PromptTemplate(
+    input_variables=["customer_type", "name", "current_package", "area",
+                     "network_status", "fix_time", "bill_info", "history_text",
+                     "plans", "message", "is_first_message", "action_type"],
+    template="""
+You are a professional ISP AI support agent for FiberISP, a Pakistani fiber internet provider.
+
+Customer Information:
+- Name: {name} ({customer_type})
+- Package: {current_package}
+- Area: {area}
+- Network Status: {network_status} | Fix Time: {fix_time}
+- Billing: {bill_info}
+- Previous Tickets: {history_text}
+
+Available Plans:
+{plans}
+
+Customer Message: {message}
+
+Action Context: {action_type}
+
+GREETING RULE:
+- is_first_message: {is_first_message}
+- If is_first_message is "yes", start with a warm, professional greeting
+- If is_first_message is "no", DO NOT greet - address their concern directly
+
+RESPONSE GUIDELINES:
+1. Be professional, empathetic, and solution-focused
+2. Keep responses concise but complete (2-5 sentences)
+3. If showing records (bills, account info, tickets), format them clearly using structured data
+4. For account modifications (name changes, plan upgrades), confirm the action and provide details
+5. Detect sentiment: Positive/Neutral/Frustrated/Angry
+6. Assign priority: High (urgent)/Medium (moderate)/Low (simple)
+7. Determine category from message content
+8. Recommend technician for hardware/physical issues
+
+SPECIAL ACTIONS:
+- If customer requests to change their name, extract the new name and set "update_name" field
+- If showing account information, use structured format
+- If showing bills or tickets, use clear tabular format
+- Mention outage only if network_status is DOWN
+
+Return ONLY valid JSON (no markdown, no code blocks):
+{{
+    "category":"",
+    "priority":"",
+    "sentiment":"",
+    "technician_required":"yes or no",
+    "reply":"",
+    "update_name":"" (only if name change requested, otherwise empty),
+    "show_records":"" (bill/account/tickets/none)
+}}
+"""
+)
+
+# ═══════════════════════════════════════════════════════════════
+# HELPER FUNCTIONS
+# ═══════════════════════════════════════════════════════════════
+def gen_ticket_id():
+    return f"FIB-{datetime.datetime.now().year}-{random.randint(1000, 9999)}"
+
+def gen_tech():
+    return f"TECH-{random.randint(100, 999)}"
+
+def format_record_table(data_dict):
+    """Format data as beautiful record table HTML"""
+    rows = ""
+    for label, value in data_dict.items():
+        # Determine value class based on content
+        value_class = "record-value"
+        if "PKR" in str(value) or "Rs" in str(value):
+            value_class += " record-highlight"
+        elif "Paid" in str(value) or "Active" in str(value) or "✓" in str(value):
+            value_class += " record-success"
+        elif "Due" in str(value) or "Overdue" in str(value) or "⚠" in str(value):
+            value_class += " record-warning"
+        elif "Down" in str(value) or "Error" in str(value) or "✗" in str(value):
+            value_class += " record-error"
+            
+        rows += f"""
+        <div class="record-row">
+            <div class="record-label">{htmllib.escape(str(label))}</div>
+            <div class="{value_class}">{htmllib.escape(str(value))}</div>
+        </div>
+        """
+    
+    return f'<div class="record-table">{rows}</div>'
+
+def process_ticket(llm, phone, customer_type, name, current_package,
+                   area, network_status, fix_time, bill_info, history_text,
+                   message, is_first_message=False, action_type="general"):
+    try:
+        prompt_text = PROMPT_TEMPLATE.format(
+            customer_type=customer_type,
+            name=name,
+            current_package=current_package,
+            area=area,
+            network_status=network_status,
+            fix_time=fix_time,
+            bill_info=bill_info,
+            history_text=history_text,
+            plans=PLANS,
+            message=message,
+            is_first_message="yes" if is_first_message else "no",
+            action_type=action_type
+        )
+        
+        response = llm.invoke(prompt_text)
+        raw = response.content.strip().replace("```json", "").replace("```", "").strip()
+        
+        import re
+        m = re.search(r'\{.*\}', raw, re.DOTALL)
+        result = json.loads(m.group(0) if m else raw)
+        
+        # Handle name update
+        if result.get("update_name") and result["update_name"].strip():
+            new_name = result["update_name"].strip()
+            c = db()
+            c.execute("UPDATE customers SET name=? WHERE phone=?", (new_name, phone))
+            conn.commit()
+            result["name_updated"] = True
+            result["new_name"] = new_name
+        
+        ticket_id = gen_ticket_id()
+        technician = gen_tech() if result.get("technician_required", "").lower() == "yes" else "Not Assigned"
+        
+        c = db()
+        c.execute("INSERT INTO tickets VALUES(?,?,?,?,?,?,?,?)", (
+            ticket_id,
+            phone,
+            result.get("category", "General"),
+            result.get("priority", "Medium"),
+            result.get("sentiment", "Neutral"),
+            technician,
+            "Open",
+            datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        ))
+        conn.commit()
+        
+        result["ticket_id"] = ticket_id
+        result["technician"] = technician
+        return result, None
+    except Exception as e:
+        return None, str(e)
+
+def render_custom_chat(chat_list, customer_info):
+    """Render beautiful chat interface with custom styling"""
+    chat_html = '<div class="chat-container">'
+    
+    for msg in chat_list:
+        if msg["role"] == "user":
+            chat_html += f"""
+            <div class="chat-message user">
+                <div class="chat-bubble user">
+                    <div class="chat-text">{htmllib.escape(msg['text'])}</div>
+                </div>
+                <div class="chat-avatar user">👤</div>
+            </div>
+            """
+        elif msg["role"] == "ai":
+            if "error" in msg:
+                chat_html += f"""
+                <div class="chat-message assistant">
+                    <div class="chat-avatar assistant">🤖</div>
+                    <div class="chat-bubble assistant">
+                        <div class="chat-text" style="color:#f87171;">⚠️ Error: {htmllib.escape(msg['error'])}</div>
+                    </div>
+                </div>
+                """
+            else:
+                r = msg["result"]
+                reply_text = r.get("reply", "")
+                
+                # Add record display if requested
+                if r.get("show_records") == "account":
+                    c = db()
+                    c.execute("SELECT name, phone, package, area FROM customers WHERE phone=?", (customer_info["phone"],))
+                    cust = c.fetchone()
+                    if cust:
+                        account_data = {
+                            "Full Name": cust[0],
+                            "Phone Number": cust[1],
+                            "Current Package": cust[2],
+                            "Service Area": cust[3],
+                            "Account Status": "✓ Active"
+                        }
+                        reply_text += format_record_table(account_data)
+                
+                elif r.get("show_records") == "bill":
+                    c = db()
+                    c.execute("SELECT amount, due_date FROM bills WHERE customer_phone=?", (customer_info["phone"],))
+                    bill = c.fetchone()
+                    if bill:
+                        today = datetime.date.today()
+                        try:
+                            due = datetime.date.fromisoformat(bill[1])
+                            status = "⚠ Overdue" if today > due else "✓ Current"
+                        except:
+                            status = "✓ Current"
+                        
+                        bill_data = {
+                            "Bill Amount": f"PKR {bill[0]:,}",
+                            "Due Date": bill[1],
+                            "Status": status,
+                            "Payment Method": "Online/Bank"
+                        }
+                        reply_text += format_record_table(bill_data)
+                
+                elif r.get("show_records") == "tickets":
+                    c = db()
+                    c.execute("SELECT ticket_id, issue, status, created_at FROM tickets WHERE customer_phone=? ORDER BY created_at DESC LIMIT 3", (customer_info["phone"],))
+                    tickets = c.fetchall()
+                    if tickets:
+                        for tid, issue, status, created in tickets:
+                            ticket_data = {
+                                "Ticket ID": tid,
+                                "Issue": issue,
+                                "Status": status,
+                                "Created": created
+                            }
+                            reply_text += format_record_table(ticket_data)
+                
+                # Show name update confirmation
+                if r.get("name_updated"):
+                    reply_text += f'<div style="margin-top:12px;padding:12px;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.3);border-radius:12px;color:#4ade80;font-weight:600;">✓ Name successfully updated to: {htmllib.escape(r["new_name"])}</div>'
+                
+                chat_html += f"""
+                <div class="chat-message assistant">
+                    <div class="chat-avatar assistant">🤖</div>
+                    <div class="chat-bubble assistant">
+                        <div class="chat-text">{reply_text}</div>
+                        <div class="chat-meta">
+                            <span class="chat-badge badge-ticket">🎫 {htmllib.escape(r.get('ticket_id', 'N/A'))}</span>
+                            {f'<span class="chat-badge badge-tech">🔧 {htmllib.escape(r.get("technician", "N/A"))}</span>' if r.get("technician") != "Not Assigned" else ""}
+                        </div>
+                    </div>
+                </div>
+                """
+    
+    chat_html += '</div>'
+    return chat_html
+
+# ═══════════════════════════════════════════════════════════════
+# SESSION STATE INITIALIZATION
+# ═══════════════════════════════════════════════════════════════
+defaults = {
+    "screen": "welcome",
+    "phone": "",
+    "customer": None,
+    "customer_type": "",
+    "bill_info": "",
+    "network_status": "ACTIVE",
+    "fix_time": "N/A",
+    "history_text": "",
+    "chat": [],
+    "api_key": "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",
+    "first_message_sent": False,
+}
+
+for k, v in defaults.items():
+    if k not in st.session_state:
+        st.session_state[k] = v
+
+# ═══════════════════════════════════════════════════════════════
+# TOP BAR (shown on all screens except welcome)
+# ═══════════════════════════════════════════════════════════════
+if st.session_state.screen != "welcome":
+    st.markdown("""
+    <div class="topbar">
+      <div class="topbar-brand">
+        <div class="topbar-icon">🌐</div>
+        <div>
+          <div class="topbar-title">FiberISP</div>
+          <div class="topbar-sub">AI-POWERED CUSTOMER SUPPORT</div>
+        </div>
+      </div>
+      <div class="status-pill"><div class="status-dot"></div> SYSTEM ONLINE</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# ╔═══════════════════════════════════════════════════════════════╗
+# ║ SCREEN: WELCOME                                               ║
+# ╚═══════════════════════════════════════════════════════════════╝
+if st.session_state.screen == "welcome":
+    st.markdown("""
+    <div class="welcome-hero">
+        <div class="welcome-logo">🌐</div>
+        <div class="welcome-title">Welcome to FiberISP</div>
+        <div class="welcome-subtitle">Experience Ultra-Fast Fiber Internet</div>
+        <div class="welcome-tagline">AI-Powered Support • 24/7 Assistance • Lightning Speed</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<div style='text-align:center; margin: 48px 0 28px;'><span style='font-size:18px; color:#94a3b8; font-weight:600;'>Choose your account type to continue</span></div>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 1, 1], gap="large")
+    
+    with col1:
+        st.markdown("""
+        <div class="choice-card">
+          <div class="choice-icon">👤</div>
+          <div class="choice-title">Existing Customer</div>
+          <div class="choice-desc">Login to your account and access full support dashboard</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("🔑 Login", key="btn_existing", use_container_width=True):
+            st.session_state.customer_type = "existing"
+            st.session_state.screen = "customer_login"
+            st.rerun()
+    
+    with col2:
+        st.markdown("""
+        <div class="choice-card">
+          <div class="choice-icon">🆕</div>
+          <div class="choice-title">New Customer</div>
+          <div class="choice-desc">Register for a new connection and get instant support</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("📝 Register", key="btn_new", use_container_width=True):
+            st.session_state.customer_type = "new"
+            st.session_state.screen = "new_customer_register"
+            st.rerun()
+    
+    with col3:
+        st.markdown("""
+        <div class="choice-card">
+          <div class="choice-icon">🛠️</div>
+          <div class="choice-title">Admin Panel</div>
+          <div class="choice-desc">Manage customers, tickets, and system operations</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("🔐 Admin Access", key="btn_admin", use_container_width=True):
+            st.session_state.screen = "admin_panel"
+            st.rerun()
+
+# ╔═══════════════════════════════════════════════════════════════╗
+# ║ SCREEN: CUSTOMER LOGIN (PHONE INPUT - NO OTP)                 ║
+# ╚═══════════════════════════════════════════════════════════════╝
+elif st.session_state.screen == "customer_login":
+    _, col, _ = st.columns([1, 2, 1])
+    with col:
+        st.markdown("""
+        <div class="form-box">
+          <div class="form-title">📱 Customer Login</div>
+          <div class="form-sub">Enter your registered phone number to access your account</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        phone = st.text_input("Phone Number", placeholder="03001234567", key="phone_input")
+        
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("✓ Login", key="do_login"):
+                if phone.strip():
+                    # Check if customer exists
+                    c = db()
+                    c.execute("SELECT name, package, area FROM customers WHERE phone=?", (phone.strip(),))
+                    cust = c.fetchone()
+                    
+                    if cust:
+                        st.session_state.phone = phone.strip()
+                        st.session_state.customer = {
+                            "name": cust[0],
+                            "package": cust[1],
+                            "area": cust[2],
+                            "phone": phone.strip()
+                        }
+                        st.session_state.customer_type = "Existing Customer"
+                        area = cust[2]
+                        
+                        # Load billing info
+                        c.execute("SELECT amount, due_date FROM bills WHERE customer_phone=?", (phone.strip(),))
+                        bill = c.fetchone()
+                        st.session_state.bill_info = f"PKR {bill[0]:,}, Due: {bill[1]}" if bill else "No billing record"
+                        
+                        # Check for outages
+                        if area:
+                            c.execute("SELECT status, expected_fix_time FROM outages WHERE area=?", (area,))
+                            out = c.fetchone()
+                            if out:
+                                st.session_state.network_status = out[0]
+                                st.session_state.fix_time = out[1]
+                        
+                        # Load ticket history
+                        c.execute("SELECT issue FROM tickets WHERE customer_phone=?", (phone.strip(),))
+                        rows = c.fetchall()
+                        st.session_state.history_text = "\n".join([f"- {r[0]}" for r in rows]) if rows else "No previous tickets."
+                        
+                        # Reset first message flag
+                        st.session_state.first_message_sent = False
+                        st.session_state.chat = []
+                        
+                        # Go to dashboard
+                        st.session_state.screen = "customer_dashboard"
+                        st.rerun()
+                    else:
+                        st.error("❌ Phone number not registered. Please register as a new customer.")
+                else:
+                    st.error("⚠️ Please enter a valid phone number.")
+        
+        with c2:
+            if st.button("← Back", key="back_login"):
+                st.session_state.screen = "welcome"
+                st.rerun()
+
+# ╔═══════════════════════════════════════════════════════════════╗
+# ║ SCREEN: NEW CUSTOMER REGISTRATION (NO OTP)                    ║
+# ╚═══════════════════════════════════════════════════════════════╝
+elif st.session_state.screen == "new_customer_register":
+    _, col, _ = st.columns([1, 2, 1])
+    with col:
+        st.markdown("""
+        <div class="form-box">
+          <div class="form-title">🆕 New Customer Registration</div>
+          <div class="form-sub">Complete your profile to start using FiberISP services</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        with st.form("new_cust_form"):
+            name = st.text_input("Full Name", placeholder="e.g. Muhammad Ali")
+            phone = st.text_input("Phone Number", placeholder="03001234567")
+            area = st.selectbox("Select Your Area", PAKISTAN_LOCATIONS)
+            
+            submit = st.form_submit_button("✓ Register & Continue")
+            
+            if submit:
+                if name.strip() and phone.strip():
+                    # Register the customer directly
+                    c = db()
+                    
+                    try:
+                        c.execute("INSERT INTO customers(name, phone, package, area) VALUES(?,?,?,?)",
+                                  (name.strip(), phone.strip(), "No Package", area))
+                        conn.commit()
+                        
+                        # Set session state
+                        st.session_state.phone = phone.strip()
+                        st.session_state.customer = {
+                            "name": name.strip(),
+                            "package": "No Package",
+                            "area": area,
+                            "phone": phone.strip()
+                        }
+                        st.session_state.customer_type = "New Customer"
+                        st.session_state.bill_info = "No billing record"
+                        
+                        # Check for outages
+                        c.execute("SELECT status, expected_fix_time FROM outages WHERE area=?", (area,))
+                        out = c.fetchone()
+                        if out:
+                            st.session_state.network_status = out[0]
+                            st.session_state.fix_time = out[1]
+                        
+                        st.session_state.history_text = "No previous tickets."
+                        st.session_state.first_message_sent = False
+                        st.session_state.chat = []
+                        
+                        st.success("✅ Registration successful! Welcome to FiberISP!")
+                        st.session_state.screen = "customer_dashboard"
+                        st.rerun()
+                    except sqlite3.IntegrityError:
+                        st.error("❌ This phone number is already registered!")
+                else:
+                    st.error("⚠️ Please fill in all required fields.")
+        
+        if st.button("← Back", key="back_new_reg"):
+            st.session_state.screen = "welcome"
+            st.rerun()
+
+# ╔═══════════════════════════════════════════════════════════════╗
+# ║ SCREEN: CUSTOMER DASHBOARD (Main Portal)                      ║
+# ╚═══════════════════════════════════════════════════════════════╝
+elif st.session_state.screen == "customer_dashboard":
+    cust = st.session_state.customer
+    phone = st.session_state.phone
+    llm = get_llm(st.session_state.api_key)
+    
+    # Customer info card with outage warning
+    outage_html = ""
+    if st.session_state.network_status == "DOWN":
+        outage_html = f'''
+        <div class="outage-warn">
+          ⚠️ <strong>Network Outage Detected in {htmllib.escape(cust["area"])}</strong> — 
+          Expected resolution: {htmllib.escape(st.session_state.fix_time)}
+        </div>
+        '''
+    
+    st.markdown(f"""
+    <div class="cust-card">
+      <div class="cust-name">👋 Welcome, {htmllib.escape(cust["name"])}</div>
+      <div class="cust-meta">
+        <div class="cust-chip">📱 <span>{htmllib.escape(phone)}</span></div>
+        <div class="cust-chip">📦 <span>{htmllib.escape(cust["package"])}</span></div>
+        <div class="cust-chip">📍 <span>{htmllib.escape(cust["area"])}</span></div>
+        <div class="cust-chip">💳 <span>{htmllib.escape(st.session_state.bill_info)}</span></div>
+      </div>
+      {outage_html}
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Logout button
+    col_logout, _ = st.columns([1, 5])
+    with col_logout:
+        if st.button("🚪 Logout", key="logout_cust"):
+            for k in defaults:
+                st.session_state[k] = defaults[k]
+            st.rerun()
+    
+    # Main dashboard tabs
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "💬  AI Support Chat",
+        "🆕  New Connection",
+        "💳  My Bill & Tickets",
+        "📶  Upgrade Plan"
+    ])
+    
+    # ══════ TAB 1: AI SUPPORT CHAT ══════
+    with tab1:
+        # AI Assistance Banner
+        st.markdown("""
+        <div class="ai-banner">
+          <div class="ai-banner-title">
+            <span>🤖</span> AI Assistant Ready to Help
+          </div>
+          <div class="ai-banner-sub">
+            Ask anything - check bills, change account details, report issues, or upgrade plans
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<div class='sec-hdr'>Quick Actions — Click for Instant Help</div>", unsafe_allow_html=True)
+        
+        quick_topics = [
+            ("🐌", "Slow internet speed", "troubleshoot"),
+            ("📡", "WiFi not working", "troubleshoot"),
+            ("⛔", "No internet connection", "troubleshoot"),
+            ("💳", "Show my bill details", "bill"),
+            ("👤", "Show my account info", "account"),
+            ("⬆️", "Upgrade my plan", "upgrade"),
+            ("🔁", "Router restart help", "troubleshoot"),
+            ("📶", "Weak signal issue", "troubleshoot"),
+            ("🔧", "Request technician", "technician"),
+            ("📋", "My ticket history", "tickets"),
+        ]
+        
+        # Render quick topic buttons
+        cols = st.columns(5)
+        for i, (icon, label, action) in enumerate(quick_topics):
+            with cols[i % 5]:
+                if st.button(f"{icon} {label}", key=f"qt_{i}"):
+                    st.session_state.chat.append({"role": "user", "text": label})
+                    
+                    with st.spinner("🤖 AI is analyzing your request..."):
+                        is_first = not st.session_state.first_message_sent
+                        result, err = process_ticket(
+                            llm, phone, st.session_state.customer_type,
+                            cust["name"], cust["package"], cust["area"],
+                            st.session_state.network_status, st.session_state.fix_time,
+                            st.session_state.bill_info, st.session_state.history_text,
+                            label, is_first, action
+                        )
+                        st.session_state.first_message_sent = True
+                    
+                    if result:
+                        st.session_state.chat.append({"role": "ai", "result": result})
+                        # Reload customer data if name was updated
+                        if result.get("name_updated"):
+                            c = db()
+                            c.execute("SELECT name FROM customers WHERE phone=?", (phone,))
+                            new_name = c.fetchone()[0]
+                            st.session_state.customer["name"] = new_name
+                    else:
+                        st.session_state.chat.append({"role": "ai", "error": err})
+                    st.rerun()
+        
+        # Chat conversation area
+        st.markdown("<div class='sec-hdr'>Conversation</div>", unsafe_allow_html=True)
+        
+        if not st.session_state.chat:
+            st.info("💬 Select a quick action above or type your question below to start chatting with our AI assistant.")
+        else:
+            # Render custom chat interface
+            st.markdown(render_custom_chat(st.session_state.chat, cust), unsafe_allow_html=True)
+        
+        # Chat input at the bottom
+        user_msg = st.chat_input("Type your question or issue here...")
+        if user_msg and user_msg.strip():
+            st.session_state.chat.append({"role": "user", "text": user_msg.strip()})
+            
+            # Detect action type from message
+            action_type = "general"
+            msg_lower = user_msg.lower()
+            if any(word in msg_lower for word in ["bill", "payment", "amount", "due"]):
+                action_type = "bill"
+            elif any(word in msg_lower for word in ["account", "profile", "details", "info"]):
+                action_type = "account"
+            elif any(word in msg_lower for word in ["ticket", "history", "previous"]):
+                action_type = "tickets"
+            elif any(word in msg_lower for word in ["change name", "update name", "rename"]):
+                action_type = "name_change"
+            
+            with st.spinner("🤖 AI is thinking..."):
+                is_first = not st.session_state.first_message_sent
+                result, err = process_ticket(
+                    llm, phone, st.session_state.customer_type,
+                    cust["name"], cust["package"], cust["area"],
+                    st.session_state.network_status, st.session_state.fix_time,
+                    st.session_state.bill_info, st.session_state.history_text,
+                    user_msg.strip(), is_first, action_type
+                )
+                st.session_state.first_message_sent = True
+            
+            if result:
+                st.session_state.chat.append({"role": "ai", "result": result})
+                # Reload customer data if name was updated
+                if result.get("name_updated"):
+                    c = db()
+                    c.execute("SELECT name FROM customers WHERE phone=?", (phone,))
+                    new_name = c.fetchone()[0]
+                    st.session_state.customer["name"] = new_name
+            else:
+                st.session_state.chat.append({"role": "ai", "error": err})
+            st.rerun()
+        
+        # Clear chat button
+        if st.session_state.chat:
+            if st.button("🗑️ Clear Chat History", key="clear_chat"):
+                st.session_state.chat = []
+                st.session_state.first_message_sent = False
+                st.rerun()
+    
+    # ══════ TAB 2: NEW CONNECTION ══════
+    with tab2:
+        st.markdown("""
+        <div style="background:linear-gradient(135deg,#0f172a,#1e293b);border:2px solid rgba(14,165,233,.25);border-radius:20px;padding:28px 32px;margin-bottom:24px;">
+          <div style="font-size:22px;font-weight:800;color:#f1f5f9;margin-bottom:8px;">🆕 Request New Internet Connection</div>
+          <div style="font-size:15px;color:#94a3b8;line-height:1.7;">Fill in the details below and our team will contact you within 24 hours to schedule your installation.</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<div class='sec-hdr'>Choose Your Plan</div>", unsafe_allow_html=True)
+        
+        plan_cols = st.columns(4)
+        plans_data = [
+            ("Basic Home", "25 Mbps", "PKR 2,000"),
+            ("Gaming Pro", "100 Mbps", "PKR 4,000"),
+            ("Ultra Fiber", "250 Mbps", "PKR 6,500"),
+            ("Extreme Fiber", "500 Mbps", "PKR 9,000"),
+        ]
+        
+        if "selected_plan" not in st.session_state:
+            st.session_state.selected_plan = ""
+        
+        for i, (pname, speed, price) in enumerate(plans_data):
+            with plan_cols[i]:
+                selected_cls = "selected" if st.session_state.selected_plan == pname else ""
+                st.markdown(f"""
+                <div class="plan-card {selected_cls}">
+                  <div class="plan-name">{pname}</div>
+                  <div class="plan-speed">{speed}</div>
+                  <div class="plan-price">{price}</div>
+                  <div class="plan-per">/month</div>
+                </div>
+                """, unsafe_allow_html=True)
+                if st.button(f"✓ Select", key=f"plan_{i}"):
+                    st.session_state.selected_plan = pname
+                    st.rerun()
+        
+        st.markdown("<div class='sec-hdr'>Your Contact Details</div>", unsafe_allow_html=True)
+        
+        with st.form("new_conn_form", clear_on_submit=True):
+            nc_name = st.text_input("Full Name", value=cust["name"])
+            nc_phone = st.text_input("Phone Number", value=phone)
+            nc_area = st.selectbox("Installation Area", PAKISTAN_LOCATIONS, index=PAKISTAN_LOCATIONS.index(cust["area"]) if cust["area"] in PAKISTAN_LOCATIONS else 0)
+            
+            if st.form_submit_button("📩 Submit Connection Request"):
+                if nc_name.strip() and nc_phone.strip() and st.session_state.selected_plan:
+                    c = db()
+                    c.execute("INSERT INTO new_connection_requests(name,phone,area,package,created_at) VALUES(?,?,?,?,?)",
+                              (nc_name.strip(), nc_phone.strip(), nc_area,
+                               st.session_state.selected_plan,
+                               datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                    conn.commit()
+                    st.success(f"✅ Request submitted! We'll contact you at {nc_phone.strip()} within 24 hours.")
+                    st.session_state.selected_plan = ""
+                elif not st.session_state.selected_plan:
+                    st.error("⚠️ Please select a plan first.")
+                else:
+                    st.error("⚠️ Please fill in all required fields.")
+    
+    # ══════ TAB 3: MY BILL & TICKETS ══════
+    with tab3:
+        c = db()
+        c.execute("SELECT amount, due_date FROM bills WHERE customer_phone=?", (phone,))
+        bill_row = c.fetchone()
+        
+        if bill_row:
+            amount, due_date = bill_row
+            today = datetime.date.today()
+            try:
+                due = datetime.date.fromisoformat(due_date)
+                overdue = today > due
+            except:
+                overdue = False
+            
+            status_html = '<span class="bill-status-due">⚠️ OVERDUE</span>' if overdue else '<span class="bill-status-ok">✅ CURRENT</span>'
+            
+            st.markdown(f"""
+            <div class="bill-card">
+              <div style="font-size:13px;color:#94a3b8;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;margin-bottom:12px;text-transform:uppercase;">Current Bill Amount</div>
+              <div class="bill-amount"><span class="bill-currency">PKR</span>{amount:,}</div>
+              <div class="bill-due">📅 Due Date: {due_date}</div>
+              {status_html}
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.info("💳 No billing record found for your account.")
+        
+        # Ticket history
+        st.markdown("<div class='sec-hdr'>Recent Support Tickets</div>", unsafe_allow_html=True)
+        c.execute("SELECT ticket_id, issue, priority, status, created_at FROM tickets WHERE customer_phone=? ORDER BY created_at DESC LIMIT 5", (phone,))
+        tickets = c.fetchall()
+        
+        if tickets:
+            for tid, issue, priority, status, created in tickets:
+                card_cls = "resolved" if status == "Resolved" else priority.lower()
+                status_cls = "s-resolved" if status == "Resolved" else "s-open"
+                st.markdown(f"""
+                <div class="ticket-card {card_cls}">
+                  <div class="ticket-hdr">
+                    <span class="ticket-id">{htmllib.escape(tid)}</span>
+                    <span class="ticket-status {status_cls}">{status}</span>
+                  </div>
+                  <div class="ticket-issue">{htmllib.escape(issue)}</div>
+                  <div class="ticket-meta">
+                    <span class="tag tag-{priority.lower()}">{priority}</span>
+                    <span class="tag tag-sent">🕐 {htmllib.escape(created)}</span>
+                  </div>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("📋 No support tickets found.")
+    
+    # ══════ TAB 4: UPGRADE PLAN ══════
+    with tab4:
+        st.markdown(f"""
+        <div style="background:linear-gradient(135deg,#0f172a,#1e293b);border:2px solid rgba(14,165,233,.25);border-radius:20px;padding:28px 32px;margin-bottom:24px;">
+          <div style="font-size:22px;font-weight:800;color:#f1f5f9;margin-bottom:8px;">📶 Upgrade Your Internet Plan</div>
+          <div style="font-size:15px;color:#94a3b8;">
+            Current plan: <strong style="color:#0ea5e9;">{htmllib.escape(cust["package"])}</strong><br>
+            Select a new plan below to upgrade your connection speed
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        up_cols = st.columns(4)
+        for i, (pname, speed, price) in enumerate(plans_data):
+            with up_cols[i]:
+                is_current = pname in cust["package"]
+                border = "border-color:#0ea5e9;box-shadow:0 0 30px rgba(14,165,233,0.2);" if is_current else ""
+                current_badge = '<div style="font-size:11px;color:#0ea5e9;font-family:monospace;margin-top:10px;font-weight:800;">✓ CURRENT PLAN</div>' if is_current else ""
+                
+                st.markdown(f"""
+                <div class="plan-card" style="{border}">
+                  <div class="plan-name">{pname}</div>
+                  <div class="plan-speed">{speed}</div>
+                  <div class="plan-price">{price}</div>
+                  <div class="plan-per">/month</div>
+                  {current_badge}
+                </div>
+                """, unsafe_allow_html=True)
+                
+                if not is_current:
+                    if st.button(f"⬆️ Upgrade", key=f"up_{i}"):
+                        upgrade_msg = f"I want to upgrade my plan from {cust['package']} to {pname} ({speed}, {price}/month)"
+                        st.session_state.chat.append({"role": "user", "text": upgrade_msg})
+                        
+                        with st.spinner("🤖 Processing upgrade request..."):
+                            is_first = not st.session_state.first_message_sent
+                            result, err = process_ticket(
+                                llm, phone,
