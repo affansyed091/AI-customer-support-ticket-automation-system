@@ -1075,9 +1075,9 @@ elif st.session_state.screen == "new_customer_register":
         </div>
         """, unsafe_allow_html=True)
         with st.form("new_cust_form"):
-            name = st.text_input("Full Name", placeholder="e.g. Muhammad Ali")
-            phone = st.text_input("Phone Number", placeholder="03001234567")
-            area = st.selectbox("Select Your Area")
+            name = st.text_input("Full Name", placeholder="Type your full name here")
+            phone = st.text_input("Phone Number", placeholder="Type your number")
+            area = st.selectbox("Select Your Area",PAKISTAN_LOCATIONS,placeholder="Your location")
             submit = st.form_submit_button("✅ Register")
             if submit:
                 if name.strip() and phone.strip():
