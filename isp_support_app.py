@@ -1438,7 +1438,7 @@ elif st.session_state.screen == "customer_dashboard":
         else:
             render_chat(st.session_state.chat)
         
-        user_msg = st.chat_input("Select from quick topic our start conversation with our AI assistant")")
+        user_msg = st.chat_input("Select from quick topic our start conversation with our AI assistant"))
         if user_msg and user_msg.strip():
             st.session_state.chat.append({"role": "user", "text": user_msg.strip()})
             with st.spinner("🤖 AI is thinking..."):
