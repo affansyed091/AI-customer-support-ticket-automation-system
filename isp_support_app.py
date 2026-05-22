@@ -1075,7 +1075,7 @@ elif st.session_state.screen == "new_customer_register":
         </div>
         """, unsafe_allow_html=True)
         
-       with st.form("new_cust_form"):
+       with st.form("new_cust_form")
     name = st.text_input("Full Name", placeholder="Type your full name here")
     phone = st.text_input("Phone Number", placeholder="Type your number")
     area = st.selectbox("Select Your Area", PAKISTAN_LOCATIONS, index=None, placeholder="Choose your area")
@@ -1083,7 +1083,7 @@ elif st.session_state.screen == "new_customer_register":
     
     if submit:
         if name.strip() and phone.strip() and area is not None:
-            # registration code...
+            
         else:
             st.error("⚠️ Please fill all fields and select a valid area.")
             
