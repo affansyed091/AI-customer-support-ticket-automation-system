@@ -900,7 +900,7 @@ def process_ticket(llm, phone, customer_type, name, current_package,
                 st.session_state.network_status = out[0]
                 st.session_state.fix_time = out[1]
             result["record_updated"] = {"field":"area","value":new_val}
-        elif action == "update_package" and new_val:
+            elif action == "update_package" and new_val:
 
     # PLAN PRICE MAPPING
     package_prices = {
@@ -944,25 +944,24 @@ def process_ticket(llm, phone, customer_type, name, current_package,
     if st.session_state.customer:
         st.session_state.customer["package"] = new_val
 
-    # UPDATE BILL INFO ON DASHBOARD
+    # UPDATE BILL INFO
     st.session_state.bill_info = (
         f"PKR {new_amount:,}, Due: {new_due_date}"
     )
 
-    # SHOW BILL IN AI CHAT
+    # SHOW BILL IN CHAT
     result["bill_data"] = {
         "amount": new_amount,
         "due_date": new_due_date,
         "overdue": False
     }
 
-    # SHOW SUCCESS MESSAGE
+    # SUCCESS MESSAGE
     result["record_updated"] = {
         "field": "package",
         "value": new_val
     }
-        
-        # Process data display
+    # Process data display
         show = result.get("show_records", "none")
         if show == "bill":
             c = db()
