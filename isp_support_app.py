@@ -1701,8 +1701,64 @@ elif st.session_state.screen == "customer_dashboard":
         else:
             st.info("📋 No support tickets found.")
     
-    # ══════ TAB 4: UPGRADE PLAN ══════
+       # ══════ TAB 4: UPGRADE PLAN ══════
     with tab4:
         st.markdown(f"""
-        <div style="background:linear-gradient(135deg,#0f172a,#1e293b);border:2px solid rgba(14,165,233,.25);border-radius:20px;padding:28px 32px;margin-bottom:24px;">
-          <div style="
+        <div style="background:linear-gradient(135deg,#0f172a,#1e293b);
+                    border:2px solid rgba(14,165,233,.25);
+                    border-radius:20px;
+                    padding:28px 32px;
+                    margin-bottom:24px;">
+          <div style="font-size:24px;
+                      font-weight:800;
+                      color:#f1f5f9;
+                      margin-bottom:10px;">
+            📶 Upgrade Your Internet Plan
+          </div>
+
+          <div style="font-size:15px;
+                      color:#94a3b8;
+                      line-height:1.7;">
+            Current Package:
+            <strong style="color:#0ea5e9;">
+                {cust["package"]}
+            </strong>
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        upgrade_cols = st.columns(4)
+
+        upgrade_plans = [
+            ("Basic Home", "25 Mbps", "PKR 2,000"),
+            ("Gaming Pro", "100 Mbps", "PKR 4,000"),
+            ("Ultra Fiber", "250 Mbps", "PKR 6,500"),
+            ("Extreme Fiber", "500 Mbps", "PKR 9,000"),
+        ]
+
+        for i, (pname, speed, price) in enumerate(upgrade_plans):
+            with upgrade_cols[i]:
+                st.markdown(f"""
+                <div class="plan-card">
+                    <div class="plan-name">{pname}</div>
+                    <div class="plan-speed">{speed}</div>
+                    <div class="plan-price">{price}</div>
+                    <div class="plan-per">/month</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+                if st.button(f"Upgrade to {pname}", key=f"upgrade_{i}"):
+
+                    c = db()
+
+                    c.execute(
+                        "UPDATE customers SET package=? WHERE phone=?",
+                        (pname, phone)
+                    )
+
+                    conn.commit()
+
+                    st.session_state.customer["package"] = pname
+
+                    st.success(f"✅ Successfully upgraded to {pname}")
+                    st.rerun()
