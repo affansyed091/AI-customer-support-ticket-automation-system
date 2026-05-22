@@ -683,7 +683,23 @@ label {
     z-index: 10 !important;
     cursor: pointer !important;
 }
+/* PRIMARY BLUE BUTTONS */
+.stForm button,
+div.stButton > button {
+    background: linear-gradient(135deg, #0ea5e9, #2563eb) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 14px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 16px rgba(14,165,233,0.35) !important;
+}
 
+/* HOVER */
+.stForm button:hover,
+div.stButton > button:hover {
+    background: linear-gradient(135deg, #38bdf8, #3b82f6) !important;
+    box-shadow: 0 8px 28px rgba(14,165,233,0.45) !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1148,12 +1164,12 @@ elif st.session_state.screen == "new_customer_register":
 
             name = st.text_input(
                 "FULL NAME",
-                placeholder="e.g. Muhammad Ali"
+                placeholder="Type Your Full Name"
             )
 
             phone = st.text_input(
                 "PHONE NUMBER",
-                placeholder="03001234567"
+                placeholder="Correct Phone Number"
             )
 
             area = st.selectbox(
