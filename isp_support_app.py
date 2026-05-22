@@ -1048,38 +1048,43 @@ if st.session_state.screen == "welcome":
         <div class="welcome-tagline">AI-Powered Support • 24/7 Assistance • Lightning Speed</div>
     </div>
     """, unsafe_allow_html=True)
+    
     st.markdown("<div style='text-align:center; margin: 48px 0 28px;'><span style='font-size:18px; color:#94a3b8; font-weight:600;'>Choose your account type to continue</span></div>", unsafe_allow_html=True)
+    
     col1, col2, col3 = st.columns([1,1,1], gap="large")
+    
     with col1:
         st.markdown("""
         <div class="choice-card">
-          <div class="choice-icon">👤</div>
-          <div class="choice-title">Existing Customer</div>
-          <div class="choice-desc">Login to your account and access full support dashboard</div>
+            <div class="choice-icon">👤</div>
+            <div class="choice-title">Existing Customer</div>
+            <div class="choice-desc">Login with your phone number to access your account, check bills, and get AI support.</div>
         </div>
         """, unsafe_allow_html=True)
         if st.button("🔑 Login", key="btn_existing", use_container_width=True):
             st.session_state.customer_type = "existing"
             st.session_state.screen = "lang_select"
             st.rerun()
+    
     with col2:
         st.markdown("""
         <div class="choice-card">
-          <div class="choice-icon">🆕</div>
-          <div class="choice-title">New Customer</div>
-          <div class="choice-desc">Register for a new connection and get instant support</div>
+            <div class="choice-icon">🆕</div>
+            <div class="choice-title">New Customer</div>
+            <div class="choice-desc">Sign up for a new FiberISP connection and get instant AI-powered support.</div>
         </div>
         """, unsafe_allow_html=True)
         if st.button("📝 Register", key="btn_new", use_container_width=True):
             st.session_state.customer_type = "new"
             st.session_state.screen = "lang_select"
             st.rerun()
+    
     with col3:
         st.markdown("""
         <div class="choice-card">
-          <div class="choice-icon">🛠️</div>
-          <div class="choice-title">Admin Panel</div>
-          <div class="choice-desc">Manage customers, tickets, and system operations</div>
+            <div class="choice-icon">🛠️</div>
+            <div class="choice-title">Admin Panel</div>
+            <div class="choice-desc">Manage customers, monitor tickets, configure outages, and oversee system operations.</div>
         </div>
         """, unsafe_allow_html=True)
         if st.button("🔐 Admin Access", key="btn_admin", use_container_width=True):
