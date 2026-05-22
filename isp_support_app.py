@@ -838,7 +838,7 @@ def process_ticket(llm, phone, customer_type, name, current_package,
         raw = response.content.strip().replace("```json", "").replace("```", "").strip()
         import re
         m = re.search(r'\{.*\}', raw, re.DOTALL)
-        result = json.loads(m.group(0) if m else raw)
+        result = json.loads(m.group(0) if m else raw, strict=False)
         
         # Handle AI‑requested customer info update (e.g. name change)
         if "update_customer_info" in result and result["update_customer_info"]:
