@@ -1,3 +1,4 @@
+````python
 import streamlit as st
 import sqlite3
 import json
@@ -303,29 +304,10 @@ def get_db():
     """)
 
     c.execute("""
-    CREATE TABLE IF NOT EXISTS outages (
-        area TEXT UNIQUE,
-        status TEXT,
-        expected_fix_time TEXT
-    )
-    """)
-
-    c.execute("""
     CREATE TABLE IF NOT EXISTS bills (
         customer_phone TEXT UNIQUE,
         amount INTEGER,
         due_date TEXT
-    )
-    """)
-
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS new_connection_requests (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        phone TEXT,
-        area TEXT,
-        package TEXT,
-        created_at TEXT
     )
     """)
 
@@ -335,11 +317,6 @@ def get_db():
         c.execute("""
         INSERT OR IGNORE INTO customers(name,phone,package,area)
         VALUES('Ali Khan','03001234567','Gaming Pro','DHA')
-        """)
-
-        c.execute("""
-        INSERT OR IGNORE INTO outages(area,status,expected_fix_time)
-        VALUES('DHA','DOWN','2 Hours')
         """)
 
         c.execute("""
@@ -372,9 +349,9 @@ def get_llm(api_key):
     )
 
 PLANS = """
-• Basic Home    → 25 Mbps  → PKR 2,000/month
-• Gaming Pro    → 100 Mbps → PKR 4,000/month
-• Ultra Fiber   → 250 Mbps → PKR 6,500/month
+• Basic Home → 25 Mbps → PKR 2,000/month
+• Gaming Pro → 100 Mbps → PKR 4,000/month
+• Ultra Fiber → 250 Mbps → PKR 6,500/month
 • Extreme Fiber → 500 Mbps → PKR 9,000/month
 """
 
@@ -384,8 +361,6 @@ PROMPT_TEMPLATE = PromptTemplate(
         "name",
         "current_package",
         "area",
-        "network_status",
-        "fix_time",
         "bill_info",
         "history_text",
         "plans",
@@ -393,13 +368,11 @@ PROMPT_TEMPLATE = PromptTemplate(
         "language"
     ],
     template="""
-You are a professional ISP AI support agent for ConnectPK.
+You are a professional ISP AI support agent.
 
 Customer: {name} ({customer_type})
 Package: {current_package}
 Area: {area}
-Network Status: {network_status}
-Fix Time: {fix_time}
 Bill: {bill_info}
 History: {history_text}
 Plans: {plans}
@@ -438,21 +411,18 @@ def process_ticket(
     name,
     current_package,
     area,
-    network_status,
-    fix_time,
     bill_info,
     history_text,
     message,
     language="English"
 ):
     try:
+
         prompt_text = PROMPT_TEMPLATE.format(
             customer_type=customer_type,
             name=name,
             current_package=current_package,
             area=area,
-            network_status=network_status,
-            fix_time=fix_time,
             bill_info=bill_info,
             history_text=history_text,
             plans=PLANS,
@@ -505,53 +475,16 @@ def process_ticket(
     except Exception as e:
         return None, str(e)
 
-def pri_tag(p):
-    cls = {
-        "High":"tag-high",
-        "Medium":"tag-medium",
-        "Low":"tag-low"
-    }.get(p, "tag-low")
-
-    return f'<span class="tag {cls}">{p}</span>'
-
-def render_chat(chat_list):
-    for msg in chat_list:
-
-        if msg["role"] == "user":
-            with st.chat_message("user"):
-                st.write(msg["text"])
-
-        elif msg["role"] == "ai":
-            with st.chat_message("assistant", avatar="🌐"):
-
-                if "error" in msg:
-                    st.error(msg["error"])
-
-                else:
-                    r = msg["result"]
-
-                    st.write(r.get("reply", ""))
-
-                    st.caption(
-                        f"🎫 {r.get('ticket_id','')}  ·  🔧 {r.get('technician','Not Assigned')}"
-                    )
-
 # ─────────────────────────────────────────
 # SESSION STATE
 # ─────────────────────────────────────────
 defaults = {
-    "screen": "role",
+    "screen": "login",
     "phone": "",
-    "otp": None,
     "customer": None,
-    "customer_type": "",
-    "bill_info": "",
-    "network_status": "ACTIVE",
-    "fix_time": "N/A",
-    "history_text": "",
     "chat": [],
-    "lang": "",
-    "api_key": "YOUR_GROQ_API_KEY"
+    "lang": "English",
+    "api_key": "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"
 }
 
 for k, v in defaults.items():
@@ -559,260 +492,54 @@ for k, v in defaults.items():
         st.session_state[k] = v
 
 # ─────────────────────────────────────────
-# TOP BAR
+# LOGIN
 # ─────────────────────────────────────────
-st.markdown("""
-<div class="topbar">
-    <div class="topbar-brand">
-        <div class="topbar-icon">🌐</div>
-        <div>
-            <div class="topbar-title">ConnectPK ISP</div>
-            <div class="topbar-sub">AI CUSTOMER SUPPORT SYSTEM</div>
-        </div>
-    </div>
-
-    <div class="status-pill">
-        <div class="status-dot"></div>
-        SYSTEM ONLINE
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# ════════════════════════════════════════
-# ROLE SCREEN
-# ════════════════════════════════════════
-if st.session_state.screen == "role":
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("""
-        <div class="role-card">
-            <div class="role-icon">👤</div>
-            <div class="role-title">Customer</div>
-            <div class="role-desc">
-                Get support for internet issues, billing and plans.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        if st.button("Login as Customer"):
-            st.session_state.screen = "customer_login"
-            st.rerun()
-
-    with col2:
-        st.markdown("""
-        <div class="role-card">
-            <div class="role-icon">🛠️</div>
-            <div class="role-title">Admin</div>
-            <div class="role-desc">
-                Manage customers, outages and tickets.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        if st.button("Login as Admin"):
-            st.session_state.screen = "admin_login"
-            st.rerun()
-
-# ════════════════════════════════════════
-# CUSTOMER LOGIN
-# ════════════════════════════════════════
-elif st.session_state.screen == "customer_login":
-
-    _, col, _ = st.columns([1,2,1])
-
-    with col:
-
-        st.markdown("""
-        <div class="login-box">
-            <div class="login-title">📱 Customer Login</div>
-            <div class="login-sub">
-                Enter your phone number
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        phone = st.text_input(
-            "Phone Number",
-            placeholder="03001234567"
-        )
-
-        if st.button("Send OTP"):
-
-            if phone.strip():
-
-                otp = random.randint(1000, 9999)
-
-                st.session_state.phone = phone
-                st.session_state.otp = otp
-                st.session_state.screen = "otp"
-
-                st.rerun()
-
-            else:
-                st.error("Enter phone number")
-
-        if st.button("Back"):
-            st.session_state.screen = "role"
-            st.rerun()
-
-# ════════════════════════════════════════
-# OTP
-# ════════════════════════════════════════
-elif st.session_state.screen == "otp":
-
-    _, col, _ = st.columns([1,2,1])
-
-    with col:
-
-        st.markdown(f"""
-        <div class="login-box">
-            <div class="login-title">🔐 OTP Verification</div>
-            <h2>{st.session_state.otp}</h2>
-        </div>
-        """, unsafe_allow_html=True)
-
-        entered = st.text_input("Enter OTP")
-
-        if st.button("Verify"):
-
-            if entered == str(st.session_state.otp):
-
-                phone = st.session_state.phone
-
-                c = db()
-
-                c.execute("""
-                SELECT name,package,area
-                FROM customers
-                WHERE phone=?
-                """, (phone,))
-
-                cust = c.fetchone()
-
-                if cust:
-
-                    st.session_state.customer = {
-                        "name": cust[0],
-                        "package": cust[1],
-                        "area": cust[2]
-                    }
-
-                    st.session_state.customer_type = "Existing Customer"
-
-                else:
-                    st.session_state.customer = None
-                    st.session_state.customer_type = "New Customer"
-
-                st.session_state.screen = "lang_select"
-
-                st.rerun()
-
-            else:
-                st.error("Invalid OTP")
-
-# ════════════════════════════════════════
-# LANGUAGE SELECT
-# ════════════════════════════════════════
-elif st.session_state.screen == "lang_select":
-
-    c1, c2 = st.columns(2)
-
-    with c1:
-
-        st.markdown("""
-        <div class="lang-card">
-            <h1>🇬🇧</h1>
-            <h2>English</h2>
-        </div>
-        """, unsafe_allow_html=True)
-
-        if st.button("English"):
-
-            st.session_state.lang = "English"
-
-            if st.session_state.customer is None:
-                st.session_state.screen = "new_customer"
-            else:
-                st.session_state.screen = "customer"
-
-            st.rerun()
-
-    with c2:
-
-        st.markdown("""
-        <div class="lang-card">
-            <h1>🇵🇰</h1>
-            <h2>اردو</h2>
-        </div>
-        """, unsafe_allow_html=True)
-
-        if st.button("اردو"):
-
-            st.session_state.lang = "Urdu"
-
-            if st.session_state.customer is None:
-                st.session_state.screen = "new_customer"
-            else:
-                st.session_state.screen = "customer"
-
-            st.rerun()
-
-# ════════════════════════════════════════
-# NEW CUSTOMER
-# ════════════════════════════════════════
-elif st.session_state.screen == "new_customer":
+if st.session_state.screen == "login":
 
     st.markdown("""
     <div class="login-box">
-        <div class="login-title">🆕 New Customer</div>
+        <div class="login-title">📱 Customer Login</div>
     </div>
     """, unsafe_allow_html=True)
 
-    name = st.text_input("Full Name")
+    phone = st.text_input("Phone Number")
 
-    area = st.selectbox(
-        "Area",
-        ["DHA","Gulshan","Clifton","Nazimabad","Korangi"]
-    )
+    if st.button("Login"):
 
-    if st.button("Register"):
+        c = db()
 
-        if name.strip():
+        c.execute("""
+        SELECT name,package,area
+        FROM customers
+        WHERE phone=?
+        """, (phone,))
 
-            c = db()
+        cust = c.fetchone()
 
-            c.execute("""
-            INSERT OR IGNORE INTO customers(name,phone,package,area)
-            VALUES(?,?,?,?)
-            """, (
-                name,
-                st.session_state.phone,
-                "No Package",
-                area
-            ))
+        if cust:
 
-            conn.commit()
+            st.session_state.phone = phone
 
             st.session_state.customer = {
-                "name": name,
-                "package": "No Package",
-                "area": area
+                "name": cust[0],
+                "package": cust[1],
+                "area": cust[2]
             }
 
             st.session_state.screen = "customer"
 
             st.rerun()
 
-# ════════════════════════════════════════
+        else:
+            st.error("Customer not found")
+
+# ─────────────────────────────────────────
 # CUSTOMER PORTAL
-# ════════════════════════════════════════
+# ─────────────────────────────────────────
 elif st.session_state.screen == "customer":
 
     cust = st.session_state.customer
     phone = st.session_state.phone
-    lang = st.session_state.lang
 
     llm = get_llm(st.session_state.api_key)
 
@@ -831,87 +558,42 @@ elif st.session_state.screen == "customer":
     """, unsafe_allow_html=True)
 
     if st.button("Logout"):
+
         for k, v in defaults.items():
             st.session_state[k] = v
 
         st.rerun()
 
-    tab1, tab2, tab3 = st.tabs([
+    tab1, tab2 = st.tabs([
         "💬 Support",
-        "💳 Bill",
-        "📶 Plans"
+        "💳 Bill"
     ])
 
     # SUPPORT TAB
     with tab1:
 
-        st.markdown("""
-        <div class="sec-hdr">
-            Quick Topics
-        </div>
-        """, unsafe_allow_html=True)
+        for msg in st.session_state.chat:
 
-        topics = [
-            "Slow internet speed",
-            "WiFi not working",
-            "No internet connection",
-            "Weak signals",
-            "Need technician"
-        ]
+            if msg["role"] == "user":
+                with st.chat_message("user"):
+                    st.write(msg["text"])
 
-        cols = st.columns(5)
+            else:
+                with st.chat_message("assistant", avatar="🌐"):
 
-        for i, topic in enumerate(topics):
-
-            with cols[i]:
-
-                if st.button(topic, key=f"topic_{i}"):
-
-                    st.session_state.chat.append({
-                        "role": "user",
-                        "text": topic
-                    })
-
-                    with st.spinner("AI is analyzing..."):
-
-                        result, err = process_ticket(
-                            llm,
-                            phone,
-                            st.session_state.customer_type,
-                            cust["name"],
-                            cust["package"],
-                            cust["area"],
-                            st.session_state.network_status,
-                            st.session_state.fix_time,
-                            st.session_state.bill_info,
-                            st.session_state.history_text,
-                            topic,
-                            lang
-                        )
-
-                    if result:
-                        st.session_state.chat.append({
-                            "role": "ai",
-                            "result": result
-                        })
+                    if "error" in msg:
+                        st.error(msg["error"])
 
                     else:
-                        st.session_state.chat.append({
-                            "role": "ai",
-                            "error": err
-                        })
+                        r = msg["result"]
 
-                    st.rerun()
+                        st.write(r.get("reply", ""))
 
-        st.markdown("""
-        <div class="sec-hdr">
-            Conversation
-        </div>
-        """, unsafe_allow_html=True)
+                        st.caption(
+                            f"🎫 {r.get('ticket_id','')} · 🔧 {r.get('technician','Not Assigned')}"
+                        )
 
-        render_chat(st.session_state.chat)
-
-        user_msg = st.chat_input("Type your issue...")
+        user_msg = st.chat_input("Describe your issue...")
 
         if user_msg:
 
@@ -920,30 +602,30 @@ elif st.session_state.screen == "customer":
                 "text": user_msg
             })
 
-            with st.spinner("Thinking..."):
+            with st.spinner("AI analyzing issue..."):
 
                 result, err = process_ticket(
                     llm,
                     phone,
-                    st.session_state.customer_type,
+                    "Existing Customer",
                     cust["name"],
                     cust["package"],
                     cust["area"],
-                    st.session_state.network_status,
-                    st.session_state.fix_time,
-                    st.session_state.bill_info,
-                    st.session_state.history_text,
+                    "No Pending Bill",
+                    "",
                     user_msg,
-                    lang
+                    st.session_state.lang
                 )
 
             if result:
+
                 st.session_state.chat.append({
                     "role": "ai",
                     "result": result
                 })
 
             else:
+
                 st.session_state.chat.append({
                     "role": "ai",
                     "error": err
@@ -971,185 +653,15 @@ elif st.session_state.screen == "customer":
             st.markdown(f"""
             <div class="bill-card">
                 <div>CURRENT BILL</div>
+
                 <div class="bill-amount">
                     PKR {amount}
                 </div>
+
                 <div>Due Date: {due}</div>
             </div>
             """, unsafe_allow_html=True)
 
         else:
             st.info("No bill found")
-
-    # PLAN TAB
-    with tab3:
-
-        plans = [
-            ("Basic Home","25 Mbps","PKR 2,000"),
-            ("Gaming Pro","100 Mbps","PKR 4,000"),
-            ("Ultra Fiber","250 Mbps","PKR 6,500"),
-            ("Extreme Fiber","500 Mbps","PKR 9,000"),
-        ]
-
-        cols = st.columns(4)
-
-        for i, (name, speed, price) in enumerate(plans):
-
-            with cols[i]:
-
-                st.markdown(f"""
-                <div class="plan-card">
-                    <div class="plan-name">{name}</div>
-                    <div class="plan-speed">{speed}</div>
-                    <div class="plan-price">{price}</div>
-                </div>
-                """, unsafe_allow_html=True)
-
-                st.button("Choose", key=f"choose_{i}")
-
-# ════════════════════════════════════════
-# ADMIN LOGIN
-# ════════════════════════════════════════
-elif st.session_state.screen == "admin_login":
-
-    st.markdown("""
-    <div class="login-box">
-        <div class="login-title">🔐 Admin Login</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    pwd = st.text_input("Password", type="password")
-
-    if st.button("Login"):
-
-        if pwd == "admin123":
-
-            st.session_state.screen = "admin"
-            st.rerun()
-
-        else:
-            st.error("Wrong password")
-
-# ════════════════════════════════════════
-# ADMIN DASHBOARD
-# ════════════════════════════════════════
-elif st.session_state.screen == "admin":
-
-    c = db()
-
-    c.execute("SELECT COUNT(*) FROM customers")
-    total_customers = c.fetchone()[0]
-
-    c.execute("SELECT COUNT(*) FROM tickets")
-    total_tickets = c.fetchone()[0]
-
-    c.execute("""
-    SELECT COUNT(*)
-    FROM tickets
-    WHERE status='Open'
-    """)
-    open_tickets = c.fetchone()[0]
-
-    c.execute("""
-    SELECT COUNT(*)
-    FROM tickets
-    WHERE priority='High'
-    """)
-    high_priority = c.fetchone()[0]
-
-    st.markdown(f"""
-    <div class="metric-grid">
-
-        <div class="metric-card">
-            <div class="metric-num">{total_customers}</div>
-            <div class="metric-lbl">Customers</div>
-        </div>
-
-        <div class="metric-card">
-            <div class="metric-num">{total_tickets}</div>
-            <div class="metric-lbl">Tickets</div>
-        </div>
-
-        <div class="metric-card">
-            <div class="metric-num">{open_tickets}</div>
-            <div class="metric-lbl">Open</div>
-        </div>
-
-        <div class="metric-card">
-            <div class="metric-num">{high_priority}</div>
-            <div class="metric-lbl">High Priority</div>
-        </div>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-    tab1, tab2 = st.tabs([
-        "🎫 Tickets",
-        "👥 Customers"
-    ])
-
-    with tab1:
-
-        c.execute("""
-        SELECT *
-        FROM tickets
-        ORDER BY created_at DESC
-        """)
-
-        rows = c.fetchall()
-
-        for row in rows:
-
-            tid, phone, issue, priority, sentiment, tech, status, created = row
-
-            st.markdown(f"""
-            <div class="ticket-card">
-
-                <div class="ticket-id">
-                    {tid}
-                </div>
-
-                <div class="ticket-issue">
-                    {issue}
-                </div>
-
-                {pri_tag(priority)}
-
-                <div style="margin-top:10px;color:#94a3b8;font-size:12px;">
-                    {phone} · {created}
-                </div>
-
-            </div>
-            """, unsafe_allow_html=True)
-
-    with tab2:
-
-        c.execute("""
-        SELECT name,phone,package,area
-        FROM customers
-        """)
-
-        rows = c.fetchall()
-
-        if rows:
-
-            import pandas as pd
-
-            df = pd.DataFrame(
-                rows,
-                columns=["Name","Phone","Package","Area"]
-            )
-
-            st.dataframe(
-                df,
-                use_container_width=True,
-                hide_index=True
-            )
-
-    if st.button("Logout"):
-
-        st.session_state.screen = "role"
-
-        st.rerun()
 ````
-
