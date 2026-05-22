@@ -533,69 +533,36 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
 .metric-num.green { color: #4ade80; }
 .metric-num.blue { color: #0ea5e9; }
 
-
-/* ══════ CHAT BUBBLE STYLES – MODERN BLUE BUBBLES ══════ */
-
-/* Overall container spacing */
+/* ══════ CHAT BUBBLE STYLES ══════ */
 div[data-testid="stChatMessage"] {
     display: flex;
-    margin: 16px 0;
-    align-items: flex-end;
+    margin: 12px 0;
 }
-
-/* User bubble (right side, vibrant blue) */
 div[data-testid="stChatMessage"][data-testid="stChatMessage-user"] {
     justify-content: flex-end;
 }
-div[data-testid="stChatMessage-user"] > div:first-child {
-    max-width: 70%;
-    padding: 16px 22px;
-    border-radius: 24px 24px 4px 24px;   /* "tail" at bottom right */
-    background: linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%);
-    color: #ffffff;
-    box-shadow: 0 8px 20px rgba(14,165,233,0.35);
-    font-weight: 500;
-    border: 1px solid rgba(255,255,255,0.15);
-}
-
-/* Assistant bubble (left side, dark blue-ish) */
 div[data-testid="stChatMessage"][data-testid="stChatMessage-assistant"] {
     justify-content: flex-start;
 }
+div[data-testid="stChatMessage"] > div:first-child {
+    max-width: 75%;
+    border-radius: 20px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: 1px solid rgba(14,165,233,0.2);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    color: #f1f5f9;
+}
+div[data-testid="stChatMessage-user"] > div:first-child {
+    background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: white;
+}
 div[data-testid="stChatMessage-assistant"] > div:first-child {
-    max-width: 70%;
-    padding: 16px 22px;
-    border-radius: 24px 24px 24px 4px;   /* "tail" at bottom left */
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    color: #e2e8f0;
-    border: 1px solid rgba(14,165,233,0.3);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: 1px solid rgba(14,165,233,0.2);
 }
 
-/* Make markdown inside bubbles look crisp */
-div[data-testid="stChatMessage"] p {
-    margin-bottom: 0;
-    line-height: 1.5;
-}
-
-/* Lighten links & inline code in the assistant bubble */
-div[data-testid="stChatMessage-assistant"] a {
-    color: #93c5fd;
-}
-div[data-testid="stChatMessage-assistant"] code {
-    background: rgba(14,165,233,0.15);
-    color: #7dd3fc;
-    padding: 2px 6px;
-    border-radius: 6px;
-}
-
-/* Small avatar adjustment (optional) */
-div[data-testid="stChatMessage"] img[data-testid="stChatMessageAvatar"] {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-}
 /* ══════ STREAMLIT COMPONENT OVERRIDES ══════ */
 .stTextInput > div > div > input,
 .stTextArea > div > div > textarea,
