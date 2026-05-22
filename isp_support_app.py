@@ -951,10 +951,10 @@ def get_llm(api_key):
     )
 
 PLANS = """
-• Basic Home    → 25 Mbps  → PKR 2,000/month
-• Gaming Pro    → 100 Mbps → PKR 4,000/month
-• Ultra Fiber   → 250 Mbps → PKR 6,500/month
-• Extreme Fiber → 500 Mbps → PKR 9,000/month
+ Basic Home    → 25 Mbps  → PKR 2,000/month
+ Gaming Pro    → 100 Mbps → PKR 4,000/month
+ Ultra Fiber   → 250 Mbps → PKR 6,500/month
+ Extreme Fiber → 500 Mbps → PKR 9,000/month
 """
 
 PROMPT_TEMPLATE = PromptTemplate(
