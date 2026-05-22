@@ -20,7 +20,7 @@ st.set_page_config(
 )
 
 # ══════════════════════════════════════════════
-#  GLOBAL CSS  (completely redesigned)
+#  GLOBAL CSS
 # ══════════════════════════════════════════════
 st.markdown("""
 <style>
@@ -117,66 +117,280 @@ html,body,[class*="css"]{font-family:'DM Sans',sans-serif !important;}
 .status-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;animation:blink 2s infinite;}
 @keyframes blink{0%,100%{opacity:1;box-shadow:0 0 7px #4ade80;}50%{opacity:.2;box-shadow:none;}}
 
-/* ══════════════════ CHOICE CARDS (Landing) ══════════════════ */
-/* The card top half — icon + title + desc */
-.choice-card-top{
+/* ══════════════════ WELCOME CHOICE CARDS — ICON-ONLY CLICK ══════════════════ */
+.welcome-choice-card{
   background:linear-gradient(150deg,#0d1524,#0f1d35);
   border:1px solid rgba(14,165,233,.14);
-  border-bottom:none;
-  border-radius:22px 22px 0 0;
-  padding:40px 28px 28px;
+  border-radius:24px;
+  padding:36px 28px 32px;
   text-align:center;
   position:relative;overflow:hidden;
-  transition:border-color .3s,background .3s;
+  transition:border-color .35s, box-shadow .35s, transform .35s;
 }
-.choice-card-top::before{
+.welcome-choice-card:hover{
+  border-color:rgba(14,165,233,.32);
+  box-shadow:0 20px 60px rgba(14,165,233,.1);
+  transform:translateY(-4px);
+}
+.welcome-choice-card::before{
   content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
-  background:linear-gradient(90deg,transparent,rgba(14,165,233,.06),transparent);
-  transition:left .5s;
+  background:linear-gradient(90deg,transparent,rgba(14,165,233,.04),transparent);
+  transition:left .6s;
 }
-.choice-card-top:hover::before{left:100%;}
-.choice-icon-wrap{
-  width:72px;height:72px;border-radius:20px;
-  background:linear-gradient(135deg,rgba(14,165,233,.1),rgba(99,102,241,.1));
-  border:1px solid rgba(14,165,233,.18);
-  display:flex;align-items:center;justify-content:center;
-  font-size:34px;margin:0 auto 18px;
-  transition:all .3s;
-}
-.choice-title{
-  font-family:'Syne',sans-serif;font-size:20px;font-weight:700;
-  color:#f1f5f9;margin-bottom:10px;
-}
-.choice-desc{font-size:13.5px;color:#475569;line-height:1.75;}
-.choice-badge{
+.welcome-choice-card:hover::before{left:100%;}
+.wcc-badge{
   position:absolute;top:14px;right:14px;
   background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.3);
   color:#38bdf8;font-size:9px;font-weight:800;padding:3px 9px;
   border-radius:8px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;
 }
-
-/* ── Button fused to card bottom ── */
-.stButton > button {
-  background:linear-gradient(135deg,#0ea5e9,#3b82f6) !important;
-  color:white !important;border:none !important;
-  border-radius:12px !important;
-  font-family:'DM Sans',sans-serif !important;font-weight:600 !important;font-size:14px !important;
-  padding:12px 24px !important;transition:all .25s !important;width:100% !important;
-  box-shadow:0 4px 18px rgba(14,165,233,.22) !important;
+.wcc-title{
+  font-family:'Syne',sans-serif;font-size:19px;font-weight:700;
+  color:#f1f5f9;margin-bottom:8px;
 }
-.stButton > button:hover{
-  transform:translateY(-2px) !important;
-  box-shadow:0 8px 28px rgba(14,165,233,.35) !important;
-  background:linear-gradient(135deg,#38bdf8,#6366f1) !important;
-}
-.stButton > button:active{transform:translateY(0) !important;}
+.wcc-desc{font-size:13px;color:#334155;line-height:1.75;}
 
-/* Landing card wrapper — fuses card top + button */
-.landing-col > div > div > div > div:nth-child(1) > div{
-  margin-bottom:-1px !important;
+/* Icon-only button — the LOGO is the clickable element */
+.icon-btn-only > div > .stButton > button {
+  width: 86px !important;
+  height: 86px !important;
+  border-radius: 24px !important;
+  background: linear-gradient(135deg, rgba(14,165,233,.13), rgba(99,102,241,.1)) !important;
+  border: 1px solid rgba(14,165,233,.25) !important;
+  color: white !important;
+  font-size: 38px !important;
+  padding: 0 !important;
+  margin: 0 auto 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 8px 32px rgba(14,165,233,.15), inset 0 1px 0 rgba(255,255,255,.08) !important;
+  transition: all .35s cubic-bezier(.34,1.56,.64,1) !important;
+  line-height: 1 !important;
+}
+.icon-btn-only > div > .stButton > button:hover {
+  transform: translateY(-8px) scale(1.1) !important;
+  box-shadow: 0 20px 50px rgba(14,165,233,.4), 0 0 0 6px rgba(14,165,233,.08) !important;
+  background: linear-gradient(135deg, #0ea5e9, #6366f1) !important;
+  border-color: rgba(14,165,233,.6) !important;
+}
+.icon-btn-only > div > .stButton > button:active {
+  transform: translateY(-2px) scale(1.04) !important;
 }
 
-/* ══════════════════ FORM BOX ══════════════════ */
+/* Admin icon variant */
+.icon-btn-admin > div > .stButton > button {
+  width: 86px !important;
+  height: 86px !important;
+  border-radius: 24px !important;
+  background: linear-gradient(135deg, rgba(168,85,247,.13), rgba(99,102,241,.1)) !important;
+  border: 1px solid rgba(168,85,247,.25) !important;
+  color: white !important;
+  font-size: 38px !important;
+  padding: 0 !important;
+  margin: 0 auto 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 8px 32px rgba(168,85,247,.15), inset 0 1px 0 rgba(255,255,255,.08) !important;
+  transition: all .35s cubic-bezier(.34,1.56,.64,1) !important;
+  line-height: 1 !important;
+}
+.icon-btn-admin > div > .stButton > button:hover {
+  transform: translateY(-8px) scale(1.1) !important;
+  box-shadow: 0 20px 50px rgba(168,85,247,.4), 0 0 0 6px rgba(168,85,247,.08) !important;
+  background: linear-gradient(135deg, #a855f7, #6366f1) !important;
+  border-color: rgba(168,85,247,.6) !important;
+}
+
+/* ══════════════════ BUBBLE SCREEN BACKGROUND ══════════════════ */
+.bubble-bg-container{
+  position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
+}
+.orb{
+  position:absolute;border-radius:50%;
+  animation:orb-drift linear infinite;
+  filter:blur(1px);
+}
+@keyframes orb-drift{
+  0%  {transform:translate(0,0) scale(1);   opacity:0;}
+  8%  {opacity:1;}
+  92% {opacity:.6;}
+  100%{transform:translate(var(--tx),var(--ty)) scale(var(--ts)); opacity:0;}
+}
+
+/* ══════════════════ GLASS FORM CARD ══════════════════ */
+.glass-form-card{
+  background:rgba(8,14,28,.82);
+  backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);
+  border-radius:32px;
+  padding:48px 44px 40px;
+  position:relative;z-index:2;
+  box-shadow:
+    0 0 0 1px rgba(14,165,233,.18),
+    0 32px 80px rgba(0,0,0,.65),
+    inset 0 1px 0 rgba(255,255,255,.07),
+    0 0 60px rgba(14,165,233,.04);
+  overflow:hidden;
+}
+.glass-form-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(14,165,233,.5),rgba(99,102,241,.4),transparent);
+}
+.glass-form-card::after{
+  content:'';position:absolute;top:-60%;left:-20%;width:140%;height:80%;
+  background:radial-gradient(ellipse,rgba(14,165,233,.04) 0%,transparent 70%);
+  pointer-events:none;
+}
+
+.gfc-icon-wrap{
+  width:80px;height:80px;border-radius:22px;margin:0 auto 24px;
+  display:flex;align-items:center;justify-content:center;font-size:36px;
+  background:linear-gradient(135deg,#0ea5e9,#3b82f6,#6366f1);
+  box-shadow:0 16px 48px rgba(14,165,233,.4);
+  animation:gfc-float 4s ease-in-out infinite;
+  position:relative;z-index:1;
+}
+@keyframes gfc-float{
+  0%,100%{transform:translateY(0) rotate(0deg);}
+  33%{transform:translateY(-8px) rotate(-3deg);}
+  66%{transform:translateY(-4px) rotate(3deg);}
+}
+
+.gfc-title{
+  font-family:'Syne',sans-serif;font-size:28px;font-weight:800;
+  text-align:center;letter-spacing:-.03em;margin-bottom:8px;
+  background:linear-gradient(135deg,#e2e8f0 0%,#38bdf8 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  position:relative;z-index:1;
+}
+.gfc-sub{
+  font-size:13.5px;color:#334155;text-align:center;
+  line-height:1.75;margin-bottom:32px;position:relative;z-index:1;
+}
+
+/* Bubble pill divider */
+.gfc-divider{
+  display:flex;align-items:center;gap:12px;margin-bottom:20px;
+}
+.gfc-divider-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(14,165,233,.15),transparent);}
+.gfc-divider-pill{
+  font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:#1e3a5f;font-family:'JetBrains Mono',monospace;
+  background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.1);
+  padding:4px 12px;border-radius:20px;white-space:nowrap;
+}
+
+/* Demo chip */
+.demo-chip-wrap{
+  text-align:center;margin-top:20px;
+  font-size:11.5px;color:#1e3a5f;
+  font-family:'JetBrains Mono',monospace;
+  position:relative;z-index:1;
+}
+.demo-chip{
+  background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.18);
+  padding:3px 10px;border-radius:6px;color:#38bdf8;font-weight:700;
+  letter-spacing:.04em;
+}
+
+/* Floating tag bubbles in login screens */
+.float-tags{
+  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:28px;
+  position:relative;z-index:1;
+}
+.ftag{
+  font-size:10.5px;font-weight:600;padding:5px 13px;border-radius:20px;
+  border:1px solid;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;
+  animation:ftag-bob 3s ease-in-out infinite;
+}
+.ftag:nth-child(2){animation-delay:.4s;}
+.ftag:nth-child(3){animation-delay:.8s;}
+.ftag-blue{color:#38bdf8;border-color:rgba(14,165,233,.25);background:rgba(14,165,233,.07);}
+.ftag-purple{color:#c084fc;border-color:rgba(192,132,252,.25);background:rgba(192,132,252,.07);}
+.ftag-green{color:#4ade80;border-color:rgba(74,222,128,.25);background:rgba(74,222,128,.07);}
+@keyframes ftag-bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
+
+/* Login back button */
+.login-back-btn > div > .stButton > button {
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  color: #475569 !important;
+  border-radius: 12px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  padding: 10px 18px !important;
+  box-shadow: none !important;
+  transition: all .2s !important;
+}
+.login-back-btn > div > .stButton > button:hover {
+  background: rgba(255,255,255,.07) !important;
+  color: #94a3b8 !important;
+  transform: translateX(-2px) !important;
+}
+
+/* Login primary button */
+.login-primary-btn > div > .stButton > button {
+  background: linear-gradient(135deg, #0ea5e9, #3b82f6, #6366f1) !important;
+  border: none !important;
+  color: white !important;
+  border-radius: 14px !important;
+  font-size: 14.5px !important;
+  font-weight: 700 !important;
+  padding: 14px 24px !important;
+  box-shadow: 0 8px 28px rgba(14,165,233,.3), inset 0 1px 0 rgba(255,255,255,.15) !important;
+  transition: all .25s !important;
+  letter-spacing: .01em !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+.login-primary-btn > div > .stButton > button:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 14px 40px rgba(14,165,233,.45) !important;
+  background: linear-gradient(135deg, #38bdf8, #6366f1, #a78bfa) !important;
+}
+.login-primary-btn > div > .stButton > button:active {
+  transform: translateY(0) !important;
+}
+
+/* Register submit button */
+.reg-submit-btn > div > .stButton > button,
+div[data-testid="stForm"] .stButton > button {
+  background: linear-gradient(135deg, #0ea5e9, #6366f1) !important;
+  border: none !important;
+  color: white !important;
+  border-radius: 14px !important;
+  font-size: 14.5px !important;
+  font-weight: 700 !important;
+  padding: 14px !important;
+  box-shadow: 0 8px 28px rgba(14,165,233,.3) !important;
+  transition: all .25s !important;
+  width: 100% !important;
+}
+div[data-testid="stForm"] .stButton > button:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 14px 40px rgba(14,165,233,.45) !important;
+}
+
+/* Input fields in login screens */
+.glass-form-card .stTextInput>div>div>input{
+  background:rgba(255,255,255,.04) !important;
+  border:1px solid rgba(14,165,233,.18) !important;
+  border-radius:14px !important;
+  color:#f1f5f9 !important;
+  font-family:'DM Sans',sans-serif !important;
+  padding:14px 16px !important;
+  font-size:15px !important;
+  transition:all .25s !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03) !important;
+}
+.glass-form-card .stTextInput>div>div>input:focus{
+  border-color:#0ea5e9 !important;
+  background:rgba(14,165,233,.05) !important;
+  box-shadow:0 0 0 4px rgba(14,165,233,.1), inset 0 1px 0 rgba(255,255,255,.05) !important;
+}
+
+/* ══════════════════ FORM BOX (kept for any remaining usage) ══════════════════ */
 .form-box{
   background:linear-gradient(150deg,#0d1524,#0f1d35);
   border:1px solid rgba(14,165,233,.16);border-radius:24px;
@@ -397,6 +611,22 @@ div[data-testid="stChatInput"] textarea{
 
 /* Spinner */
 .stSpinner > div{border-top-color:#0ea5e9 !important;}
+
+/* General button fallback */
+.stButton > button {
+  background:linear-gradient(135deg,#0ea5e9,#3b82f6) !important;
+  color:white !important;border:none !important;
+  border-radius:12px !important;
+  font-family:'DM Sans',sans-serif !important;font-weight:600 !important;font-size:14px !important;
+  padding:12px 24px !important;transition:all .25s !important;width:100% !important;
+  box-shadow:0 4px 18px rgba(14,165,233,.22) !important;
+}
+.stButton > button:hover{
+  transform:translateY(-2px) !important;
+  box-shadow:0 8px 28px rgba(14,165,233,.35) !important;
+  background:linear-gradient(135deg,#38bdf8,#6366f1) !important;
+}
+.stButton > button:active{transform:translateY(0) !important;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -601,7 +831,7 @@ def sent_tag(s):
 
 
 # ══════════════════════════════════════════════
-#  CHAT RENDERER  (self-contained HTML component)
+#  CHAT RENDERER
 # ══════════════════════════════════════════════
 def render_chat(chat_list):
     if not chat_list:
@@ -951,7 +1181,7 @@ if st.session_state.screen != "welcome":
 
 
 # ══════════════════════════════════════════════
-#  SCREEN: WELCOME
+#  SCREEN: WELCOME  ← ICON-ONLY CLICK
 # ══════════════════════════════════════════════
 if st.session_state.screen == "welcome":
     st.markdown("""
@@ -963,7 +1193,7 @@ if st.session_state.screen == "welcome":
     </div>""", unsafe_allow_html=True)
 
     st.markdown(
-        "<div style='text-align:center;margin:0 0 28px;'>"
+        "<div style='text-align:center;margin:0 0 32px;'>"
         "<span style='font-size:12px;color:#1e3a5f;font-family:JetBrains Mono,monospace;"
         "letter-spacing:.18em;text-transform:uppercase;'>CHOOSE YOUR ACCOUNT TYPE</span></div>",
         unsafe_allow_html=True
@@ -973,150 +1203,258 @@ if st.session_state.screen == "welcome":
 
     # ── Card 1: Existing Customer ──
     with c1:
-        st.markdown("""
-        <div class="choice-card-top">
-          <div class="choice-icon-wrap">👤</div>
-          <div class="choice-title">Existing Customer</div>
-          <div class="choice-desc">Login with your phone number and access your full AI support dashboard.</div>
-        </div>""", unsafe_allow_html=True)
-        if st.button("🔑 Customer Login", key="btn_existing"):
+        st.markdown('<div class="welcome-choice-card">', unsafe_allow_html=True)
+        # Icon is the ONLY clickable element
+        st.markdown('<div class="icon-btn-only" style="display:flex;justify-content:center;">', unsafe_allow_html=True)
+        if st.button("👤", key="btn_existing"):
             st.session_state.screen = "customer_login"
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("""
+          <div class="wcc-title">Existing Customer</div>
+          <div class="wcc-desc">Login with your phone number and access your full AI support dashboard.</div>
+        </div>""", unsafe_allow_html=True)
 
     # ── Card 2: New Customer ──
     with c2:
-        st.markdown("""
-        <div class="choice-card-top">
-          <div class="choice-badge">NEW</div>
-          <div class="choice-icon-wrap">✨</div>
-          <div class="choice-title">New Customer</div>
-          <div class="choice-desc">Register for a new connection and get instant AI-powered support.</div>
-        </div>""", unsafe_allow_html=True)
-        if st.button("📝 Register Now", key="btn_new"):
+        st.markdown('<div class="welcome-choice-card">', unsafe_allow_html=True)
+        st.markdown('<span class="wcc-badge">NEW</span>', unsafe_allow_html=True)
+        st.markdown('<div class="icon-btn-only" style="display:flex;justify-content:center;">', unsafe_allow_html=True)
+        if st.button("✨", key="btn_new"):
             st.session_state.screen = "new_customer_register"
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("""
+          <div class="wcc-title">New Customer</div>
+          <div class="wcc-desc">Register for a new connection and get instant AI-powered support.</div>
+        </div>""", unsafe_allow_html=True)
 
     # ── Card 3: Admin ──
     with c3:
-        st.markdown("""
-        <div class="choice-card-top">
-          <div class="choice-icon-wrap">🛠️</div>
-          <div class="choice-title">Admin Panel</div>
-          <div class="choice-desc">Manage customers, tickets, outages, and system operations.</div>
-        </div>""", unsafe_allow_html=True)
-        if st.button("🔐 Admin Access", key="btn_admin"):
+        st.markdown('<div class="welcome-choice-card">', unsafe_allow_html=True)
+        st.markdown('<div class="icon-btn-admin" style="display:flex;justify-content:center;">', unsafe_allow_html=True)
+        if st.button("🛠️", key="btn_admin"):
             st.session_state.screen = "admin_login"
             st.rerun()
-
-    # Fuse cards to buttons via CSS override
-    st.markdown("""
-    <style>
-    /* Remove gap between card-top and button */
-    section[data-testid="stMain"] .stColumns .stColumn > div {
-        gap: 0 !important;
-    }
-    section[data-testid="stMain"] .stColumns .stColumn .stMarkdown {
-        margin-bottom: 0 !important;
-    }
-    section[data-testid="stMain"] .stColumns .stColumn > div > div:last-child .stButton > button {
-        border-radius: 0 0 22px 22px !important;
-        margin-top: 0 !important;
-        border-top: 1px solid rgba(14,165,233,.1) !important;
-        background: linear-gradient(135deg,rgba(14,165,233,.12),rgba(99,102,241,.08)) !important;
-        color: #38bdf8 !important;
-        font-weight: 700 !important;
-        font-size: 14px !important;
-        padding: 16px 24px !important;
-        box-shadow: none !important;
-        border-left: 1px solid rgba(14,165,233,.14) !important;
-        border-right: 1px solid rgba(14,165,233,.14) !important;
-        border-bottom: 1px solid rgba(14,165,233,.14) !important;
-    }
-    section[data-testid="stMain"] .stColumns .stColumn > div > div:last-child .stButton > button:hover {
-        background: linear-gradient(135deg,rgba(14,165,233,.22),rgba(99,102,241,.14)) !important;
-        color: #7dd3fc !important;
-        transform: none !important;
-        box-shadow: none !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-
-# ══════════════════════════════════════════════
-#  SCREEN: CUSTOMER LOGIN
-# ══════════════════════════════════════════════
-elif st.session_state.screen == "customer_login":
-    _, col, _ = st.columns([1, 2, 1])
-    with col:
+        st.markdown('</div>', unsafe_allow_html=True)
         st.markdown("""
-        <div class="form-box">
-          <div style="font-size:36px;margin-bottom:14px;">📱</div>
-          <div class="form-title">Customer Login</div>
-          <div class="form-sub">Enter your registered phone number to access your account instantly.</div>
+          <div class="wcc-title">Admin Panel</div>
+          <div class="wcc-desc">Manage customers, tickets, outages, and system operations.</div>
         </div>""", unsafe_allow_html=True)
 
-        phone = st.text_input("Phone Number", placeholder="03001234567", key="login_phone")
-        c1, c2 = st.columns(2)
-        with c1:
-            if st.button("🔑 Login", key="do_login"):
-                if phone.strip():
-                    c = db()
-                    c.execute("SELECT name,package,area FROM customers WHERE phone=?", (phone.strip(),))
-                    cust = c.fetchone()
-                    if cust:
-                        st.session_state.phone         = phone.strip()
-                        st.session_state.customer      = {"name":cust[0],"package":cust[1],"area":cust[2]}
-                        st.session_state.customer_type = "Existing Customer"
-                        c.execute("SELECT amount,due_date FROM bills WHERE customer_phone=?", (phone.strip(),))
-                        bill = c.fetchone()
-                        st.session_state.bill_info = f"PKR {bill[0]:,}, Due: {bill[1]}" if bill else "No billing record"
-                        c.execute("SELECT status,expected_fix_time FROM outages WHERE area=?", (cust[2],))
-                        out = c.fetchone()
-                        if out:
-                            st.session_state.network_status = out[0]
-                            st.session_state.fix_time       = out[1]
-                        c.execute("SELECT issue FROM tickets WHERE customer_phone=?", (phone.strip(),))
-                        rows = c.fetchall()
-                        st.session_state.history_text = "\n".join([f"- {r[0]}" for r in rows]) if rows else "No previous tickets."
-                        st.session_state.chat = []
-                        st.session_state.screen = "customer_dashboard"
-                        st.rerun()
-                    else:
-                        st.error("❌ Phone number not registered. Please register as a new customer.")
-                else:
-                    st.error("⚠️ Please enter your phone number.")
-        with c2:
-            if st.button("← Back", key="back_login"):
-                st.session_state.screen = "welcome"
-                st.rerun()
 
-        st.markdown(
-            "<p style='text-align:center;font-size:12px;color:#1e3a5f;margin-top:16px;"
-            "font-family:JetBrains Mono,monospace;'>Demo: try "
-            "<code style='background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.16);"
-            "padding:2px 7px;border-radius:5px;color:#38bdf8;'>03001234567</code></p>",
-            unsafe_allow_html=True
-        )
+# ══════════════════════════════════════════════
+#  SCREEN: CUSTOMER LOGIN  ← BUBBLE REDESIGN
+# ══════════════════════════════════════════════
+elif st.session_state.screen == "customer_login":
+
+    # Animated bubble background
+    st.markdown("""
+    <style>
+    @keyframes orb1{0%{transform:translate(0,0) scale(1);opacity:0;}
+      10%{opacity:.55;}90%{opacity:.25;}100%{transform:translate(120px,-400px) scale(1.4);opacity:0;}}
+    @keyframes orb2{0%{transform:translate(0,0) scale(1);opacity:0;}
+      10%{opacity:.4;}90%{opacity:.2;}100%{transform:translate(-80px,-520px) scale(.8);opacity:0;}}
+    @keyframes orb3{0%{transform:translate(0,0);opacity:0;}
+      10%{opacity:.6;}90%{opacity:.15;}100%{transform:translate(60px,-460px) scale(1.2);opacity:0;}}
+    @keyframes orb4{0%{transform:translate(0,0);opacity:0;}
+      10%{opacity:.35;}90%{opacity:.1;}100%{transform:translate(-140px,-380px);opacity:0;}}
+    .login-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(2px);}
+    .lo1{width:140px;height:140px;background:radial-gradient(circle,rgba(14,165,233,.35),transparent);
+         bottom:5%;left:8%;animation:orb1 7s ease-in infinite;}
+    .lo2{width:90px;height:90px;background:radial-gradient(circle,rgba(99,102,241,.4),transparent);
+         bottom:12%;left:55%;animation:orb2 9s ease-in infinite 1.5s;}
+    .lo3{width:60px;height:60px;background:radial-gradient(circle,rgba(56,189,248,.45),transparent);
+         bottom:3%;left:30%;animation:orb3 6s ease-in infinite 3s;}
+    .lo4{width:110px;height:110px;background:radial-gradient(circle,rgba(167,139,250,.3),transparent);
+         bottom:18%;left:80%;animation:orb4 8s ease-in infinite .8s;}
+    .lo5{width:50px;height:50px;background:radial-gradient(circle,rgba(74,222,128,.35),transparent);
+         bottom:8%;left:18%;animation:orb1 10s ease-in infinite 4s;}
+    .lo6{width:75px;height:75px;background:radial-gradient(circle,rgba(14,165,233,.3),transparent);
+         bottom:25%;left:42%;animation:orb2 7.5s ease-in infinite 2.2s;}
+    </style>
+    <div class="login-orb lo1"></div>
+    <div class="login-orb lo2"></div>
+    <div class="login-orb lo3"></div>
+    <div class="login-orb lo4"></div>
+    <div class="login-orb lo5"></div>
+    <div class="login-orb lo6"></div>
+    """, unsafe_allow_html=True)
+
+    _, col, _ = st.columns([1, 1.6, 1])
+    with col:
+        st.markdown('<div class="glass-form-card">', unsafe_allow_html=True)
+
+        # Floating icon
+        st.markdown('<div class="gfc-icon-wrap">📱</div>', unsafe_allow_html=True)
+
+        # Title
+        st.markdown('<div class="gfc-title">Welcome Back</div>', unsafe_allow_html=True)
+        st.markdown('<div class="gfc-sub">Enter your registered phone number to access your AI support dashboard.</div>', unsafe_allow_html=True)
+
+        # Feature pills
+        st.markdown("""
+        <div class="float-tags">
+          <span class="ftag ftag-blue">⚡ Instant Access</span>
+          <span class="ftag ftag-purple">🤖 AI Support</span>
+          <span class="ftag ftag-green">🔒 Secure</span>
+        </div>""", unsafe_allow_html=True)
+
+        # Divider
+        st.markdown("""
+        <div class="gfc-divider">
+          <div class="gfc-divider-line"></div>
+          <div class="gfc-divider-pill">YOUR PHONE NUMBER</div>
+          <div class="gfc-divider-line"></div>
+        </div>""", unsafe_allow_html=True)
+
+        phone = st.text_input("", placeholder="📞  03001234567", key="login_phone",
+                              label_visibility="collapsed")
+
+        # Buttons
+        st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
+        bc1, bc2 = st.columns([2, 1])
+        with bc1:
+            st.markdown('<div class="login-primary-btn">', unsafe_allow_html=True)
+            login_clicked = st.button("🔑  Login to Dashboard", key="do_login", use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        with bc2:
+            st.markdown('<div class="login-back-btn">', unsafe_allow_html=True)
+            back_clicked = st.button("← Back", key="back_login", use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        if login_clicked:
+            if phone.strip():
+                c = db()
+                c.execute("SELECT name,package,area FROM customers WHERE phone=?", (phone.strip(),))
+                cust = c.fetchone()
+                if cust:
+                    st.session_state.phone         = phone.strip()
+                    st.session_state.customer      = {"name":cust[0],"package":cust[1],"area":cust[2]}
+                    st.session_state.customer_type = "Existing Customer"
+                    c.execute("SELECT amount,due_date FROM bills WHERE customer_phone=?", (phone.strip(),))
+                    bill = c.fetchone()
+                    st.session_state.bill_info = f"PKR {bill[0]:,}, Due: {bill[1]}" if bill else "No billing record"
+                    c.execute("SELECT status,expected_fix_time FROM outages WHERE area=?", (cust[2],))
+                    out = c.fetchone()
+                    if out:
+                        st.session_state.network_status = out[0]
+                        st.session_state.fix_time       = out[1]
+                    c.execute("SELECT issue FROM tickets WHERE customer_phone=?", (phone.strip(),))
+                    rows = c.fetchall()
+                    st.session_state.history_text = "\n".join([f"- {r[0]}" for r in rows]) if rows else "No previous tickets."
+                    st.session_state.chat = []
+                    st.session_state.screen = "customer_dashboard"
+                    st.rerun()
+                else:
+                    st.error("❌ Phone number not registered. Please register as a new customer.")
+            else:
+                st.error("⚠️ Please enter your phone number.")
+
+        if back_clicked:
+            st.session_state.screen = "welcome"
+            st.rerun()
+
+        # Demo hint
+        st.markdown("""
+        <div class="demo-chip-wrap">
+          Try demo: <span class="demo-chip">03001234567</span>
+        </div>""", unsafe_allow_html=True)
+
+        st.markdown('</div>', unsafe_allow_html=True)  # close glass-form-card
 
 
 # ══════════════════════════════════════════════
-#  SCREEN: NEW CUSTOMER REGISTER
+#  SCREEN: NEW CUSTOMER REGISTER  ← BUBBLE REDESIGN
 # ══════════════════════════════════════════════
 elif st.session_state.screen == "new_customer_register":
-    _, col, _ = st.columns([1, 2, 1])
+
+    # Bubble background (different color palette — greens + purples)
+    st.markdown("""
+    <style>
+    @keyframes nOrb1{0%{transform:translate(0,0) scale(1);opacity:0;}
+      10%{opacity:.5;}90%{opacity:.2;}100%{transform:translate(-100px,-430px) scale(1.3);opacity:0;}}
+    @keyframes nOrb2{0%{transform:translate(0,0);opacity:0;}
+      10%{opacity:.45;}90%{opacity:.15;}100%{transform:translate(90px,-500px) scale(.9);opacity:0;}}
+    @keyframes nOrb3{0%{transform:translate(0,0);opacity:0;}
+      10%{opacity:.55;}90%{opacity:.2;}100%{transform:translate(50px,-380px) scale(1.1);opacity:0;}}
+    .reg-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(2px);}
+    .ro1{width:130px;height:130px;background:radial-gradient(circle,rgba(74,222,128,.3),transparent);
+         bottom:4%;left:10%;animation:nOrb1 8s ease-in infinite;}
+    .ro2{width:100px;height:100px;background:radial-gradient(circle,rgba(192,132,252,.35),transparent);
+         bottom:15%;left:60%;animation:nOrb2 10s ease-in infinite 1s;}
+    .ro3{width:65px;height:65px;background:radial-gradient(circle,rgba(56,189,248,.4),transparent);
+         bottom:6%;left:35%;animation:nOrb3 7s ease-in infinite 2.5s;}
+    .ro4{width:85px;height:85px;background:radial-gradient(circle,rgba(251,191,36,.25),transparent);
+         bottom:20%;left:80%;animation:nOrb1 9s ease-in infinite .5s;}
+    .ro5{width:55px;height:55px;background:radial-gradient(circle,rgba(74,222,128,.3),transparent);
+         bottom:10%;left:20%;animation:nOrb2 6.5s ease-in infinite 3.5s;}
+    .ro6{width:90px;height:90px;background:radial-gradient(circle,rgba(99,102,241,.3),transparent);
+         bottom:28%;left:48%;animation:nOrb3 8.5s ease-in infinite 1.8s;}
+    </style>
+    <div class="reg-orb ro1"></div>
+    <div class="reg-orb ro2"></div>
+    <div class="reg-orb ro3"></div>
+    <div class="reg-orb ro4"></div>
+    <div class="reg-orb ro5"></div>
+    <div class="reg-orb ro6"></div>
+    """, unsafe_allow_html=True)
+
+    _, col, _ = st.columns([1, 1.6, 1])
     with col:
+        st.markdown('<div class="glass-form-card">', unsafe_allow_html=True)
+
+        # Floating icon
         st.markdown("""
-        <div class="form-box">
-          <div style="font-size:36px;margin-bottom:14px;">✨</div>
-          <div class="form-title">New Customer Registration</div>
-          <div class="form-sub">Fill in your details to create an account and get started with FiberISP.</div>
+        <div class="gfc-icon-wrap" style="background:linear-gradient(135deg,#10b981,#3b82f6,#8b5cf6);">
+          ✨
+        </div>""", unsafe_allow_html=True)
+
+        st.markdown('<div class="gfc-title">Create Account</div>', unsafe_allow_html=True)
+        st.markdown('<div class="gfc-sub">Join FiberISP and enjoy ultra-fast fiber internet with 24/7 AI-powered support.</div>', unsafe_allow_html=True)
+
+        # Feature pills
+        st.markdown("""
+        <div class="float-tags">
+          <span class="ftag ftag-green">🚀 Fast Setup</span>
+          <span class="ftag ftag-blue">📡 Wide Coverage</span>
+          <span class="ftag ftag-purple">💎 Premium Plans</span>
+        </div>""", unsafe_allow_html=True)
+
+        # Form
+        st.markdown("""
+        <div class="gfc-divider">
+          <div class="gfc-divider-line"></div>
+          <div class="gfc-divider-pill">YOUR DETAILS</div>
+          <div class="gfc-divider-line"></div>
         </div>""", unsafe_allow_html=True)
 
         with st.form("reg_form"):
-            name  = st.text_input("Full Name",    placeholder="e.g. Muhammad Ali")
-            phone = st.text_input("Phone Number", placeholder="03001234567")
-            area  = st.selectbox("Your Area",     PAKISTAN_LOCATIONS)
-            if st.form_submit_button("✅ Create Account"):
+            # Row 1: Name + Phone
+            nc1, nc2 = st.columns(2)
+            with nc1:
+                name = st.text_input("Full Name", placeholder="Muhammad Ali")
+            with nc2:
+                phone = st.text_input("Phone Number", placeholder="03001234567")
+
+            # Area
+            area = st.selectbox("Your Area", PAKISTAN_LOCATIONS)
+
+            # Info bubble
+            st.markdown("""
+            <div style="background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.14);
+                 border-radius:12px;padding:11px 15px;margin:8px 0 4px;
+                 display:flex;align-items:center;gap:10px;">
+              <span style="font-size:18px;">💡</span>
+              <span style="font-size:12px;color:#334155;line-height:1.6;">
+                Our team will contact you within <strong style="color:#38bdf8;">24 hours</strong>
+                to confirm your connection details.
+              </span>
+            </div>""", unsafe_allow_html=True)
+
+            submitted = st.form_submit_button("✨  Create My Account  →", use_container_width=True)
+
+            if submitted:
                 if name.strip() and phone.strip():
                     c = db()
                     try:
@@ -1141,9 +1479,21 @@ elif st.session_state.screen == "new_customer_register":
                 else:
                     st.error("⚠️ Please fill in all fields.")
 
-        if st.button("← Back", key="back_reg"):
+        st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
+        st.markdown('<div class="login-back-btn">', unsafe_allow_html=True)
+        if st.button("← Back to Home", key="back_reg", use_container_width=True):
             st.session_state.screen = "welcome"
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # Already have account hint
+        st.markdown("""
+        <div class="demo-chip-wrap" style="margin-top:14px;">
+          Already registered?
+          <span class="demo-chip" style="cursor:pointer;">Login instead</span>
+        </div>""", unsafe_allow_html=True)
+
+        st.markdown('</div>', unsafe_allow_html=True)  # close glass-form-card
 
 
 # ══════════════════════════════════════════════
@@ -1188,7 +1538,6 @@ elif st.session_state.screen == "customer_dashboard":
                 st.session_state[k] = defaults[k]
             st.rerun()
 
-    # ── Tabs ──
     tab1, tab2, tab3, tab4 = st.tabs([
         "💬  AI Support Chat",
         "🔌  New Connection",
@@ -1196,9 +1545,6 @@ elif st.session_state.screen == "customer_dashboard":
         "⬆️  Upgrade Plan",
     ])
 
-    # ────────────────────────────────────────
-    #  TAB 1: AI SUPPORT CHAT
-    # ────────────────────────────────────────
     with tab1:
         st.markdown("""
         <div class="chat-banner">
@@ -1264,9 +1610,6 @@ elif st.session_state.screen == "customer_dashboard":
                 st.session_state.chat = []
                 st.rerun()
 
-    # ────────────────────────────────────────
-    #  TAB 2: NEW CONNECTION
-    # ────────────────────────────────────────
     with tab2:
         st.markdown("""
         <div style="background:linear-gradient(150deg,#0d1524,#0f1d35);
@@ -1332,9 +1675,6 @@ elif st.session_state.screen == "customer_dashboard":
                 else:
                     st.error("⚠️ Please fill in all fields.")
 
-    # ────────────────────────────────────────
-    #  TAB 3: BILL & TICKETS
-    # ────────────────────────────────────────
     with tab3:
         c = db()
         c.execute("SELECT amount,due_date FROM bills WHERE customer_phone=?", (phone,))
@@ -1389,9 +1729,6 @@ elif st.session_state.screen == "customer_dashboard":
         else:
             st.info("📋 No tickets found. Chat with AI Support to create one.")
 
-    # ────────────────────────────────────────
-    #  TAB 4: UPGRADE PLAN
-    # ────────────────────────────────────────
     with tab4:
         st.markdown(f"""
         <div style="background:linear-gradient(150deg,#0d1524,#0f1d35);
