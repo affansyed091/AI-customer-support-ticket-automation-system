@@ -1086,7 +1086,48 @@ if st.session_state.screen == "welcome":
             st.session_state.screen = "admin_login"
             st.rerun()
 
-
+# LANGUAGE SELECTION
+elif st.session_state.screen == "lang_select":
+    st.markdown("""
+    <div style='text-align:center; margin: 60px 0 40px;'>
+      <div style='font-size:38px; font-weight:900; color:#f1f5f9; margin-bottom:16px;'>🌍 Choose Your Language</div>
+      <div style='font-size:18px; color:#94a3b8; line-height:1.8;'>
+        آپ کی پسندیدہ زبان منتخب کریں<br>
+        Select your preferred language
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+    _, lcol, rcol, _ = st.columns([1,2,2,1])
+    with lcol:
+        st.markdown("""
+        <div class="lang-card">
+          <div class="lang-emoji">🇬🇧</div>
+          <div class="lang-title">English</div>
+          <div class="lang-sub">Continue in English</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("✓ Select English", key="lang_en", use_container_width=True):
+            st.session_state.lang = "English"
+            if st.session_state.customer_type == "new":
+                st.session_state.screen = "new_customer_register"
+            else:
+                st.session_state.screen = "customer_login"
+            st.rerun()
+    with rcol:
+        st.markdown("""
+        <div class="lang-card">
+          <div class="lang-emoji">🇵🇰</div>
+          <div class="lang-title">اردو</div>
+          <div class="lang-sub">اردو میں جاری رکھیں</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("✓ اردو منتخب کریں", key="lang_ur", use_container_width=True):
+            st.session_state.lang = "Urdu"
+            if st.session_state.customer_type == "new":
+                st.session_state.screen = "new_customer_register"
+            else:
+                st.session_state.screen = "customer_login"
+            st.rerun()
 
 # CUSTOMER LOGIN (PHONE INPUT)
 elif st.session_state.screen == "customer_login":
@@ -1359,7 +1400,7 @@ elif st.session_state.screen == "customer_dashboard":
             <span>🤖</span> Need AI Assistance? Type Your Issue Below
           </div>
           <div class="ai-banner-sub">
-            
+            Try: "change my name to Ahmed", "show my bill", "upgrade my plan to Gaming Pro", "what plans are available?"
           </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1393,11 +1434,11 @@ elif st.session_state.screen == "customer_dashboard":
         
         st.markdown("<div class='sec-hdr'>Conversation History</div>", unsafe_allow_html=True)
         if not st.session_state.chat:
-            st.info("💬 Select a quick topic above or type your question below to start chatting with our AI assistant.")
+            st.info("💬 Our AI assistant is here 24/7 to answer your queries and resolve your issues—instantly.")
         else:
             render_chat(st.session_state.chat)
         
-        user_msg = st.chat_input("Our AI assistant is here 24/7 to answer your queries and resolve your issues—instantly")
+        user_msg = st.chat_input("Select from quick topic our start conversation with our AI assistant")")
         if user_msg and user_msg.strip():
             st.session_state.chat.append({"role": "user", "text": user_msg.strip()})
             with st.spinner("🤖 AI is thinking..."):
