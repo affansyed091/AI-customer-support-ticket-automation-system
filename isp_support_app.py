@@ -1397,10 +1397,9 @@ elif st.session_state.screen == "customer_dashboard":
         st.markdown("""
         <div class="ai-banner">
           <div class="ai-banner-title">
-            <span>🤖</span> Need AI Assistance? Type Your Issue Below
+            <span></span> ✨ Try our new AI assistant – ask anything, anytime
           </div>
           <div class="ai-banner-sub">
-            Try: "change my name to Ahmed", "show my bill", "upgrade my plan to Gaming Pro", "what plans are available?"
           </div>
         </div>
         """, unsafe_allow_html=True)
