@@ -1105,7 +1105,7 @@ elif st.session_state.screen == "customer_login":
           <div class="form-sub">Enter your registered phone number to access your account</div>
         </div>
         """, unsafe_allow_html=True)
-        phone = st.text_input("Phone Number", placeholder="03001234567", key="login_phone")
+        phone = st.text_input("Phone Number", placeholder="Your Registered Phone Number", key="login_phone")
         c1, c2 = st.columns(2)
         with c1:
             if st.button("🔑 Login", key="do_login"):
@@ -1265,7 +1265,7 @@ elif st.session_state.screen == "admin_login":
         """, unsafe_allow_html=True)
         pwd = st.text_input("Admin Password", type="password", placeholder="admin123")
         if st.button("Login →", key="admin_go"):
-            if pwd == "admin123":
+            if pwd == "xxxxxxxxx":
                 st.session_state.screen = "admin"
                 st.rerun()
             else:
