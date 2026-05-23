@@ -1292,7 +1292,7 @@ defaults = {
     "fix_time": "N/A",
     "history_text": "",
     "chat": [],
-    "api_key": "YOUR_API_KEY",
+    "api_key": "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",
     "first_message_sent": False,
     "new_customer_data": None,
     "selected_plan": "",
